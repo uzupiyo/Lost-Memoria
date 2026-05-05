@@ -1,7 +1,7 @@
 extends Control
 
 var still_ids: Array = []
-var current_index := 0
+var current_index: int = 0
 
 @onready var title_label: Label = %StillTitle
 @onready var progress_label: Label = %ProgressLabel
@@ -18,10 +18,10 @@ func _ready() -> void:
 	_update_collection_view(str(still_ids[current_index]))
 
 func _update_collection_view(still_id: String) -> void:
-	var data := GameState.get_still_data(still_id)
+	var data: Dictionary = GameState.get_still_data(still_id)
 	title_label.text = str(data.get("title", "Unknown Memory"))
 	counter_label.text = "%d / %d" % [current_index + 1, still_ids.size()]
-	var percent := GameState.get_unlock_percent(still_id)
+	var percent: int = GameState.get_unlock_percent(still_id)
 	progress_label.text = "Restoration: %d%%" % percent
 	_load_still_texture(str(data.get("image_path", "")))
 	_apply_unlock_mask(percent)
@@ -36,15 +36,15 @@ func _load_still_texture(path: String) -> void:
 		overlay_label.text = "NO IMAGE"
 		overlay_label.visible = true
 		return
-	var texture := load(path)
-	if texture is Texture2D:
-		still_image.texture = texture
+	var loaded_resource: Resource = load(path)
+	if loaded_resource is Texture2D:
+		still_image.texture = loaded_resource as Texture2D
 
 func _apply_unlock_mask(percent: int) -> void:
-	var clamped_percent := clamp(percent, 0, 100)
-	var alpha := 0.82 - (float(clamped_percent) / 100.0) * 0.82
+	var clamped_percent: int = clamp(percent, 0, 100)
+	var alpha: float = 0.82 - (float(clamped_percent) / 100.0) * 0.82
 	lock_overlay.color = Color(0, 0, 0, alpha)
-	var brightness := 0.35 + float(clamped_percent) / 100.0 * 0.65
+	var brightness: float = 0.35 + float(clamped_percent) / 100.0 * 0.65
 	still_image.modulate = Color(brightness, brightness, brightness, 1.0)
 	if clamped_percent <= 0:
 		overlay_label.text = "LOCKED"
