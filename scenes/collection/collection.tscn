@@ -29,27 +29,32 @@ alignment = 1
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 2
 text = "Collection"
 horizontal_alignment = 1
 
 [node name="StillTitle" type="Label" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 2
 text = "Rin Memory 001"
 horizontal_alignment = 1
 
 [node name="CounterLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 2
 text = "1 / 5"
 horizontal_alignment = 1
 
 [node name="StillFrame" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+mouse_filter = 2
 custom_minimum_size = Vector2(720, 405)
 
 [node name="StillStack" type="Control" parent="MarginContainer/VBoxContainer/StillFrame"]
 layout_mode = 2
+mouse_filter = 2
 custom_minimum_size = Vector2(720, 405)
 
 [node name="StillImage" type="TextureRect" parent="MarginContainer/VBoxContainer/StillFrame/StillStack"]
@@ -60,6 +65,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 stretch_mode = 5
 
 [node name="LockOverlay" type="ColorRect" parent="MarginContainer/VBoxContainer/StillFrame/StillStack"]
@@ -70,6 +76,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0, 0, 0, 0.75)
 
 [node name="OverlayLabel" type="Label" parent="MarginContainer/VBoxContainer/StillFrame/StillStack"]
@@ -86,6 +93,7 @@ offset_right = 220.0
 offset_bottom = 24.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 text = "LOCKED"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -105,12 +113,14 @@ text = "NEXT"
 [node name="ProgressLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 2
 text = "Restoration: 0%"
 horizontal_alignment = 1
 
 [node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 2
 text = "Locked / In Progress"
 horizontal_alignment = 1
 
