@@ -8,7 +8,7 @@ var selected_stage_index: int = 0
 var stills := {
 	"rin_001": {
 		"title": "First Memory",
-		"image_path": "res://assets/stills/rin/rin_001.png",
+		"image_path": "res://assets/stills/rin/rin_001.svg",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	}
