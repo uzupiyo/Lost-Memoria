@@ -11,6 +11,7 @@ var piece_buttons: Array = []
 var selected_indices: Array = []
 var selected_color := -1
 var is_selecting := false
+var has_cleared := false
 
 @onready var stage_label: Label = %StageLabel
 @onready var gauge: ProgressBar = %RestoreGauge
@@ -43,7 +44,7 @@ func _generate_board() -> void:
 	_update_board_view()
 
 func _input(event: InputEvent) -> void:
-	if not is_selecting:
+	if has_cleared or not is_selecting:
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
 		_finish_selection()
@@ -51,12 +52,16 @@ func _input(event: InputEvent) -> void:
 		_finish_selection()
 
 func _on_piece_gui_input(event: InputEvent, index: int) -> void:
+	if has_cleared:
+		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_start_selection(index)
 	elif event is InputEventScreenTouch and event.pressed:
 		_start_selection(index)
 
 func _on_piece_mouse_entered(index: int) -> void:
+	if has_cleared:
+		return
 	if is_selecting:
 		_try_add_to_selection(index)
 
@@ -85,13 +90,16 @@ func _try_add_to_selection(index: int) -> void:
 
 func _finish_selection() -> void:
 	is_selecting = false
+	var cleared_now := false
 	if selected_indices.size() >= MIN_MATCH:
-		_resolve_match(selected_indices.duplicate())
+		cleared_now = _resolve_match(selected_indices.duplicate())
+	if cleared_now:
+		return
 	selected_indices.clear()
 	selected_color = -1
 	_update_board_view()
 
-func _resolve_match(indices: Array) -> void:
+func _resolve_match(indices: Array) -> bool:
 	var removed := {}
 	for index in indices:
 		removed[int(index)] = true
@@ -100,9 +108,11 @@ func _resolve_match(indices: Array) -> void:
 	_drop_and_refill(removed)
 	if score >= CLEAR_SCORE:
 		_clear_stage()
+		return true
+	return false
 
 func _drop_and_refill(removed: Dictionary) -> void:
-	for col in BOARD_SIZE:
+	for col in range(BOARD_SIZE):
 		var kept: Array = []
 		for row in range(BOARD_SIZE - 1, -1, -1):
 			var index := _to_index(row, col)
@@ -116,11 +126,13 @@ func _drop_and_refill(removed: Dictionary) -> void:
 				pieces[index] = randi() % COLOR_COUNT
 
 func _is_adjacent(a: int, b: int) -> bool:
-	var a_row := a / BOARD_SIZE
+	var a_row := int(a / BOARD_SIZE)
 	var a_col := a % BOARD_SIZE
-	var b_row := b / BOARD_SIZE
+	var b_row := int(b / BOARD_SIZE)
 	var b_col := b % BOARD_SIZE
-	return abs(a_row - b_row) + abs(a_col - b_col) == 1
+	var row_distance := abs(a_row - b_row)
+	var col_distance := abs(a_col - b_col)
+	return row_distance <= 1 and col_distance <= 1 and row_distance + col_distance > 0
 
 func _to_index(row: int, col: int) -> int:
 	return row * BOARD_SIZE + col
@@ -148,7 +160,7 @@ func _piece_symbol(index: int) -> String:
 			return "●\nGreen"
 
 func _update_board_view() -> void:
-	for i in piece_buttons.size():
+	for i in range(piece_buttons.size()):
 		var button: Button = piece_buttons[i]
 		var piece_color := int(pieces[i])
 		button.text = _piece_symbol(piece_color)
@@ -170,7 +182,13 @@ func _piece_modulate(index: int) -> Color:
 			return Color(0.55, 1.0, 0.65)
 
 func _clear_stage() -> void:
+	if has_cleared:
+		return
+	has_cleared = true
 	GameState.clear_selected_stage()
+	call_deferred("_go_to_collection")
+
+func _go_to_collection() -> void:
 	get_tree().change_scene_to_file("res://scenes/collection/collection.tscn")
 
 func _on_back_pressed() -> void:
