@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b2038"/>
+      <stop offset="0.55" stop-color="#27365f"/>
+      <stop offset="1" stop-color="#5d3f74"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="42%" r="58%">
+      <stop offset="0" stop-color="#ffe1a6" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#ffe1a6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#bg)"/>
+  <rect width="960" height="540" fill="url(#glow)" opacity="0.5"/>
+  <circle cx="480" cy="245" r="116" fill="#f0c66a" opacity="0.95"/>
+  <path d="M335 365 C365 230 595 230 625 365 C560 420 400 420 335 365 Z" fill="#70d6ff" opacity="0.95"/>
+  <circle cx="435" cy="282" r="15" fill="#1b2038"/>
+  <circle cx="525" cy="282" r="15" fill="#1b2038"/>
+  <path d="M425 330 C455 352 505 352 535 330" fill="none" stroke="#1b2038" stroke-width="12" stroke-linecap="round"/>
+  <text x="480" y="72" font-family="sans-serif" font-size="44" text-anchor="middle" fill="#ffffff" opacity="0.92">First Memory</text>
+  <text x="480" y="492" font-family="sans-serif" font-size="24" text-anchor="middle" fill="#ffffff" opacity="0.72">Placeholder still - replace with assets/stills/rin/rin_001.png later</text>
+</svg>
