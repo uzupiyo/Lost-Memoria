@@ -13,6 +13,7 @@ var selected_color: int = -1
 var is_selecting: bool = false
 var has_cleared: bool = false
 var pending_scene_change: bool = false
+var drop_textures: Array[Texture2D] = []
 
 @onready var stage_label: Label = %StageLabel
 @onready var gauge: ProgressBar = %RestoreGauge
@@ -20,10 +21,29 @@ var pending_scene_change: bool = false
 
 func _ready() -> void:
 	randomize()
+	_load_drop_textures()
 	stage_label.text = "Stage %d - Drag same colors, release at 3+ / diagonal OK" % (GameState.selected_stage_index + 1)
 	gauge.max_value = CLEAR_SCORE
 	gauge.value = 0
 	_generate_board()
+
+func _load_drop_textures() -> void:
+	drop_textures.clear()
+	var paths: Array[String] = [
+		"res://assets/puzzle/drops/memory_orb_red.png",
+		"res://assets/puzzle/drops/memory_orb_blue.png",
+		"res://assets/puzzle/drops/memory_orb_gold.png",
+		"res://assets/puzzle/drops/memory_orb_green.png"
+	]
+	var index: int = 0
+	while index < paths.size():
+		var texture: Texture2D = null
+		if ResourceLoader.exists(paths[index]):
+			var loaded_resource: Resource = load(paths[index])
+			if loaded_resource is Texture2D:
+				texture = loaded_resource as Texture2D
+		drop_textures.append(texture)
+		index += 1
 
 func _process(_delta: float) -> void:
 	if has_cleared or not is_selecting:
@@ -47,9 +67,11 @@ func _generate_board() -> void:
 		var piece_value: int = randi() % COLOR_COUNT
 		pieces.append(piece_value)
 		var button: Button = Button.new()
-		button.custom_minimum_size = Vector2(72, 72)
+		button.custom_minimum_size = Vector2(76, 76)
 		button.focus_mode = Control.FOCUS_NONE
 		button.mouse_filter = Control.MOUSE_FILTER_STOP
+		button.expand_icon = true
+		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		button.gui_input.connect(_on_piece_gui_input.bind(create_index))
 		piece_buttons.append(button)
 		board.add_child(button)
@@ -208,24 +230,21 @@ func _update_board_view() -> void:
 	while i < piece_buttons.size():
 		var button: Button = piece_buttons[i]
 		var piece_color: int = pieces[i]
-		button.text = _piece_symbol(piece_color)
-		if selected_indices.has(i):
-			button.text = "✓\n" + _piece_text(piece_color)
-			button.modulate = Color(1.25, 1.25, 1.25)
+		button.icon = _get_drop_texture(piece_color)
+		if button.icon == null:
+			button.text = _piece_symbol(piece_color)
 		else:
-			button.modulate = _piece_modulate(piece_color)
+			button.text = ""
+		if selected_indices.has(i):
+			button.modulate = Color(1.35, 1.35, 1.35)
+		else:
+			button.modulate = Color(1, 1, 1)
 		i += 1
 
-func _piece_modulate(index: int) -> Color:
-	match index:
-		0:
-			return Color(1.0, 0.55, 0.55)
-		1:
-			return Color(0.55, 0.75, 1.0)
-		2:
-			return Color(1.0, 0.88, 0.45)
-		_:
-			return Color(0.55, 1.0, 0.65)
+func _get_drop_texture(index: int) -> Texture2D:
+	if index >= 0 and index < drop_textures.size():
+		return drop_textures[index]
+	return null
 
 func _clear_stage() -> void:
 	if has_cleared:
