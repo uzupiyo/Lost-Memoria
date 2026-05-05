@@ -37,20 +37,23 @@ func _generate_board() -> void:
 	pieces.clear()
 	piece_buttons.clear()
 	selected_indices.clear()
-	var child_count: int = board.get_child_count()
-	for child_index in range(child_count - 1, -1, -1):
+	var child_index: int = board.get_child_count() - 1
+	while child_index >= 0:
 		var child: Node = board.get_child(child_index)
 		child.queue_free()
-	for i in range(BOARD_SIZE * BOARD_SIZE):
+		child_index -= 1
+	var create_index: int = 0
+	while create_index < BOARD_SIZE * BOARD_SIZE:
 		var piece_value: int = randi() % COLOR_COUNT
 		pieces.append(piece_value)
 		var button: Button = Button.new()
 		button.custom_minimum_size = Vector2(72, 72)
 		button.focus_mode = Control.FOCUS_NONE
 		button.mouse_filter = Control.MOUSE_FILTER_STOP
-		button.gui_input.connect(_on_piece_gui_input.bind(i))
+		button.gui_input.connect(_on_piece_gui_input.bind(create_index))
 		piece_buttons.append(button)
 		board.add_child(button)
+		create_index += 1
 	_update_board_view()
 
 func _input(event: InputEvent) -> void:
@@ -121,9 +124,11 @@ func _finish_selection() -> void:
 
 func _resolve_match(indices: Array[int]) -> bool:
 	var removed: Dictionary = {}
-	for i in range(indices.size()):
-		var index: int = indices[i]
-		removed[index] = true
+	var index_cursor: int = 0
+	while index_cursor < indices.size():
+		var remove_index: int = indices[index_cursor]
+		removed[remove_index] = true
+		index_cursor += 1
 	score += indices.size()
 	gauge.value = min(score, CLEAR_SCORE)
 	if score >= CLEAR_SCORE:
@@ -133,25 +138,33 @@ func _resolve_match(indices: Array[int]) -> bool:
 	return false
 
 func _drop_and_refill(removed: Dictionary) -> void:
-	for col in range(BOARD_SIZE):
+	var col: int = 0
+	while col < BOARD_SIZE:
 		var kept: Array[int] = []
-		for row in range(BOARD_SIZE - 1, -1, -1):
-			var index: int = _to_index(row, col)
-			if not removed.has(index):
-				kept.append(pieces[index])
-		for row in range(BOARD_SIZE - 1, -1, -1):
-			var index: int = _to_index(row, col)
+		var row: int = BOARD_SIZE - 1
+		while row >= 0:
+			var check_index: int = _to_index(row, col)
+			if not removed.has(check_index):
+				kept.append(pieces[check_index])
+			row -= 1
+		row = BOARD_SIZE - 1
+		while row >= 0:
+			var fill_index: int = _to_index(row, col)
 			if kept.size() > 0:
-				pieces[index] = kept.pop_front()
+				pieces[fill_index] = kept.pop_front()
 			else:
-				pieces[index] = randi() % COLOR_COUNT
+				pieces[fill_index] = randi() % COLOR_COUNT
+			row -= 1
+		col += 1
 
 func _get_piece_index_at_position(global_position: Vector2) -> int:
-	for i in range(piece_buttons.size()):
+	var i: int = 0
+	while i < piece_buttons.size():
 		var button: Button = piece_buttons[i]
 		var rect: Rect2 = Rect2(button.global_position, button.size)
 		if rect.has_point(global_position):
 			return i
+		i += 1
 	return -1
 
 func _is_adjacent_8way(a: int, b: int) -> bool:
@@ -191,7 +204,8 @@ func _piece_symbol(index: int) -> String:
 func _update_board_view() -> void:
 	if piece_buttons.size() != pieces.size():
 		return
-	for i in range(piece_buttons.size()):
+	var i: int = 0
+	while i < piece_buttons.size():
 		var button: Button = piece_buttons[i]
 		var piece_color: int = pieces[i]
 		button.text = _piece_symbol(piece_color)
@@ -200,6 +214,7 @@ func _update_board_view() -> void:
 			button.modulate = Color(1.25, 1.25, 1.25)
 		else:
 			button.modulate = _piece_modulate(piece_color)
+		i += 1
 
 func _piece_modulate(index: int) -> Color:
 	match index:
