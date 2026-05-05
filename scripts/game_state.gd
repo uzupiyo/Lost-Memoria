@@ -7,8 +7,32 @@ var selected_stage_index: int = 0
 
 var stills := {
 	"rin_001": {
-		"title": "First Memory",
-		"image_path": "res://assets/stills/rin/rin_001.svg",
+		"title": "Rin Memory 001",
+		"image_path": "res://assets/stills/rin/Rin001.png",
+		"unlocked_stages": 0,
+		"total_stages": STILL_STAGE_COUNT
+	},
+	"rin_002": {
+		"title": "Rin Memory 002",
+		"image_path": "res://assets/stills/rin/Rin002.png",
+		"unlocked_stages": 0,
+		"total_stages": STILL_STAGE_COUNT
+	},
+	"rin_003": {
+		"title": "Rin Memory 003",
+		"image_path": "res://assets/stills/rin/Rin003.png",
+		"unlocked_stages": 0,
+		"total_stages": STILL_STAGE_COUNT
+	},
+	"rin_004": {
+		"title": "Rin Memory 004",
+		"image_path": "res://assets/stills/rin/Rin004.png",
+		"unlocked_stages": 0,
+		"total_stages": STILL_STAGE_COUNT
+	},
+	"rin_005": {
+		"title": "Rin Memory 005",
+		"image_path": "res://assets/stills/rin/Rin005.png",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	}
@@ -19,6 +43,9 @@ func _ready() -> void:
 
 func get_still_data(still_id: String) -> Dictionary:
 	return stills.get(still_id, {})
+
+func get_all_still_ids() -> Array:
+	return stills.keys()
 
 func get_unlock_percent(still_id: String) -> int:
 	var data := get_still_data(still_id)
