@@ -1,0 +1,64 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/stage_select.gd" id="1_stage"]
+
+[node name="StageSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_stage")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 48
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 48
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Stage Select"
+horizontal_alignment = 1
+
+[node name="ProgressLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "First Memory: 0% restored"
+horizontal_alignment = 1
+
+[node name="Stage1Button" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Stage 1"
+
+[node name="Stage2Button" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Stage 2"
+
+[node name="Stage3Button" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Stage 3"
+
+[node name="Stage4Button" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Stage 4"
+
+[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "BACK"
+
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Stage1Button" to="." method="_on_stage_1_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Stage2Button" to="." method="_on_stage_2_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Stage3Button" to="." method="_on_stage_3_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Stage4Button" to="." method="_on_stage_4_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/BackButton" to="." method="_on_back_pressed"]
