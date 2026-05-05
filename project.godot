@@ -1,0 +1,33 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section]
+;   param=value
+
+config_version=5
+
+[application]
+
+config/name="Lost Memoria"
+config/description="A simple puzzle game where clearing stages restores illustration stills and unlocks them in a collection gallery."
+run/main_scene="res://scenes/title/title.tscn"
+config/features=PackedStringArray("4.2")
+config/icon="res://assets/ui/icon.svg"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[autoload]
+
+GameState="*res://scripts/game_state.gd"
+SaveManager="*res://scripts/save_manager.gd"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
