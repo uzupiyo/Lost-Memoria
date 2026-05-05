@@ -37,10 +37,14 @@ func _generate_board() -> void:
 	pieces.clear()
 	piece_buttons.clear()
 	selected_indices.clear()
-	for child: Node in board.get_children():
-		child.queue_free()
-	for i: int in range(BOARD_SIZE * BOARD_SIZE):
-		pieces.append(randi() % COLOR_COUNT)
+	var children: Array = board.get_children()
+	for child_variant in children:
+		var child: Node = child_variant as Node
+		if child != null:
+			child.queue_free()
+	for i in range(BOARD_SIZE * BOARD_SIZE):
+		var piece_value: int = randi() % COLOR_COUNT
+		pieces.append(piece_value)
 		var button: Button = Button.new()
 		button.custom_minimum_size = Vector2(72, 72)
 		button.focus_mode = Control.FOCUS_NONE
@@ -53,12 +57,16 @@ func _generate_board() -> void:
 func _input(event: InputEvent) -> void:
 	if has_cleared or not is_selecting:
 		return
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
-		_finish_selection()
-	elif event is InputEventScreenTouch and not event.pressed:
-		_finish_selection()
+	if event is InputEventMouseButton:
+		var mouse_event: InputEventMouseButton = event as InputEventMouseButton
+		if mouse_event.button_index == MOUSE_BUTTON_LEFT and not mouse_event.pressed:
+			_finish_selection()
+	elif event is InputEventScreenTouch:
+		var touch_event: InputEventScreenTouch = event as InputEventScreenTouch
+		if not touch_event.pressed:
+			_finish_selection()
 	elif event is InputEventScreenDrag:
-		var drag_event: InputEventScreenDrag = event
+		var drag_event: InputEventScreenDrag = event as InputEventScreenDrag
 		var hovered_index: int = _get_piece_index_at_position(drag_event.position)
 		if hovered_index >= 0:
 			_try_add_to_selection(hovered_index)
@@ -66,10 +74,14 @@ func _input(event: InputEvent) -> void:
 func _on_piece_gui_input(event: InputEvent, index: int) -> void:
 	if has_cleared:
 		return
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		_start_selection(index)
-	elif event is InputEventScreenTouch and event.pressed:
-		_start_selection(index)
+	if event is InputEventMouseButton:
+		var mouse_event: InputEventMouseButton = event as InputEventMouseButton
+		if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
+			_start_selection(index)
+	elif event is InputEventScreenTouch:
+		var touch_event: InputEventScreenTouch = event as InputEventScreenTouch
+		if touch_event.pressed:
+			_start_selection(index)
 
 func _start_selection(index: int) -> void:
 	is_selecting = true
@@ -109,8 +121,9 @@ func _finish_selection() -> void:
 
 func _resolve_match(indices: Array) -> bool:
 	var removed: Dictionary = {}
-	for index: Variant in indices:
-		removed[int(index)] = true
+	for index_variant in indices:
+		var index: int = int(index_variant)
+		removed[index] = true
 	score += indices.size()
 	gauge.value = min(score, CLEAR_SCORE)
 	if score >= CLEAR_SCORE:
@@ -120,22 +133,24 @@ func _resolve_match(indices: Array) -> bool:
 	return false
 
 func _drop_and_refill(removed: Dictionary) -> void:
-	for col: int in range(BOARD_SIZE):
+	for col in range(BOARD_SIZE):
 		var kept: Array = []
-		for row: int in range(BOARD_SIZE - 1, -1, -1):
+		for row in range(BOARD_SIZE - 1, -1, -1):
 			var index: int = _to_index(row, col)
 			if not removed.has(index):
 				kept.append(int(pieces[index]))
-		for row: int in range(BOARD_SIZE - 1, -1, -1):
+		for row in range(BOARD_SIZE - 1, -1, -1):
 			var index: int = _to_index(row, col)
 			if kept.size() > 0:
-				pieces[index] = kept.pop_front()
+				pieces[index] = int(kept.pop_front())
 			else:
 				pieces[index] = randi() % COLOR_COUNT
 
 func _get_piece_index_at_position(global_position: Vector2) -> int:
-	for i: int in range(piece_buttons.size()):
-		var button: Button = piece_buttons[i]
+	for i in range(piece_buttons.size()):
+		var button: Button = piece_buttons[i] as Button
+		if button == null:
+			continue
 		var rect: Rect2 = Rect2(button.global_position, button.size)
 		if rect.has_point(global_position):
 			return i
@@ -178,8 +193,10 @@ func _piece_symbol(index: int) -> String:
 func _update_board_view() -> void:
 	if piece_buttons.size() != pieces.size():
 		return
-	for i: int in range(piece_buttons.size()):
-		var button: Button = piece_buttons[i]
+	for i in range(piece_buttons.size()):
+		var button: Button = piece_buttons[i] as Button
+		if button == null:
+			continue
 		var piece_color: int = int(pieces[i])
 		button.text = _piece_symbol(piece_color)
 		if selected_indices.has(i):
