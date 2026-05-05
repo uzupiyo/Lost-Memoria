@@ -68,7 +68,7 @@ grow_vertical = 2
 mouse_filter = 2
 stretch_mode = 5
 
-[node name="LockOverlay" type="ColorRect" parent="MarginContainer/VBoxContainer/StillFrame/StillStack"]
+[node name="ShardLayer" type="Control" parent="MarginContainer/VBoxContainer/StillFrame/StillStack"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -77,7 +77,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0, 0, 0, 0.75)
 
 [node name="OverlayLabel" type="Label" parent="MarginContainer/VBoxContainer/StillFrame/StillStack"]
 unique_name_in_owner = true
@@ -87,9 +86,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -220.0
+offset_left = -240.0
 offset_top = -24.0
-offset_right = 220.0
+offset_right = 240.0
 offset_bottom = 24.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -114,7 +113,7 @@ text = "NEXT"
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
-text = "Restoration: 0%"
+text = "Mirror Shards: 0 / 5"
 horizontal_alignment = 1
 
 [node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer"]
