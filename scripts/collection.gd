@@ -2,33 +2,67 @@ extends Control
 
 var still_ids: Array = []
 var current_index: int = 0
+var shard_overlays: Array[Polygon2D] = []
 
 @onready var title_label: Label = %StillTitle
 @onready var progress_label: Label = %ProgressLabel
 @onready var status_label: Label = %StatusLabel
 @onready var still_image: TextureRect = %StillImage
-@onready var lock_overlay: ColorRect = %LockOverlay
+@onready var shard_layer: Control = %ShardLayer
 @onready var overlay_label: Label = %OverlayLabel
 @onready var counter_label: Label = %CounterLabel
 
 func _ready() -> void:
+	_setup_shards()
 	still_ids = GameState.get_all_still_ids()
 	if still_ids.is_empty():
 		return
 	_update_collection_view(str(still_ids[current_index]))
 
+func _setup_shards() -> void:
+	var child_index: int = shard_layer.get_child_count() - 1
+	while child_index >= 0:
+		var child: Node = shard_layer.get_child(child_index)
+		child.queue_free()
+		child_index -= 1
+	shard_overlays.clear()
+
+	var shard_index: int = 0
+	while shard_index < GameState.STILL_STAGE_COUNT:
+		var shard: Polygon2D = Polygon2D.new()
+		shard.color = Color(0.12, 0.12, 0.14, 0.88)
+		shard.polygon = _get_shard_polygon(shard_index)
+		shard_layer.add_child(shard)
+		shard_overlays.append(shard)
+		shard_index += 1
+
+func _get_shard_polygon(index: int) -> PackedVector2Array:
+	match index:
+		0:
+			return PackedVector2Array([Vector2(0, 0), Vector2(355, 0), Vector2(300, 210), Vector2(0, 275)])
+		1:
+			return PackedVector2Array([Vector2(355, 0), Vector2(720, 0), Vector2(720, 170), Vector2(455, 250), Vector2(300, 210)])
+		2:
+			return PackedVector2Array([Vector2(0, 275), Vector2(300, 210), Vector2(360, 405), Vector2(0, 405)])
+		3:
+			return PackedVector2Array([Vector2(300, 210), Vector2(455, 250), Vector2(500, 405), Vector2(360, 405)])
+		_:
+			return PackedVector2Array([Vector2(455, 250), Vector2(720, 170), Vector2(720, 405), Vector2(500, 405)])
+
 func _update_collection_view(still_id: String) -> void:
 	var data: Dictionary = GameState.get_still_data(still_id)
 	title_label.text = str(data.get("title", "Unknown Memory"))
 	counter_label.text = "%d / %d" % [current_index + 1, still_ids.size()]
+	var unlocked_stages: int = int(data.get("unlocked_stages", 0))
+	var total_stages: int = int(data.get("total_stages", GameState.STILL_STAGE_COUNT))
 	var percent: int = GameState.get_unlock_percent(still_id)
-	progress_label.text = "Restoration: %d%%" % percent
+	progress_label.text = "Mirror Shards: %d / %d" % [unlocked_stages, total_stages]
 	_load_still_texture(str(data.get("image_path", "")))
-	_apply_unlock_mask(percent)
+	_apply_shard_mask(unlocked_stages)
 	if GameState.is_still_complete(still_id):
 		status_label.text = "Unlocked"
 	else:
-		status_label.text = "Locked / In Progress"
+		status_label.text = "%d%% restored" % percent
 
 func _load_still_texture(path: String) -> void:
 	if path.is_empty() or not ResourceLoader.exists(path):
@@ -40,17 +74,18 @@ func _load_still_texture(path: String) -> void:
 	if loaded_resource is Texture2D:
 		still_image.texture = loaded_resource as Texture2D
 
-func _apply_unlock_mask(percent: int) -> void:
-	var clamped_percent: int = clamp(percent, 0, 100)
-	var alpha: float = 0.82 - (float(clamped_percent) / 100.0) * 0.82
-	lock_overlay.color = Color(0, 0, 0, alpha)
-	var brightness: float = 0.35 + float(clamped_percent) / 100.0 * 0.65
-	still_image.modulate = Color(brightness, brightness, brightness, 1.0)
-	if clamped_percent <= 0:
+func _apply_shard_mask(unlocked_stages: int) -> void:
+	var shard_index: int = 0
+	while shard_index < shard_overlays.size():
+		var shard: Polygon2D = shard_overlays[shard_index]
+		shard.visible = shard_index >= unlocked_stages
+		shard_index += 1
+	still_image.modulate = Color(1, 1, 1, 1)
+	if unlocked_stages <= 0:
 		overlay_label.text = "LOCKED"
 		overlay_label.visible = true
-	elif clamped_percent < 100:
-		overlay_label.text = "%d%% RESTORED" % clamped_percent
+	elif unlocked_stages < shard_overlays.size():
+		overlay_label.text = "%d / %d SHARDS RESTORED" % [unlocked_stages, shard_overlays.size()]
 		overlay_label.visible = true
 	else:
 		overlay_label.visible = false
