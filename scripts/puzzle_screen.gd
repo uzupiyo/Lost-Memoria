@@ -1,18 +1,18 @@
 extends Control
 
-const BOARD_SIZE := 6
-const COLOR_COUNT := 4
-const CLEAR_SCORE := 30
-const MIN_MATCH := 3
+const BOARD_SIZE: int = 6
+const COLOR_COUNT: int = 4
+const CLEAR_SCORE: int = 30
+const MIN_MATCH: int = 3
 
-var score := 0
+var score: int = 0
 var pieces: Array = []
 var piece_buttons: Array = []
 var selected_indices: Array = []
-var selected_color := -1
-var is_selecting := false
-var has_cleared := false
-var pending_scene_change := false
+var selected_color: int = -1
+var is_selecting: bool = false
+var has_cleared: bool = false
+var pending_scene_change: bool = false
 
 @onready var stage_label: Label = %StageLabel
 @onready var gauge: ProgressBar = %RestoreGauge
@@ -28,7 +28,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if has_cleared or not is_selecting:
 		return
-	var hovered_index := _get_piece_index_at_position(get_global_mouse_position())
+	var hovered_index: int = _get_piece_index_at_position(get_global_mouse_position())
 	if hovered_index >= 0:
 		_try_add_to_selection(hovered_index)
 
@@ -37,11 +37,11 @@ func _generate_board() -> void:
 	pieces.clear()
 	piece_buttons.clear()
 	selected_indices.clear()
-	for child in board.get_children():
+	for child: Node in board.get_children():
 		child.queue_free()
-	for i in range(BOARD_SIZE * BOARD_SIZE):
+	for i: int in range(BOARD_SIZE * BOARD_SIZE):
 		pieces.append(randi() % COLOR_COUNT)
-		var button := Button.new()
+		var button: Button = Button.new()
 		button.custom_minimum_size = Vector2(72, 72)
 		button.focus_mode = Control.FOCUS_NONE
 		button.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -58,7 +58,8 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventScreenTouch and not event.pressed:
 		_finish_selection()
 	elif event is InputEventScreenDrag:
-		var hovered_index := _get_piece_index_at_position(event.position)
+		var drag_event: InputEventScreenDrag = event
+		var hovered_index: int = _get_piece_index_at_position(drag_event.position)
 		if hovered_index >= 0:
 			_try_add_to_selection(hovered_index)
 
@@ -83,7 +84,7 @@ func _try_add_to_selection(index: int) -> void:
 		return
 	if int(pieces[index]) != selected_color:
 		return
-	var last_index := int(selected_indices[selected_indices.size() - 1])
+	var last_index: int = int(selected_indices[selected_indices.size() - 1])
 	if selected_indices.size() >= 2 and index == int(selected_indices[selected_indices.size() - 2]):
 		selected_indices.pop_back()
 		_update_board_view()
@@ -97,7 +98,7 @@ func _try_add_to_selection(index: int) -> void:
 
 func _finish_selection() -> void:
 	is_selecting = false
-	var did_clear := false
+	var did_clear: bool = false
 	if selected_indices.size() >= MIN_MATCH:
 		did_clear = _resolve_match(selected_indices.duplicate())
 	if did_clear:
@@ -107,8 +108,8 @@ func _finish_selection() -> void:
 	_update_board_view()
 
 func _resolve_match(indices: Array) -> bool:
-	var removed := {}
-	for index in indices:
+	var removed: Dictionary = {}
+	for index: Variant in indices:
 		removed[int(index)] = true
 	score += indices.size()
 	gauge.value = min(score, CLEAR_SCORE)
@@ -119,34 +120,34 @@ func _resolve_match(indices: Array) -> bool:
 	return false
 
 func _drop_and_refill(removed: Dictionary) -> void:
-	for col in range(BOARD_SIZE):
+	for col: int in range(BOARD_SIZE):
 		var kept: Array = []
-		for row in range(BOARD_SIZE - 1, -1, -1):
-			var index := _to_index(row, col)
+		for row: int in range(BOARD_SIZE - 1, -1, -1):
+			var index: int = _to_index(row, col)
 			if not removed.has(index):
 				kept.append(int(pieces[index]))
-		for row in range(BOARD_SIZE - 1, -1, -1):
-			var index := _to_index(row, col)
+		for row: int in range(BOARD_SIZE - 1, -1, -1):
+			var index: int = _to_index(row, col)
 			if kept.size() > 0:
 				pieces[index] = kept.pop_front()
 			else:
 				pieces[index] = randi() % COLOR_COUNT
 
 func _get_piece_index_at_position(global_position: Vector2) -> int:
-	for i in range(piece_buttons.size()):
+	for i: int in range(piece_buttons.size()):
 		var button: Button = piece_buttons[i]
-		var rect := Rect2(button.global_position, button.size)
+		var rect: Rect2 = Rect2(button.global_position, button.size)
 		if rect.has_point(global_position):
 			return i
 	return -1
 
 func _is_adjacent_8way(a: int, b: int) -> bool:
-	var a_row := int(a / BOARD_SIZE)
-	var a_col := a % BOARD_SIZE
-	var b_row := int(b / BOARD_SIZE)
-	var b_col := b % BOARD_SIZE
-	var row_distance := abs(a_row - b_row)
-	var col_distance := abs(a_col - b_col)
+	var a_row: int = int(a / BOARD_SIZE)
+	var a_col: int = a % BOARD_SIZE
+	var b_row: int = int(b / BOARD_SIZE)
+	var b_col: int = b % BOARD_SIZE
+	var row_distance: int = abs(a_row - b_row)
+	var col_distance: int = abs(a_col - b_col)
 	return row_distance <= 1 and col_distance <= 1 and row_distance + col_distance > 0
 
 func _to_index(row: int, col: int) -> int:
@@ -177,9 +178,9 @@ func _piece_symbol(index: int) -> String:
 func _update_board_view() -> void:
 	if piece_buttons.size() != pieces.size():
 		return
-	for i in range(piece_buttons.size()):
+	for i: int in range(piece_buttons.size()):
 		var button: Button = piece_buttons[i]
-		var piece_color := int(pieces[i])
+		var piece_color: int = int(pieces[i])
 		button.text = _piece_symbol(piece_color)
 		if selected_indices.has(i):
 			button.text = "✓\n" + _piece_text(piece_color)
