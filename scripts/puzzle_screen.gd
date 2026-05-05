@@ -6,9 +6,9 @@ const CLEAR_SCORE: int = 30
 const MIN_MATCH: int = 3
 
 var score: int = 0
-var pieces: Array = []
-var piece_buttons: Array = []
-var selected_indices: Array = []
+var pieces: Array[int] = []
+var piece_buttons: Array[Button] = []
+var selected_indices: Array[int] = []
 var selected_color: int = -1
 var is_selecting: bool = false
 var has_cleared: bool = false
@@ -37,11 +37,10 @@ func _generate_board() -> void:
 	pieces.clear()
 	piece_buttons.clear()
 	selected_indices.clear()
-	var children: Array = board.get_children()
-	for child_variant in children:
-		var child: Node = child_variant as Node
-		if child != null:
-			child.queue_free()
+	var child_count: int = board.get_child_count()
+	for child_index in range(child_count - 1, -1, -1):
+		var child: Node = board.get_child(child_index)
+		child.queue_free()
 	for i in range(BOARD_SIZE * BOARD_SIZE):
 		var piece_value: int = randi() % COLOR_COUNT
 		pieces.append(piece_value)
@@ -85,8 +84,9 @@ func _on_piece_gui_input(event: InputEvent, index: int) -> void:
 
 func _start_selection(index: int) -> void:
 	is_selecting = true
-	selected_indices = [index]
-	selected_color = int(pieces[index])
+	selected_indices.clear()
+	selected_indices.append(index)
+	selected_color = pieces[index]
 	_update_board_view()
 
 func _try_add_to_selection(index: int) -> void:
@@ -94,10 +94,10 @@ func _try_add_to_selection(index: int) -> void:
 		return
 	if index < 0 or index >= pieces.size():
 		return
-	if int(pieces[index]) != selected_color:
+	if pieces[index] != selected_color:
 		return
-	var last_index: int = int(selected_indices[selected_indices.size() - 1])
-	if selected_indices.size() >= 2 and index == int(selected_indices[selected_indices.size() - 2]):
+	var last_index: int = selected_indices[selected_indices.size() - 1]
+	if selected_indices.size() >= 2 and index == selected_indices[selected_indices.size() - 2]:
 		selected_indices.pop_back()
 		_update_board_view()
 		return
@@ -119,10 +119,10 @@ func _finish_selection() -> void:
 	selected_color = -1
 	_update_board_view()
 
-func _resolve_match(indices: Array) -> bool:
+func _resolve_match(indices: Array[int]) -> bool:
 	var removed: Dictionary = {}
-	for index_variant in indices:
-		var index: int = int(index_variant)
+	for i in range(indices.size()):
+		var index: int = indices[i]
 		removed[index] = true
 	score += indices.size()
 	gauge.value = min(score, CLEAR_SCORE)
@@ -134,23 +134,21 @@ func _resolve_match(indices: Array) -> bool:
 
 func _drop_and_refill(removed: Dictionary) -> void:
 	for col in range(BOARD_SIZE):
-		var kept: Array = []
+		var kept: Array[int] = []
 		for row in range(BOARD_SIZE - 1, -1, -1):
 			var index: int = _to_index(row, col)
 			if not removed.has(index):
-				kept.append(int(pieces[index]))
+				kept.append(pieces[index])
 		for row in range(BOARD_SIZE - 1, -1, -1):
 			var index: int = _to_index(row, col)
 			if kept.size() > 0:
-				pieces[index] = int(kept.pop_front())
+				pieces[index] = kept.pop_front()
 			else:
 				pieces[index] = randi() % COLOR_COUNT
 
 func _get_piece_index_at_position(global_position: Vector2) -> int:
 	for i in range(piece_buttons.size()):
-		var button: Button = piece_buttons[i] as Button
-		if button == null:
-			continue
+		var button: Button = piece_buttons[i]
 		var rect: Rect2 = Rect2(button.global_position, button.size)
 		if rect.has_point(global_position):
 			return i
@@ -194,10 +192,8 @@ func _update_board_view() -> void:
 	if piece_buttons.size() != pieces.size():
 		return
 	for i in range(piece_buttons.size()):
-		var button: Button = piece_buttons[i] as Button
-		if button == null:
-			continue
-		var piece_color: int = int(pieces[i])
+		var button: Button = piece_buttons[i]
+		var piece_color: int = pieces[i]
 		button.text = _piece_symbol(piece_color)
 		if selected_indices.has(i):
 			button.text = "✓\n" + _piece_text(piece_color)
