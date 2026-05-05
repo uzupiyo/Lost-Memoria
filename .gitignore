@@ -1,0 +1,24 @@
+# Godot 4
+.godot/
+.import/
+export.cfg
+export_presets.cfg
+
+# Imported asset cache
+*.import
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Builds
+build/
+exports/
+*.exe
+*.app
+*.apk
+*.aab
+*.ipa
+*.zip
