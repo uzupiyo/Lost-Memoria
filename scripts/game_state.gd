@@ -1,11 +1,11 @@
 extends Node
 
-const STILL_STAGE_COUNT := 4
+const STILL_STAGE_COUNT: int = 5
 
 var selected_still_id: String = "rin_001"
 var selected_stage_index: int = 0
 
-var stills := {
+var stills: Dictionary = {
 	"rin_001": {
 		"title": "Rin Memory 001",
 		"image_path": "res://assets/stills/rin/Rin001.png",
@@ -48,14 +48,18 @@ func get_all_still_ids() -> Array:
 	return stills.keys()
 
 func get_unlock_percent(still_id: String) -> int:
-	var data := get_still_data(still_id)
+	var data: Dictionary = get_still_data(still_id)
 	if data.is_empty():
 		return 0
-	return int(float(data.get("unlocked_stages", 0)) / float(data.get("total_stages", STILL_STAGE_COUNT)) * 100.0)
+	var unlocked_stages: int = int(data.get("unlocked_stages", 0))
+	var total_stages: int = int(data.get("total_stages", STILL_STAGE_COUNT))
+	return int(float(unlocked_stages) / float(total_stages) * 100.0)
 
 func is_still_complete(still_id: String) -> bool:
-	var data := get_still_data(still_id)
-	return not data.is_empty() and int(data.get("unlocked_stages", 0)) >= int(data.get("total_stages", STILL_STAGE_COUNT))
+	var data: Dictionary = get_still_data(still_id)
+	if data.is_empty():
+		return false
+	return int(data.get("unlocked_stages", 0)) >= int(data.get("total_stages", STILL_STAGE_COUNT))
 
 func clear_selected_stage() -> void:
 	unlock_stage(selected_still_id, selected_stage_index)
@@ -64,8 +68,8 @@ func unlock_stage(still_id: String, stage_index: int) -> void:
 	if not stills.has(still_id):
 		return
 	var data: Dictionary = stills[still_id]
-	var current := int(data.get("unlocked_stages", 0))
-	var next_value = max(current, stage_index + 1)
+	var current: int = int(data.get("unlocked_stages", 0))
+	var next_value: int = max(current, stage_index + 1)
 	data["unlocked_stages"] = clamp(next_value, 0, int(data.get("total_stages", STILL_STAGE_COUNT)))
 	stills[still_id] = data
 	SaveManager.save_game()
