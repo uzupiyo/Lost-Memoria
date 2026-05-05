@@ -12,6 +12,7 @@ var selected_indices: Array = []
 var selected_color := -1
 var is_selecting := false
 var has_cleared := false
+var pending_scene_change := false
 
 @onready var stage_label: Label = %StageLabel
 @onready var gauge: ProgressBar = %RestoreGauge
@@ -19,10 +20,17 @@ var has_cleared := false
 
 func _ready() -> void:
 	randomize()
-	stage_label.text = "Stage %d - Drag same colors, release at 3+" % (GameState.selected_stage_index + 1)
+	stage_label.text = "Stage %d - Drag same colors, release at 3+ / diagonal OK" % (GameState.selected_stage_index + 1)
 	gauge.max_value = CLEAR_SCORE
 	gauge.value = 0
 	_generate_board()
+
+func _process(_delta: float) -> void:
+	if has_cleared or not is_selecting:
+		return
+	var hovered_index := _get_piece_index_at_position(get_global_mouse_position())
+	if hovered_index >= 0:
+		_try_add_to_selection(hovered_index)
 
 func _generate_board() -> void:
 	board.columns = BOARD_SIZE
@@ -31,14 +39,13 @@ func _generate_board() -> void:
 	selected_indices.clear()
 	for child in board.get_children():
 		child.queue_free()
-	for i in BOARD_SIZE * BOARD_SIZE:
+	for i in range(BOARD_SIZE * BOARD_SIZE):
 		pieces.append(randi() % COLOR_COUNT)
 		var button := Button.new()
 		button.custom_minimum_size = Vector2(72, 72)
 		button.focus_mode = Control.FOCUS_NONE
 		button.mouse_filter = Control.MOUSE_FILTER_STOP
 		button.gui_input.connect(_on_piece_gui_input.bind(i))
-		button.mouse_entered.connect(_on_piece_mouse_entered.bind(i))
 		piece_buttons.append(button)
 		board.add_child(button)
 	_update_board_view()
@@ -50,6 +57,10 @@ func _input(event: InputEvent) -> void:
 		_finish_selection()
 	elif event is InputEventScreenTouch and not event.pressed:
 		_finish_selection()
+	elif event is InputEventScreenDrag:
+		var hovered_index := _get_piece_index_at_position(event.position)
+		if hovered_index >= 0:
+			_try_add_to_selection(hovered_index)
 
 func _on_piece_gui_input(event: InputEvent, index: int) -> void:
 	if has_cleared:
@@ -58,12 +69,6 @@ func _on_piece_gui_input(event: InputEvent, index: int) -> void:
 		_start_selection(index)
 	elif event is InputEventScreenTouch and event.pressed:
 		_start_selection(index)
-
-func _on_piece_mouse_entered(index: int) -> void:
-	if has_cleared:
-		return
-	if is_selecting:
-		_try_add_to_selection(index)
 
 func _start_selection(index: int) -> void:
 	is_selecting = true
@@ -74,6 +79,8 @@ func _start_selection(index: int) -> void:
 func _try_add_to_selection(index: int) -> void:
 	if selected_indices.is_empty():
 		return
+	if index < 0 or index >= pieces.size():
+		return
 	if int(pieces[index]) != selected_color:
 		return
 	var last_index := int(selected_indices[selected_indices.size() - 1])
@@ -83,17 +90,17 @@ func _try_add_to_selection(index: int) -> void:
 		return
 	if selected_indices.has(index):
 		return
-	if not _is_adjacent(last_index, index):
+	if not _is_adjacent_8way(last_index, index):
 		return
 	selected_indices.append(index)
 	_update_board_view()
 
 func _finish_selection() -> void:
 	is_selecting = false
-	var cleared_now := false
+	var did_clear := false
 	if selected_indices.size() >= MIN_MATCH:
-		cleared_now = _resolve_match(selected_indices.duplicate())
-	if cleared_now:
+		did_clear = _resolve_match(selected_indices.duplicate())
+	if did_clear:
 		return
 	selected_indices.clear()
 	selected_color = -1
@@ -104,11 +111,11 @@ func _resolve_match(indices: Array) -> bool:
 	for index in indices:
 		removed[int(index)] = true
 	score += indices.size()
-	gauge.value = score
-	_drop_and_refill(removed)
+	gauge.value = min(score, CLEAR_SCORE)
 	if score >= CLEAR_SCORE:
 		_clear_stage()
 		return true
+	_drop_and_refill(removed)
 	return false
 
 func _drop_and_refill(removed: Dictionary) -> void:
@@ -125,7 +132,15 @@ func _drop_and_refill(removed: Dictionary) -> void:
 			else:
 				pieces[index] = randi() % COLOR_COUNT
 
-func _is_adjacent(a: int, b: int) -> bool:
+func _get_piece_index_at_position(global_position: Vector2) -> int:
+	for i in range(piece_buttons.size()):
+		var button: Button = piece_buttons[i]
+		var rect := Rect2(button.global_position, button.size)
+		if rect.has_point(global_position):
+			return i
+	return -1
+
+func _is_adjacent_8way(a: int, b: int) -> bool:
 	var a_row := int(a / BOARD_SIZE)
 	var a_col := a % BOARD_SIZE
 	var b_row := int(b / BOARD_SIZE)
@@ -160,6 +175,8 @@ func _piece_symbol(index: int) -> String:
 			return "●\nGreen"
 
 func _update_board_view() -> void:
+	if piece_buttons.size() != pieces.size():
+		return
 	for i in range(piece_buttons.size()):
 		var button: Button = piece_buttons[i]
 		var piece_color := int(pieces[i])
@@ -185,8 +202,13 @@ func _clear_stage() -> void:
 	if has_cleared:
 		return
 	has_cleared = true
+	is_selecting = false
+	selected_indices.clear()
+	selected_color = -1
 	GameState.clear_selected_stage()
-	call_deferred("_go_to_collection")
+	if not pending_scene_change:
+		pending_scene_change = true
+		get_tree().create_timer(0.25).timeout.connect(_go_to_collection)
 
 func _go_to_collection() -> void:
 	get_tree().change_scene_to_file("res://scenes/collection/collection.tscn")
