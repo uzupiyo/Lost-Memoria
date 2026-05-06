@@ -11,53 +11,52 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_collection")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="Root" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 48
-theme_override_constants/margin_top = 32
-theme_override_constants/margin_right = 48
-theme_override_constants/margin_bottom = 32
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
-layout_mode = 2
 alignment = 1
 
-[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="Header" type="VBoxContainer" parent="Root"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TitleLabel" type="Label" parent="Root/Header"]
 layout_mode = 2
 mouse_filter = 2
 text = "Collection"
 horizontal_alignment = 1
 
-[node name="StillTitle" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="StillTitle" type="Label" parent="Root/Header"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
-text = "Rin Memory 001"
+text = "Rin normal 001"
 horizontal_alignment = 1
 
-[node name="CounterLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="CounterLabel" type="Label" parent="Root/Header"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
-text = "1 / 5"
+text = "1 / 25"
 horizontal_alignment = 1
 
-[node name="StillFrame" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+[node name="StillFrame" type="PanelContainer" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="StillStack" type="Control" parent="Root/StillFrame"]
+unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
-custom_minimum_size = Vector2(720, 405)
+clip_contents = true
 
-[node name="StillStack" type="Control" parent="MarginContainer/VBoxContainer/StillFrame"]
-layout_mode = 2
-mouse_filter = 2
-custom_minimum_size = Vector2(720, 405)
-
-[node name="StillImage" type="TextureRect" parent="MarginContainer/VBoxContainer/StillFrame/StillStack"]
+[node name="StillImage" type="TextureRect" parent="Root/StillFrame/StillStack"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -66,9 +65,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-stretch_mode = 5
+stretch_mode = 6
 
-[node name="ShardLayer" type="Control" parent="MarginContainer/VBoxContainer/StillFrame/StillStack"]
+[node name="LockedOverlay" type="ColorRect" parent="Root/StillFrame/StillStack"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -77,19 +76,25 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+color = Color(0, 0, 0, 1)
 
-[node name="OverlayLabel" type="Label" parent="MarginContainer/VBoxContainer/StillFrame/StillStack"]
+[node name="ShardLayer" type="Control" parent="Root/StillFrame/StillStack"]
 unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = -24.0
-offset_right = 240.0
-offset_bottom = 24.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="OverlayLabel" type="Label" parent="Root/StillFrame/StillStack"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -97,41 +102,45 @@ text = "LOCKED"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="NavigationRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="Footer" type="VBoxContainer" parent="Root"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="NavigationRow" type="HBoxContainer" parent="Root/Footer"]
 layout_mode = 2
 alignment = 1
 
-[node name="PreviousButton" type="Button" parent="MarginContainer/VBoxContainer/NavigationRow"]
+[node name="PreviousButton" type="Button" parent="Root/Footer/NavigationRow"]
 layout_mode = 2
 text = "PREVIOUS"
 
-[node name="NextButton" type="Button" parent="MarginContainer/VBoxContainer/NavigationRow"]
+[node name="NextButton" type="Button" parent="Root/Footer/NavigationRow"]
 layout_mode = 2
 text = "NEXT"
 
-[node name="ProgressLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="ProgressLabel" type="Label" parent="Root/Footer"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
 text = "Mirror Shards: 0 / 5"
 horizontal_alignment = 1
 
-[node name="StatusLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="StatusLabel" type="Label" parent="Root/Footer"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
-text = "Locked / In Progress"
+text = "0% restored"
 horizontal_alignment = 1
 
-[node name="StageSelectButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="StageSelectButton" type="Button" parent="Root/Footer"]
 layout_mode = 2
 text = "STAGE SELECT"
 
-[node name="TitleButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="TitleButton" type="Button" parent="Root/Footer"]
 layout_mode = 2
 text = "TITLE"
 
-[connection signal="pressed" from="MarginContainer/VBoxContainer/NavigationRow/PreviousButton" to="." method="_on_previous_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/NavigationRow/NextButton" to="." method="_on_next_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/StageSelectButton" to="." method="_on_stage_select_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/TitleButton" to="." method="_on_title_pressed"]
+[connection signal="pressed" from="Root/Footer/NavigationRow/PreviousButton" to="." method="_on_previous_pressed"]
+[connection signal="pressed" from="Root/Footer/NavigationRow/NextButton" to="." method="_on_next_pressed"]
+[connection signal="pressed" from="Root/Footer/StageSelectButton" to="." method="_on_stage_select_pressed"]
+[connection signal="pressed" from="Root/Footer/TitleButton" to="." method="_on_title_pressed"]
