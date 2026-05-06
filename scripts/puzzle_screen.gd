@@ -6,6 +6,7 @@ const CLEAR_SCORE: int = 30
 const MIN_MATCH: int = 3
 const PIECE_SIZE: Vector2 = Vector2(82, 82)
 const ORB_SIZE: Vector2 = Vector2(78, 78)
+const SD_FRAME_PATH: String = "res://assets/puzzle/ui/sd_character_frame.png"
 
 const DROP_PATHS: Array[String] = [
 	"res://assets/puzzle/drops/memory_orb_red.png",
@@ -22,6 +23,7 @@ const DROP_PATHS_FALLBACK: Array[String] = [
 ]
 
 var score: int = 0
+var moves: int = 25
 var pieces: Array[int] = []
 var piece_controls: Array[PanelContainer] = []
 var selected_indices: Array[int] = []
@@ -32,16 +34,41 @@ var pending_scene_change: bool = false
 var drop_textures: Dictionary = {}
 
 @onready var stage_label: Label = %StageLabel
+@onready var target_label: Label = %TargetLabel
+@onready var moves_label: Label = %MovesLabel
+@onready var score_label: Label = %ScoreLabel
+@onready var character_name_label: Label = %CharacterNameLabel
+@onready var sd_frame: TextureRect = %SdFrame
+@onready var sd_character: TextureRect = %SdCharacter
+@onready var sd_message_label: Label = %SdMessageLabel
 @onready var gauge: ProgressBar = %RestoreGauge
+@onready var progress_label: Label = %ProgressLabel
 @onready var board: GridContainer = %Board
+@onready var still_preview: TextureRect = %StillPreview
 
 func _ready() -> void:
 	randomize()
 	_load_drop_textures()
-	stage_label.text = "Stage %d - Drag same colors, release at 3+ / diagonal OK" % (GameState.selected_stage_index + 1)
+	_setup_stage_info()
+	_generate_board()
+
+func _setup_stage_info() -> void:
+	var still_data: Dictionary = GameState.get_still_data(GameState.selected_still_id)
+	var character_id: String = str(still_data.get("character", GameState.selected_character_id))
+	var situation: String = str(still_data.get("situation", ""))
+	var stage_number: int = GameState.selected_stage_index + 1
+	stage_label.text = "%s / %s / Stage %d" % [character_id, situation, stage_number]
+	target_label.text = "TARGET\nMirror Shards"
+	moves_label.text = "MOVES\n%d" % moves
+	score_label.text = "SCORE\n0"
+	character_name_label.text = character_id
+	sd_message_label.text = "一緒に、記憶の欠片を集めましょう。"
 	gauge.max_value = CLEAR_SCORE
 	gauge.value = 0
-	_generate_board()
+	progress_label.text = "0% Restoration"
+	sd_frame.texture = _load_texture_optional(SD_FRAME_PATH)
+	sd_character.texture = _load_sd_character_texture(character_id)
+	still_preview.texture = _load_texture_optional(str(still_data.get("image_path", "")))
 
 func _load_drop_textures() -> void:
 	drop_textures.clear()
@@ -52,16 +79,35 @@ func _load_drop_textures() -> void:
 			drop_textures[index] = texture
 		index += 1
 
-func _load_texture_from_paths(primary_path: String, fallback_path: String) -> Texture2D:
-	if ResourceLoader.exists(primary_path):
-		var loaded_primary: Resource = load(primary_path)
-		if loaded_primary is Texture2D:
-			return loaded_primary as Texture2D
-	if ResourceLoader.exists(fallback_path):
-		var loaded_fallback: Resource = load(fallback_path)
-		if loaded_fallback is Texture2D:
-			return loaded_fallback as Texture2D
+func _load_texture_optional(path: String) -> Texture2D:
+	if path.is_empty() or not ResourceLoader.exists(path):
+		return null
+	var loaded: Resource = load(path)
+	if loaded is Texture2D:
+		return loaded as Texture2D
 	return null
+
+func _load_sd_character_texture(character_id: String) -> Texture2D:
+	var candidate_paths: Array[String] = [
+		"res://assets/ui/characters/sd/%s/%s_idle_01.png" % [character_id, character_id],
+		"res://assets/ui/characters/sd/%s/%s_idle_01.webp" % [character_id, character_id],
+		"res://assets/ui/characters/sd/%s/%s_sd_idle_01.png" % [character_id, character_id],
+		"res://assets/ui/characters/sd/%s/%s_sd_idle_01.webp" % [character_id, character_id],
+		"res://assets/ui/characters/portraits/%s_portrait.webp" % character_id
+	]
+	var i: int = 0
+	while i < candidate_paths.size():
+		var texture: Texture2D = _load_texture_optional(candidate_paths[i])
+		if texture != null:
+			return texture
+		i += 1
+	return null
+
+func _load_texture_from_paths(primary_path: String, fallback_path: String) -> Texture2D:
+	var primary: Texture2D = _load_texture_optional(primary_path)
+	if primary != null:
+		return primary
+	return _load_texture_optional(fallback_path)
 
 func _process(_delta: float) -> void:
 	if has_cleared or not is_selecting:
@@ -203,7 +249,12 @@ func _resolve_match(indices: Array[int]) -> bool:
 		removed[remove_index] = true
 		index_cursor += 1
 	score += indices.size()
+	moves = max(0, moves - 1)
 	gauge.value = min(score, CLEAR_SCORE)
+	var percent: int = int(float(min(score, CLEAR_SCORE)) / float(CLEAR_SCORE) * 100.0)
+	moves_label.text = "MOVES\n%d" % moves
+	score_label.text = "SCORE\n%d" % score
+	progress_label.text = "%d%% Restoration" % percent
 	if score >= CLEAR_SCORE:
 		_clear_stage()
 		return true
@@ -323,3 +374,17 @@ func _go_to_collection() -> void:
 
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/stage_select/stage_select.tscn")
+
+func _on_retry_pressed() -> void:
+	score = 0
+	moves = 25
+	has_cleared = false
+	pending_scene_change = false
+	gauge.value = 0
+	moves_label.text = "MOVES\n%d" % moves
+	score_label.text = "SCORE\n0"
+	progress_label.text = "0% Restoration"
+	_generate_board()
+
+func _on_hint_pressed() -> void:
+	sd_message_label.text = "同じ色を3つ以上、ななめにもつなげられます。"
