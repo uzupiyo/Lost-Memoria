@@ -2,10 +2,18 @@ extends Node
 
 const STILL_STAGE_COUNT: int = 5
 
-var selected_still_id: String = "rin_swimsuit_001"
+var selected_still_id: String = "rin_normal_001"
 var selected_stage_index: int = 0
 
 var stills: Dictionary = {
+	"rin_normal_001": {
+		"character": "Rin",
+		"situation": "normal",
+		"title": "Rin normal 001",
+		"image_path": "res://assets/stills/Rin/normal/Rin_normal_001.webp",
+		"unlocked_stages": 0,
+		"total_stages": STILL_STAGE_COUNT
+	},
 	"rin_swimsuit_001": {
 		"character": "Rin",
 		"situation": "swimsuit",
