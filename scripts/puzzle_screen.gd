@@ -4,6 +4,7 @@ const BOARD_SIZE: int = 6
 const COLOR_COUNT: int = 4
 const CLEAR_SCORE: int = 30
 const MIN_MATCH: int = 3
+const PIECE_SIZE: Vector2 = Vector2(76, 76)
 
 const DROP_PATHS: Array[String] = [
 	"res://assets/puzzle/drops/memory_orb_red.png",
@@ -21,7 +22,7 @@ const DROP_PATHS_FALLBACK: Array[String] = [
 
 var score: int = 0
 var pieces: Array[int] = []
-var piece_buttons: Array[Button] = []
+var piece_controls: Array[PanelContainer] = []
 var selected_indices: Array[int] = []
 var selected_color: int = -1
 var is_selecting: bool = false
@@ -71,7 +72,7 @@ func _process(_delta: float) -> void:
 func _generate_board() -> void:
 	board.columns = BOARD_SIZE
 	pieces.clear()
-	piece_buttons.clear()
+	piece_controls.clear()
 	selected_indices.clear()
 	var child_index: int = board.get_child_count() - 1
 	while child_index >= 0:
@@ -82,19 +83,41 @@ func _generate_board() -> void:
 	while create_index < BOARD_SIZE * BOARD_SIZE:
 		var piece_value: int = randi() % COLOR_COUNT
 		pieces.append(piece_value)
-		var button: Button = Button.new()
-		button.custom_minimum_size = Vector2(76, 76)
-		button.focus_mode = Control.FOCUS_NONE
-		button.mouse_filter = Control.MOUSE_FILTER_STOP
-		button.expand_icon = true
-		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
-		button.gui_input.connect(_on_piece_gui_input.bind(create_index))
-		button.mouse_entered.connect(_on_piece_mouse_entered.bind(create_index))
-		piece_buttons.append(button)
-		board.add_child(button)
+		var piece: PanelContainer = _create_piece_control(create_index)
+		piece_controls.append(piece)
+		board.add_child(piece)
 		create_index += 1
 	_update_board_view()
+
+func _create_piece_control(index: int) -> PanelContainer:
+	var panel: PanelContainer = PanelContainer.new()
+	panel.custom_minimum_size = PIECE_SIZE
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel.gui_input.connect(_on_piece_gui_input.bind(index))
+	panel.mouse_entered.connect(_on_piece_mouse_entered.bind(index))
+
+	var center: CenterContainer = CenterContainer.new()
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.add_child(center)
+
+	var texture_rect: TextureRect = TextureRect.new()
+	texture_rect.name = "DropImage"
+	texture_rect.custom_minimum_size = Vector2(64, 64)
+	texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	center.add_child(texture_rect)
+
+	var label: Label = Label.new()
+	label.name = "FallbackLabel"
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.hide()
+	center.add_child(label)
+
+	return panel
 
 func _input(event: InputEvent) -> void:
 	if has_cleared or not is_selecting:
@@ -205,9 +228,9 @@ func _drop_and_refill(removed: Dictionary) -> void:
 
 func _get_piece_index_at_position(global_position: Vector2) -> int:
 	var i: int = 0
-	while i < piece_buttons.size():
-		var button: Button = piece_buttons[i]
-		var rect: Rect2 = Rect2(button.global_position, button.size)
+	while i < piece_controls.size():
+		var piece: PanelContainer = piece_controls[i]
+		var rect: Rect2 = Rect2(piece.global_position, piece.size)
 		if rect.has_point(global_position):
 			return i
 		i += 1
@@ -248,23 +271,29 @@ func _piece_symbol(index: int) -> String:
 			return "●\nGreen"
 
 func _update_board_view() -> void:
-	if piece_buttons.size() != pieces.size():
+	if piece_controls.size() != pieces.size():
 		return
 	var i: int = 0
-	while i < piece_buttons.size():
-		var button: Button = piece_buttons[i]
+	while i < piece_controls.size():
+		var piece: PanelContainer = piece_controls[i]
 		var piece_color: int = pieces[i]
 		var texture: Texture2D = _get_drop_texture(piece_color)
-		button.icon = texture
-		if texture == null:
-			button.text = _piece_symbol(piece_color)
-			button.add_theme_color_override("font_color", _piece_font_color(piece_color))
+		var texture_rect: TextureRect = piece.get_node("CenterContainer/DropImage") as TextureRect
+		var label: Label = piece.get_node("CenterContainer/FallbackLabel") as Label
+		if texture != null:
+			texture_rect.texture = texture
+			texture_rect.show()
+			label.hide()
 		else:
-			button.text = ""
+			texture_rect.texture = null
+			texture_rect.hide()
+			label.text = _piece_symbol(piece_color)
+			label.add_theme_color_override("font_color", _piece_font_color(piece_color))
+			label.show()
 		if selected_indices.has(i):
-			button.modulate = Color(1.35, 1.35, 1.35)
+			piece.modulate = Color(1.35, 1.35, 1.35)
 		else:
-			button.modulate = Color(1, 1, 1)
+			piece.modulate = Color(1, 1, 1)
 		i += 1
 
 func _piece_font_color(index: int) -> Color:
