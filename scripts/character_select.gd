@@ -44,15 +44,12 @@ func _create_character_card(character_id: String) -> Button:
 	var card_stack: Control = Control.new()
 	card_stack.custom_minimum_size = Vector2(510, 640)
 	card_stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card_stack.clip_contents = true
 	root.add_child(card_stack)
 
 	var portrait: TextureRect = TextureRect.new()
 	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
-	portrait.offset_left = 70.0
-	portrait.offset_top = 90.0
-	portrait.offset_right = -70.0
-	portrait.offset_bottom = -92.0
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	portrait.texture = _load_character_texture(character_id, "portrait")
@@ -61,22 +58,10 @@ func _create_character_card(character_id: String) -> Button:
 	var effect: TextureRect = TextureRect.new()
 	effect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	effect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	effect.offset_left = 70.0
-	effect.offset_top = 90.0
-	effect.offset_right = -70.0
-	effect.offset_bottom = -92.0
 	effect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	effect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	effect.texture = _load_character_texture(character_id, "effect")
 	card_stack.add_child(effect)
-
-	var frame: TextureRect = TextureRect.new()
-	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	frame.set_anchors_preset(Control.PRESET_FULL_RECT)
-	frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	frame.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	frame.texture = _load_character_texture(character_id, "frame")
-	card_stack.add_child(frame)
 
 	var info_box: PanelContainer = PanelContainer.new()
 	info_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -130,10 +115,6 @@ func _get_character_asset_candidates(character_id: String, texture_kind: String)
 			paths.append("res://assets/ui/characters/%s_portrait_card.webp" % character_id)
 			paths.append("res://assets/ui/characters/%s_portrait_card.png" % character_id)
 			paths.append(_get_first_still_image_path(character_id))
-		"frame":
-			paths.append(str(data.get("frame_path", "")))
-			paths.append("res://assets/ui/characters/frames/%s_frame.png" % character_id)
-			paths.append("res://assets/ui/characters/frames/%s_frame.webp" % character_id)
 		"effect":
 			paths.append(str(data.get("effect_path", "")))
 			paths.append("res://assets/ui/characters/effects/%s_effect.png" % character_id)
