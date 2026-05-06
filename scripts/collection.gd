@@ -25,20 +25,47 @@ var current_total_stages: int = 5
 func _ready() -> void:
 	shard_layer.resized.connect(_on_shard_layer_resized)
 	_setup_shards()
-	still_ids = GameState.get_still_ids_for_character(GameState.selected_character_id)
-	collection_title_label.text = "%s Collection" % GameState.selected_character_id
-	if still_ids.is_empty():
-		return
-	var focus_index: int = still_ids.find(GameState.collection_focus_still_id)
-	if focus_index >= 0:
-		current_index = focus_index
-	_update_collection_view(str(still_ids[current_index]))
+	_reload_character_collection(GameState.selected_character_id, GameState.collection_focus_still_id)
 
 func _input(event: InputEvent) -> void:
 	if fullscreen_viewer.visible and event is InputEventKey:
 		var key_event: InputEventKey = event as InputEventKey
 		if key_event.pressed and key_event.keycode == KEY_ESCAPE:
 			_hide_fullscreen()
+
+func _reload_character_collection(character_id: String, focus_still_id: String = "") -> void:
+	GameState.select_character(character_id)
+	still_ids = GameState.get_still_ids_for_character(GameState.selected_character_id)
+	collection_title_label.text = "%s Collection" % GameState.selected_character_id
+	current_index = 0
+	if still_ids.is_empty():
+		title_label.text = "No memories"
+		counter_label.text = "0 / 0"
+		still_image.texture = null
+		overlay_label.text = "NO IMAGE"
+		overlay_label.visible = true
+		progress_label.text = "Mirror Shards: 0 / 0"
+		status_label.text = "No stills registered"
+		return
+	var resolved_focus: String = focus_still_id
+	if resolved_focus.is_empty():
+		resolved_focus = GameState.collection_focus_still_id
+	var focus_index: int = still_ids.find(resolved_focus)
+	if focus_index >= 0:
+		current_index = focus_index
+	_update_collection_view(str(still_ids[current_index]))
+
+func _switch_character(step: int) -> void:
+	var character_ids: Array = GameState.get_character_ids()
+	if character_ids.is_empty():
+		return
+	var current_character: String = GameState.selected_character_id
+	var index: int = character_ids.find(current_character)
+	if index < 0:
+		index = 0
+	var next_index: int = (index + step + character_ids.size()) % character_ids.size()
+	var next_character: String = str(character_ids[next_index])
+	_reload_character_collection(next_character)
 
 func _on_shard_layer_resized() -> void:
 	_refresh_shard_polygons()
@@ -118,6 +145,8 @@ func _load_character_portrait(character_id: String) -> Texture2D:
 	var portrait_path: String = str(data.get("portrait_path", ""))
 	if not portrait_path.is_empty():
 		candidate_paths.append(portrait_path)
+	candidate_paths.append("res://assets/ui/characters/portraits/%s_portrait.webp" % character_id)
+	candidate_paths.append("res://assets/ui/characters/portraits/%s_portrait.png" % character_id)
 	candidate_paths.append("res://assets/ui/characters/%s_portrait_card.webp" % character_id)
 	candidate_paths.append("res://assets/ui/characters/%s_portrait_card.png" % character_id)
 	candidate_paths.append("res://assets/ui/characters/%s_card.webp" % character_id)
@@ -187,6 +216,12 @@ func _on_next_pressed() -> void:
 		return
 	current_index = (current_index + 1) % still_ids.size()
 	_show_current()
+
+func _on_previous_character_pressed() -> void:
+	_switch_character(-1)
+
+func _on_next_character_pressed() -> void:
+	_switch_character(1)
 
 func _on_fullscreen_pressed() -> void:
 	if still_ids.is_empty():
