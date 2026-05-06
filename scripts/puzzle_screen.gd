@@ -8,6 +8,7 @@ const PIECE_SIZE: Vector2 = Vector2(82, 82)
 const ORB_SIZE: Vector2 = Vector2(78, 78)
 const SD_FRAME_PATH: String = "res://assets/puzzle/ui/sd_character_frame.png"
 const BOARD_FRAME_PATH: String = "res://assets/puzzle/ui/puzzle_board_frame.png"
+const STILL_PREVIEW_FRAME_PATH: String = "res://assets/puzzle/ui/still_preview_frame.png"
 
 const DROP_PATHS: Array[String] = [
 	"res://assets/puzzle/drops/memory_orb_red.png",
@@ -43,6 +44,7 @@ var drop_textures: Dictionary = {}
 @onready var sd_character: TextureRect = %SdCharacter
 @onready var sd_message_label: Label = %SdMessageLabel
 @onready var board_frame: TextureRect = %BoardFrame
+@onready var still_preview_frame: TextureRect = %StillPreviewFrame
 @onready var gauge: ProgressBar = %RestoreGauge
 @onready var progress_label: Label = %ProgressLabel
 @onready var board: GridContainer = %Board
@@ -70,6 +72,7 @@ func _setup_stage_info() -> void:
 	progress_label.text = "0% Restoration"
 	sd_frame.texture = _load_texture_optional(SD_FRAME_PATH)
 	board_frame.texture = _load_texture_optional(BOARD_FRAME_PATH)
+	still_preview_frame.texture = _load_texture_optional(STILL_PREVIEW_FRAME_PATH)
 	sd_character.texture = _load_sd_character_texture(character_id)
 	still_preview.texture = _load_texture_optional(str(still_data.get("image_path", "")))
 
