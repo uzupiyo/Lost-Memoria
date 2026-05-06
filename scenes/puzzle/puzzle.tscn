@@ -149,10 +149,41 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="BoardCenter" type="CenterContainer" parent="MarginContainer/Root/MainRow/BoardPanel"]
+[node name="BoardOuterCenter" type="CenterContainer" parent="MarginContainer/Root/MainRow/BoardPanel"]
 layout_mode = 2
 
-[node name="Board" type="GridContainer" parent="MarginContainer/Root/MainRow/BoardPanel/BoardCenter"]
+[node name="BoardFrameStack" type="Control" parent="MarginContainer/Root/MainRow/BoardPanel/BoardOuterCenter"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(620, 620)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="BoardFrame" type="TextureRect" parent="MarginContainer/Root/MainRow/BoardPanel/BoardOuterCenter/BoardFrameStack"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BoardCenter" type="CenterContainer" parent="MarginContainer/Root/MainRow/BoardPanel/BoardOuterCenter/BoardFrameStack"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 60.0
+offset_top = 62.0
+offset_right = -60.0
+offset_bottom = -62.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Board" type="GridContainer" parent="MarginContainer/Root/MainRow/BoardPanel/BoardOuterCenter/BoardFrameStack/BoardCenter"]
 unique_name_in_owner = true
 layout_mode = 2
 columns = 6
