@@ -97,6 +97,7 @@ func _create_piece_control(index: int) -> PanelContainer:
 	panel.mouse_entered.connect(_on_piece_mouse_entered.bind(index))
 
 	var center: CenterContainer = CenterContainer.new()
+	center.name = "PieceCenter"
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	panel.add_child(center)
@@ -278,18 +279,19 @@ func _update_board_view() -> void:
 		var piece: PanelContainer = piece_controls[i]
 		var piece_color: int = pieces[i]
 		var texture: Texture2D = _get_drop_texture(piece_color)
-		var texture_rect: TextureRect = piece.get_node("CenterContainer/DropImage") as TextureRect
-		var label: Label = piece.get_node("CenterContainer/FallbackLabel") as Label
-		if texture != null:
-			texture_rect.texture = texture
-			texture_rect.show()
-			label.hide()
-		else:
-			texture_rect.texture = null
-			texture_rect.hide()
-			label.text = _piece_symbol(piece_color)
-			label.add_theme_color_override("font_color", _piece_font_color(piece_color))
-			label.show()
+		var texture_rect: TextureRect = piece.get_node_or_null("PieceCenter/DropImage") as TextureRect
+		var label: Label = piece.get_node_or_null("PieceCenter/FallbackLabel") as Label
+		if texture_rect != null and label != null:
+			if texture != null:
+				texture_rect.texture = texture
+				texture_rect.show()
+				label.hide()
+			else:
+				texture_rect.texture = null
+				texture_rect.hide()
+				label.text = _piece_symbol(piece_color)
+				label.add_theme_color_override("font_color", _piece_font_color(piece_color))
+				label.show()
 		if selected_indices.has(i):
 			piece.modulate = Color(1.35, 1.35, 1.35)
 		else:
