@@ -1,8 +1,12 @@
 extends Control
 
 @onready var still_list: VBoxContainer = %StillList
+@onready var title_label: Label = %TitleLabel
+@onready var hint_label: Label = %HintLabel
 
 func _ready() -> void:
+	title_label.text = "%s Stage Select" % GameState.selected_character_id
+	hint_label.text = "Clear stages to restore %s's memories. Next stages unlock in order." % GameState.selected_character_id
 	_build_stage_list()
 
 func _build_stage_list() -> void:
@@ -12,7 +16,7 @@ func _build_stage_list() -> void:
 		child.queue_free()
 		child_index -= 1
 
-	var still_ids: Array = GameState.get_all_still_ids()
+	var still_ids: Array = GameState.get_still_ids_for_character(GameState.selected_character_id)
 	var still_index: int = 0
 	while still_index < still_ids.size():
 		var still_id: String = str(still_ids[still_index])
@@ -53,4 +57,4 @@ func _start_stage(still_id: String, stage_index: int) -> void:
 	get_tree().change_scene_to_file("res://scenes/puzzle/puzzle.tscn")
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/title/title.tscn")
+	get_tree().change_scene_to_file("res://scenes/character_select/character_select.tscn")
