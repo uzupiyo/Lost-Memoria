@@ -29,7 +29,7 @@ func _build_character_cards() -> void:
 func _create_character_card(character_id: String) -> Button:
 	var data: Dictionary = GameState.get_character_data(character_id)
 	var button: Button = Button.new()
-	button.custom_minimum_size = Vector2(520, 760)
+	button.custom_minimum_size = Vector2(420, 760)
 	button.focus_mode = Control.FOCUS_NONE
 	button.text = ""
 	button.pressed.connect(_on_character_card_pressed.bind(character_id))
@@ -41,8 +41,9 @@ func _create_character_card(character_id: String) -> Button:
 	root.add_theme_constant_override("separation", 8)
 	button.add_child(root)
 
+	# 912 x 1536 portrait ratio, scaled down to 380 x 640.
 	var card_stack: Control = Control.new()
-	card_stack.custom_minimum_size = Vector2(510, 640)
+	card_stack.custom_minimum_size = Vector2(380, 640)
 	card_stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card_stack.clip_contents = true
 	root.add_child(card_stack)
@@ -65,7 +66,7 @@ func _create_character_card(character_id: String) -> Button:
 
 	var info_box: PanelContainer = PanelContainer.new()
 	info_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	info_box.custom_minimum_size = Vector2(510, 96)
+	info_box.custom_minimum_size = Vector2(380, 96)
 	root.add_child(info_box)
 
 	var info_inner: VBoxContainer = VBoxContainer.new()
