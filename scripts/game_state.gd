@@ -12,7 +12,7 @@ var characters: Dictionary = {
 		"name": "Rin",
 		"display_name": "Rin",
 		"portrait_path": "res://assets/ui/characters/portraits/Rin_portrait.webp",
-		"frame_path": "res://assets/ui/characters/frames/mirror_frame_blue_single_transparent.png",
+		"frame_path": "res://assets/ui/characters/frames/frame_01_blue.png",
 		"effect_path": "res://assets/ui/characters/effects/portrait_effect_01_blue.png",
 		"description": "Fragments of a bright memory sealed beyond the mirror."
 	},
@@ -20,7 +20,7 @@ var characters: Dictionary = {
 		"name": "Moka",
 		"display_name": "Moka",
 		"portrait_path": "res://assets/ui/characters/portraits/Moka_portrait.webp",
-		"frame_path": "res://assets/ui/characters/frames/mirror_frame_06_purple.png",
+		"frame_path": "res://assets/ui/characters/frames/frame_06_purple.png",
 		"effect_path": "res://assets/ui/characters/effects/portrait_effect_06_purple.png",
 		"description": "A quiet record waiting inside the archive."
 	}
