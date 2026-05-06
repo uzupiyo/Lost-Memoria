@@ -3,6 +3,7 @@ extends Control
 var still_ids: Array = []
 var current_index: int = 0
 var shard_overlays: Array[Polygon2D] = []
+var current_unlocked_stages: int = 0
 
 @onready var title_label: Label = %StillTitle
 @onready var progress_label: Label = %ProgressLabel
@@ -13,11 +14,16 @@ var shard_overlays: Array[Polygon2D] = []
 @onready var counter_label: Label = %CounterLabel
 
 func _ready() -> void:
+	shard_layer.resized.connect(_on_shard_layer_resized)
 	_setup_shards()
 	still_ids = GameState.get_all_still_ids()
 	if still_ids.is_empty():
 		return
 	_update_collection_view(str(still_ids[current_index]))
+
+func _on_shard_layer_resized() -> void:
+	_refresh_shard_polygons()
+	_apply_shard_mask(current_unlocked_stages)
 
 func _setup_shards() -> void:
 	var child_index: int = shard_layer.get_child_count() - 1
@@ -30,34 +36,71 @@ func _setup_shards() -> void:
 	var shard_index: int = 0
 	while shard_index < GameState.STILL_STAGE_COUNT:
 		var shard: Polygon2D = Polygon2D.new()
-		shard.color = Color(0.12, 0.12, 0.14, 0.88)
-		shard.polygon = _get_shard_polygon(shard_index)
+		shard.color = Color(0, 0, 0, 1)
 		shard_layer.add_child(shard)
 		shard_overlays.append(shard)
 		shard_index += 1
+	_refresh_shard_polygons()
+
+func _refresh_shard_polygons() -> void:
+	var shard_index: int = 0
+	while shard_index < shard_overlays.size():
+		var shard: Polygon2D = shard_overlays[shard_index]
+		shard.polygon = _get_shard_polygon(shard_index)
+		shard_index += 1
 
 func _get_shard_polygon(index: int) -> PackedVector2Array:
+	var w: float = max(shard_layer.size.x, 1.0)
+	var h: float = max(shard_layer.size.y, 1.0)
 	match index:
 		0:
-			return PackedVector2Array([Vector2(0, 0), Vector2(355, 0), Vector2(300, 210), Vector2(0, 275)])
+			return PackedVector2Array([
+				Vector2(0, 0),
+				Vector2(w * 0.49, 0),
+				Vector2(w * 0.42, h * 0.52),
+				Vector2(0, h * 0.68)
+			])
 		1:
-			return PackedVector2Array([Vector2(355, 0), Vector2(720, 0), Vector2(720, 170), Vector2(455, 250), Vector2(300, 210)])
+			return PackedVector2Array([
+				Vector2(w * 0.49, 0),
+				Vector2(w, 0),
+				Vector2(w, h * 0.42),
+				Vector2(w * 0.63, h * 0.62),
+				Vector2(w * 0.42, h * 0.52)
+			])
 		2:
-			return PackedVector2Array([Vector2(0, 275), Vector2(300, 210), Vector2(360, 405), Vector2(0, 405)])
+			return PackedVector2Array([
+				Vector2(0, h * 0.68),
+				Vector2(w * 0.42, h * 0.52),
+				Vector2(w * 0.50, h),
+				Vector2(0, h)
+			])
 		3:
-			return PackedVector2Array([Vector2(300, 210), Vector2(455, 250), Vector2(500, 405), Vector2(360, 405)])
+			return PackedVector2Array([
+				Vector2(w * 0.42, h * 0.52),
+				Vector2(w * 0.63, h * 0.62),
+				Vector2(w * 0.69, h),
+				Vector2(w * 0.50, h)
+			])
 		_:
-			return PackedVector2Array([Vector2(455, 250), Vector2(720, 170), Vector2(720, 405), Vector2(500, 405)])
+			return PackedVector2Array([
+				Vector2(w * 0.63, h * 0.62),
+				Vector2(w, h * 0.42),
+				Vector2(w, h),
+				Vector2(w * 0.69, h)
+			])
 
 func _update_collection_view(still_id: String) -> void:
 	var data: Dictionary = GameState.get_still_data(still_id)
 	title_label.text = str(data.get("title", "Unknown Memory"))
 	counter_label.text = "%d / %d" % [current_index + 1, still_ids.size()]
 	var unlocked_stages: int = int(data.get("unlocked_stages", 0))
+	current_unlocked_stages = unlocked_stages
 	var total_stages: int = int(data.get("total_stages", GameState.STILL_STAGE_COUNT))
 	var percent: int = GameState.get_unlock_percent(still_id)
 	progress_label.text = "Mirror Shards: %d / %d" % [unlocked_stages, total_stages]
 	_load_still_texture(str(data.get("image_path", "")))
+	_refresh_shard_polygons()
 	_apply_shard_mask(unlocked_stages)
 	if GameState.is_still_complete(still_id):
 		status_label.text = "Unlocked"
@@ -75,9 +118,11 @@ func _load_still_texture(path: String) -> void:
 		still_image.texture = loaded_resource as Texture2D
 
 func _apply_shard_mask(unlocked_stages: int) -> void:
+	current_unlocked_stages = unlocked_stages
 	var shard_index: int = 0
 	while shard_index < shard_overlays.size():
 		var shard: Polygon2D = shard_overlays[shard_index]
+		shard.color = Color(0, 0, 0, 1)
 		shard.visible = shard_index >= unlocked_stages
 		shard_index += 1
 	still_image.modulate = Color(1, 1, 1, 1)
