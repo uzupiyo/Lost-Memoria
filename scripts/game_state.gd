@@ -12,7 +12,7 @@ var characters: Dictionary = {
 		"name": "Rin",
 		"display_name": "Rin",
 		"portrait_path": "res://assets/ui/characters/portraits/Rin_portrait.webp",
-		"frame_path": "res://assets/ui/characters/frames/mirror_frame_01_blue.png",
+		"frame_path": "res://assets/ui/characters/frames/mirror_frame_blue_single_transparent.png",
 		"effect_path": "res://assets/ui/characters/effects/portrait_effect_01_blue.png",
 		"description": "Fragments of a bright memory sealed beyond the mirror."
 	},
