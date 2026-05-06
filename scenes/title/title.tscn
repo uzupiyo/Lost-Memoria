@@ -4,27 +4,27 @@
 [ext_resource type="Theme" path="res://assets/ui/theme/main_theme.tres" id="2_theme"]
 
 [sub_resource type="Gradient" id="Gradient_bg"]
-offsets = PackedFloat32Array(0, 0.42, 1)
-colors = PackedColorArray(0.002, 0.004, 0.012, 1, 0.012, 0.018, 0.045, 1, 0.045, 0.025, 0.09, 1)
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(0.001, 0.003, 0.011, 1, 0.012, 0.018, 0.052, 1, 0.042, 0.026, 0.096, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_bg"]
 gradient = SubResource("Gradient_bg")
 fill = 1
-fill_from = Vector2(0.08, 0.08)
+fill_from = Vector2(0.05, 0.05)
 fill_to = Vector2(1, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_title_panel"]
-bg_color = Color(0.004, 0.007, 0.018, 0.2)
+[sub_resource type="StyleBoxFlat" id="GlassPanel"]
+bg_color = Color(0.004, 0.008, 0.022, 0.18)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.62, 0.75, 1, 0.18)
+border_color = Color(0.72, 0.82, 1, 0.22)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
-shadow_color = Color(0.1, 0.28, 0.75, 0.34)
+shadow_color = Color(0.18, 0.4, 1, 0.28)
 shadow_size = 28
 shadow_offset = Vector2(0, 0)
 
@@ -57,29 +57,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0, 0, 0, 0.32)
+color = Color(0, 0, 0, 0.38)
 
-[node name="TopLine" type="Line2D" parent="."]
-points = PackedVector2Array(110, 92, 1810, 92)
-width = 1.0
-default_color = Color(0.46, 0.64, 1, 0.32)
-
-[node name="BottomLine" type="Line2D" parent="."]
-points = PackedVector2Array(110, 888, 1810, 888)
-width = 1.0
-default_color = Color(0.46, 0.64, 1, 0.22)
-
-[node name="AccentLineLeft" type="Line2D" parent="."]
-points = PackedVector2Array(110, 92, 110, 888)
-width = 1.0
-default_color = Color(0.46, 0.64, 1, 0.18)
-
-[node name="AccentLineRight" type="Line2D" parent="."]
-points = PackedVector2Array(1810, 92, 1810, 888)
-width = 1.0
-default_color = Color(0.46, 0.64, 1, 0.18)
-
-[node name="ShardDecorations" type="Control" parent="."]
+[node name="BackdropGlow" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -87,189 +67,228 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+color = Color(0.02, 0.05, 0.14, 0.28)
 
-[node name="ShardA" type="Polygon2D" parent="ShardDecorations"]
-color = Color(0.38, 0.65, 1, 0.26)
-polygon = PackedVector2Array(260, 210, 318, 176, 350, 255, 292, 304)
-
-[node name="ShardB" type="Polygon2D" parent="ShardDecorations"]
-color = Color(0.76, 0.62, 1, 0.22)
-polygon = PackedVector2Array(1540, 178, 1618, 230, 1552, 315, 1495, 245)
-
-[node name="ShardC" type="Polygon2D" parent="ShardDecorations"]
-color = Color(0.45, 0.82, 1, 0.16)
-polygon = PackedVector2Array(220, 745, 310, 704, 360, 812, 254, 848)
-
-[node name="ShardD" type="Polygon2D" parent="ShardDecorations"]
-color = Color(0.85, 0.88, 1, 0.14)
-polygon = PackedVector2Array(1588, 730, 1680, 695, 1734, 810, 1620, 858)
-
-[node name="ShardE" type="Polygon2D" parent="ShardDecorations"]
-color = Color(0.58, 0.75, 1, 0.18)
-polygon = PackedVector2Array(970, 132, 1008, 108, 1040, 170, 988, 196)
-
-[node name="MainLayout" type="HBoxContainer" parent="."]
+[node name="FrameLines" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 170.0
-offset_top = 130.0
-offset_right = -170.0
-offset_bottom = -130.0
-grow_horizontal = 2
+mouse_filter = 2
+
+[node name="TopLine" type="Line2D" parent="FrameLines"]
+points = PackedVector2Array(90, 84, 1830, 84)
+width = 1.0
+default_color = Color(0.48, 0.66, 1, 0.32)
+
+[node name="BottomLine" type="Line2D" parent="FrameLines"]
+points = PackedVector2Array(90, 896, 1830, 896)
+width = 1.0
+default_color = Color(0.48, 0.66, 1, 0.22)
+
+[node name="LeftLine" type="Line2D" parent="FrameLines"]
+points = PackedVector2Array(90, 84, 90, 896)
+width = 1.0
+default_color = Color(0.48, 0.66, 1, 0.16)
+
+[node name="RightLine" type="Line2D" parent="FrameLines"]
+points = PackedVector2Array(1830, 84, 1830, 896)
+width = 1.0
+default_color = Color(0.48, 0.66, 1, 0.16)
+
+[node name="FloatingShards" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Shard01" type="Polygon2D" parent="FloatingShards"]
+color = Color(0.42, 0.72, 1, 0.38)
+polygon = PackedVector2Array(112, 255, 150, 190, 186, 280, 138, 345)
+
+[node name="Shard02" type="Polygon2D" parent="FloatingShards"]
+color = Color(0.72, 0.62, 1, 0.26)
+polygon = PackedVector2Array(1540, 130, 1636, 196, 1562, 302, 1490, 218)
+
+[node name="Shard03" type="Polygon2D" parent="FloatingShards"]
+color = Color(0.48, 0.82, 1, 0.18)
+polygon = PackedVector2Array(1310, 790, 1420, 735, 1482, 860, 1360, 904)
+
+[node name="Shard04" type="Polygon2D" parent="FloatingShards"]
+color = Color(0.85, 0.9, 1, 0.16)
+polygon = PackedVector2Array(430, 740, 510, 690, 565, 800, 474, 845)
+
+[node name="Shard05" type="Polygon2D" parent="FloatingShards"]
+color = Color(0.56, 0.78, 1, 0.2)
+polygon = PackedVector2Array(960, 118, 1005, 92, 1040, 166, 982, 198)
+
+[node name="LeftContent" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 155.0
+offset_top = -330.0
+offset_right = 900.0
+offset_bottom = 330.0
 grow_vertical = 2
-theme_override_constants/separation = 80
+theme_override_constants/separation = 24
 alignment = 1
 
-[node name="HeroPanel" type="PanelContainer" parent="MainLayout"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_title_panel")
-
-[node name="HeroStack" type="Control" parent="MainLayout/HeroPanel"]
+[node name="Tagline" type="Label" parent="LeftContent"]
 layout_mode = 2
 mouse_filter = 2
-
-[node name="MirrorGlow" type="ColorRect" parent="MainLayout/HeroPanel/HeroStack"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -290.0
-offset_top = -290.0
-offset_right = 290.0
-offset_bottom = 290.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.04, 0.08, 0.18, 0.42)
-
-[node name="MirrorVertical" type="Line2D" parent="MainLayout/HeroPanel/HeroStack"]
-points = PackedVector2Array(418, 90, 418, 620)
-width = 2.0
-default_color = Color(0.78, 0.88, 1, 0.3)
-
-[node name="MirrorHorizontal" type="Line2D" parent="MainLayout/HeroPanel/HeroStack"]
-points = PackedVector2Array(155, 355, 680, 355)
-width = 1.5
-default_color = Color(0.78, 0.88, 1, 0.22)
-
-[node name="CrackLine1" type="Line2D" parent="MainLayout/HeroPanel/HeroStack"]
-points = PackedVector2Array(418, 105, 380, 270, 430, 355, 370, 610)
-width = 2.0
-default_color = Color(0.76, 0.88, 1, 0.72)
-
-[node name="CrackLine2" type="Line2D" parent="MainLayout/HeroPanel/HeroStack"]
-points = PackedVector2Array(430, 355, 585, 292, 705, 208)
-width = 1.35
-default_color = Color(0.58, 0.78, 1, 0.46)
-
-[node name="CrackLine3" type="Line2D" parent="MainLayout/HeroPanel/HeroStack"]
-points = PackedVector2Array(430, 355, 292, 310, 178, 235)
-width = 1.35
-default_color = Color(0.58, 0.78, 1, 0.42)
-
-[node name="CrackLine4" type="Line2D" parent="MainLayout/HeroPanel/HeroStack"]
-points = PackedVector2Array(380, 270, 280, 175, 245, 115)
-width = 1.0
-default_color = Color(0.58, 0.78, 1, 0.32)
-
-[node name="ArchiveLabel" type="Label" parent="MainLayout/HeroPanel/HeroStack"]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -360.0
-offset_top = 140.0
-offset_right = 360.0
-offset_bottom = 180.0
-grow_horizontal = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 22
-text = "MIRROR ARCHIVE / MEMORY RESTORATION"
+theme_override_font_sizes/font_size = 30
+text = "— 失われた記憶を、もう一度 —"
 horizontal_alignment = 1
-vertical_alignment = 1
 
-[node name="TitleLabel" type="Label" parent="MainLayout/HeroPanel/HeroStack"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -430.0
-offset_top = -70.0
-offset_right = 430.0
-offset_bottom = 38.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="TitleLabel" type="Label" parent="LeftContent"]
+layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 92
+theme_override_font_sizes/font_size = 118
 text = "Lost Memoria"
 horizontal_alignment = 1
-vertical_alignment = 1
 
-[node name="SubtitleLabel" type="Label" parent="MainLayout/HeroPanel/HeroStack"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -380.0
-offset_top = 54.0
-offset_right = 380.0
-offset_bottom = 94.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 24
-text = "Restore what the mirror remembers."
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="MenuColumn" type="VBoxContainer" parent="MainLayout"]
+[node name="SubtitleLabel" type="Label" parent="LeftContent"]
 layout_mode = 2
-custom_minimum_size = Vector2(420, 0)
-size_flags_vertical = 3
-theme_override_constants/separation = 26
+mouse_filter = 2
+theme_override_font_sizes/font_size = 26
+text = "ロスト・メモリア"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="LeftContent"]
+custom_minimum_size = Vector2(1, 28)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="MenuBox" type="VBoxContainer" parent="LeftContent"]
+layout_mode = 2
+theme_override_constants/separation = 22
 alignment = 1
 
-[node name="MenuHeader" type="Label" parent="MainLayout/MenuColumn"]
+[node name="StartButton" type="Button" parent="LeftContent/MenuBox"]
+custom_minimum_size = Vector2(460, 78)
 layout_mode = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 24
-text = "SELECT RECORD"
-horizontal_alignment = 1
+text = "START\nゲームをはじめる"
 
-[node name="StartButton" type="Button" parent="MainLayout/MenuColumn"]
-custom_minimum_size = Vector2(390, 74)
+[node name="CollectionButton" type="Button" parent="LeftContent/MenuBox"]
+custom_minimum_size = Vector2(460, 78)
 layout_mode = 2
-text = "START"
+text = "COLLECTION\nコレクション"
 
-[node name="CollectionButton" type="Button" parent="MainLayout/MenuColumn"]
-custom_minimum_size = Vector2(390, 74)
-layout_mode = 2
-text = "COLLECTION"
-
-[node name="OptionsButton" type="Button" parent="MainLayout/MenuColumn"]
-custom_minimum_size = Vector2(390, 74)
+[node name="OptionsButton" type="Button" parent="LeftContent/MenuBox"]
+custom_minimum_size = Vector2(460, 78)
 layout_mode = 2
 disabled = true
-text = "OPTIONS"
+text = "OPTIONS\nオプション"
 
-[node name="MenuFooter" type="Label" parent="MainLayout/MenuColumn"]
+[node name="IconRow" type="HBoxContainer" parent="LeftContent"]
 layout_mode = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 18
-text = "Fragments remain sealed beyond the mirror."
-horizontal_alignment = 1
-autowrap_mode = 3
+theme_override_constants/separation = 38
+alignment = 1
 
-[connection signal="pressed" from="MainLayout/MenuColumn/StartButton" to="." method="_on_start_pressed"]
-[connection signal="pressed" from="MainLayout/MenuColumn/CollectionButton" to="." method="_on_collection_pressed"]
+[node name="IconA" type="PanelContainer" parent="LeftContent/IconRow"]
+custom_minimum_size = Vector2(72, 50)
+layout_mode = 2
+theme_override_styles/panel = SubResource("GlassPanel")
+
+[node name="IconALabel" type="Label" parent="LeftContent/IconRow/IconA"]
+layout_mode = 2
+text = "♕"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="IconB" type="PanelContainer" parent="LeftContent/IconRow"]
+custom_minimum_size = Vector2(72, 50)
+layout_mode = 2
+theme_override_styles/panel = SubResource("GlassPanel")
+
+[node name="IconBLabel" type="Label" parent="LeftContent/IconRow/IconB"]
+layout_mode = 2
+text = "▣"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="IconC" type="PanelContainer" parent="LeftContent/IconRow"]
+custom_minimum_size = Vector2(72, 50)
+layout_mode = 2
+theme_override_styles/panel = SubResource("GlassPanel")
+
+[node name="IconCLabel" type="Label" parent="LeftContent/IconRow/IconC"]
+layout_mode = 2
+text = "⚙"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MirrorArea" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -900.0
+offset_top = -420.0
+offset_right = -120.0
+offset_bottom = 420.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="MirrorOuter" type="Polygon2D" parent="MirrorArea"]
+color = Color(0.16, 0.18, 0.28, 0.82)
+polygon = PackedVector2Array(390, 20, 505, 58, 590, 145, 635, 285, 622, 470, 540, 640, 405, 760, 250, 690, 150, 540, 110, 360, 145, 180, 245, 62)
+
+[node name="MirrorInner" type="Polygon2D" parent="MirrorArea"]
+color = Color(0.05, 0.1, 0.19, 0.68)
+polygon = PackedVector2Array(390, 58, 485, 92, 555, 165, 592, 292, 580, 455, 510, 600, 400, 700, 270, 640, 185, 510, 150, 358, 180, 205, 260, 100)
+
+[node name="MirrorLight" type="Polygon2D" parent="MirrorArea"]
+color = Color(0.35, 0.55, 1, 0.16)
+polygon = PackedVector2Array(388, 80, 490, 110, 548, 195, 506, 340, 410, 250, 320, 170)
+
+[node name="MirrorCrack1" type="Line2D" parent="MirrorArea"]
+points = PackedVector2Array(392, 86, 374, 250, 410, 365, 360, 620)
+width = 2.2
+default_color = Color(0.78, 0.9, 1, 0.68)
+
+[node name="MirrorCrack2" type="Line2D" parent="MirrorArea"]
+points = PackedVector2Array(410, 365, 520, 278, 592, 210)
+width = 1.5
+default_color = Color(0.68, 0.84, 1, 0.48)
+
+[node name="MirrorCrack3" type="Line2D" parent="MirrorArea"]
+points = PackedVector2Array(410, 365, 270, 318, 190, 250)
+width = 1.5
+default_color = Color(0.68, 0.84, 1, 0.42)
+
+[node name="MirrorCrack4" type="Line2D" parent="MirrorArea"]
+points = PackedVector2Array(374, 250, 300, 145, 258, 94)
+width = 1.1
+default_color = Color(0.68, 0.84, 1, 0.32)
+
+[node name="FloorShard1" type="Polygon2D" parent="MirrorArea"]
+color = Color(0.36, 0.7, 1, 0.34)
+polygon = PackedVector2Array(110, 785, 195, 745, 250, 820, 160, 855)
+
+[node name="FloorShard2" type="Polygon2D" parent="MirrorArea"]
+color = Color(0.7, 0.6, 1, 0.28)
+polygon = PackedVector2Array(500, 720, 610, 760, 548, 842, 458, 800)
+
+[node name="BookPanel" type="PanelContainer" parent="MirrorArea"]
+layout_mode = 0
+offset_left = 300.0
+offset_top = 710.0
+offset_right = 555.0
+offset_bottom = 790.0
+theme_override_styles/panel = SubResource("GlassPanel")
+
+[node name="BookLabel" type="Label" parent="MirrorArea/BookPanel"]
+layout_mode = 2
+text = "MEMORY LOG"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[connection signal="pressed" from="LeftContent/MenuBox/StartButton" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="LeftContent/MenuBox/CollectionButton" to="." method="_on_collection_pressed"]
