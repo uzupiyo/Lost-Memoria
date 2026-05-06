@@ -2,37 +2,71 @@ extends Node
 
 const STILL_STAGE_COUNT: int = 5
 
-var selected_still_id: String = "rin_001"
+var selected_still_id: String = "rin_swimsuit_001"
 var selected_stage_index: int = 0
 
 var stills: Dictionary = {
-	"rin_001": {
-		"title": "Rin Memory 001",
-		"image_path": "res://assets/stills/rin/Rin001.png",
+	"rin_swimsuit_001": {
+		"character": "Rin",
+		"situation": "水着",
+		"title": "Rin 水着 001",
+		"image_path": "res://assets/stills/Rin/水着/Rin001.png",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
-	"rin_002": {
-		"title": "Rin Memory 002",
-		"image_path": "res://assets/stills/rin/Rin002.png",
+	"rin_swimsuit_002": {
+		"character": "Rin",
+		"situation": "水着",
+		"title": "Rin 水着 002",
+		"image_path": "res://assets/stills/Rin/水着/Rin002.png",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
-	"rin_003": {
-		"title": "Rin Memory 003",
-		"image_path": "res://assets/stills/rin/Rin003.png",
+	"rin_swimsuit_003": {
+		"character": "Rin",
+		"situation": "水着",
+		"title": "Rin 水着 003",
+		"image_path": "res://assets/stills/Rin/水着/Rin003.png",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
-	"rin_004": {
-		"title": "Rin Memory 004",
-		"image_path": "res://assets/stills/rin/Rin004.png",
+	"rin_swimsuit_004": {
+		"character": "Rin",
+		"situation": "水着",
+		"title": "Rin 水着 004",
+		"image_path": "res://assets/stills/Rin/水着/Rin004.png",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
-	"rin_005": {
-		"title": "Rin Memory 005",
-		"image_path": "res://assets/stills/rin/Rin005.png",
+	"rin_swimsuit_005": {
+		"character": "Rin",
+		"situation": "水着",
+		"title": "Rin 水着 005",
+		"image_path": "res://assets/stills/Rin/水着/Rin005.png",
+		"unlocked_stages": 0,
+		"total_stages": STILL_STAGE_COUNT
+	},
+	"rin_halloween_001": {
+		"character": "Rin",
+		"situation": "ハロウィン",
+		"title": "Rin ハロウィン 001",
+		"image_path": "res://assets/stills/Rin/ハロウィン/RinHalloween001.png",
+		"unlocked_stages": 0,
+		"total_stages": STILL_STAGE_COUNT
+	},
+	"moka_normal_001": {
+		"character": "Moka",
+		"situation": "通常",
+		"title": "Moka 通常 001",
+		"image_path": "res://assets/stills/Moka/通常/Moka001.png",
+		"unlocked_stages": 0,
+		"total_stages": STILL_STAGE_COUNT
+	},
+	"moka_swimsuit_001": {
+		"character": "Moka",
+		"situation": "水着",
+		"title": "Moka 水着 001",
+		"image_path": "res://assets/stills/Moka/水着/MokaSwimsuit001.png",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	}
