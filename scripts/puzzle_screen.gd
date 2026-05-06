@@ -4,7 +4,8 @@ const BOARD_SIZE: int = 6
 const COLOR_COUNT: int = 4
 const CLEAR_SCORE: int = 30
 const MIN_MATCH: int = 3
-const PIECE_SIZE: Vector2 = Vector2(76, 76)
+const PIECE_SIZE: Vector2 = Vector2(82, 82)
+const ORB_SIZE: Vector2 = Vector2(78, 78)
 
 const DROP_PATHS: Array[String] = [
 	"res://assets/puzzle/drops/memory_orb_red.png",
@@ -17,7 +18,7 @@ const DROP_PATHS_FALLBACK: Array[String] = [
 	"res://assets/puzzle/drop/memory_orb_red.png",
 	"res://assets/puzzle/drop/memory_orb_blue.png",
 	"res://assets/puzzle/drop/memory_orb_gold.png",
-	"res://assets/puzzle/drop/memory_orb_green.png"
+	"res://assets/puzzle/drop/memory_orb_blue.png"
 ]
 
 var score: int = 0
@@ -71,6 +72,8 @@ func _process(_delta: float) -> void:
 
 func _generate_board() -> void:
 	board.columns = BOARD_SIZE
+	board.add_theme_constant_override("h_separation", 2)
+	board.add_theme_constant_override("v_separation", 2)
 	pieces.clear()
 	piece_controls.clear()
 	selected_indices.clear()
@@ -104,7 +107,7 @@ func _create_piece_control(index: int) -> PanelContainer:
 
 	var texture_rect: TextureRect = TextureRect.new()
 	texture_rect.name = "DropImage"
-	texture_rect.custom_minimum_size = Vector2(64, 64)
+	texture_rect.custom_minimum_size = ORB_SIZE
 	texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -248,17 +251,6 @@ func _is_adjacent_8way(a: int, b: int) -> bool:
 
 func _to_index(row: int, col: int) -> int:
 	return row * BOARD_SIZE + col
-
-func _piece_text(index: int) -> String:
-	match index:
-		0:
-			return "Red"
-		1:
-			return "Blue"
-		2:
-			return "Gold"
-		_:
-			return "Green"
 
 func _piece_symbol(index: int) -> String:
 	match index:
