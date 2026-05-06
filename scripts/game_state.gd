@@ -11,13 +11,17 @@ var characters: Dictionary = {
 	"Rin": {
 		"name": "Rin",
 		"display_name": "Rin",
-		"portrait_path": "res://assets/ui/characters/Rin_portrait_card.png",
+		"portrait_path": "res://assets/ui/characters/portraits/Rin_portrait.webp",
+		"frame_path": "res://assets/ui/characters/frames/mirror_frame_01_blue.png",
+		"effect_path": "res://assets/ui/characters/effects/portrait_effect_01_blue.png",
 		"description": "Fragments of a bright memory sealed beyond the mirror."
 	},
 	"Moka": {
 		"name": "Moka",
 		"display_name": "Moka",
-		"portrait_path": "res://assets/ui/characters/Moka_portrait_card.png",
+		"portrait_path": "res://assets/ui/characters/portraits/Moka_portrait.webp",
+		"frame_path": "res://assets/ui/characters/frames/mirror_frame_06_purple.png",
+		"effect_path": "res://assets/ui/characters/effects/portrait_effect_06_purple.png",
 		"description": "A quiet record waiting inside the archive."
 	}
 }
