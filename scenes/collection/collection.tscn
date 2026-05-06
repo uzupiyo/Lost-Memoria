@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/collection.gd" id="1_collection"]
+[ext_resource type="Theme" path="res://assets/ui/theme/main_theme.tres" id="2_theme"]
 
 [node name="Collection" type="Control"]
 layout_mode = 3
@@ -9,13 +10,28 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_theme")
 script = ExtResource("1_collection")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.006, 0.01, 0.026, 1)
 
 [node name="Root" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 64.0
+offset_top = 32.0
+offset_right = -64.0
+offset_bottom = -32.0
 grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
@@ -25,8 +41,10 @@ layout_mode = 2
 mouse_filter = 2
 
 [node name="TitleLabel" type="Label" parent="Root/Header"]
+unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
+theme_override_font_sizes/font_size = 46
 text = "Collection"
 horizontal_alignment = 1
 
@@ -44,19 +62,57 @@ mouse_filter = 2
 text = "1 / 25"
 horizontal_alignment = 1
 
-[node name="StillFrame" type="PanelContainer" parent="Root"]
+[node name="MainRow" type="HBoxContainer" parent="Root"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 28
+
+[node name="CharacterPanel" type="PanelContainer" parent="Root/MainRow"]
+custom_minimum_size = Vector2(330, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CharacterBox" type="VBoxContainer" parent="Root/MainRow/CharacterPanel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="CharacterPortrait" type="TextureRect" parent="Root/MainRow/CharacterPanel/CharacterBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 360)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CharacterNameLabel" type="Label" parent="Root/MainRow/CharacterPanel/CharacterBox"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_font_sizes/font_size = 38
+text = "Rin"
+horizontal_alignment = 1
+
+[node name="CharacterSituationLabel" type="Label" parent="Root/MainRow/CharacterPanel/CharacterBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "normal"
+horizontal_alignment = 1
+
+[node name="StillFrame" type="PanelContainer" parent="Root/MainRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 2
 
-[node name="StillStack" type="Control" parent="Root/StillFrame"]
+[node name="StillStack" type="Control" parent="Root/MainRow/StillFrame"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
 clip_contents = true
 
-[node name="StillImage" type="TextureRect" parent="Root/StillFrame/StillStack"]
+[node name="StillImage" type="TextureRect" parent="Root/MainRow/StillFrame/StillStack"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -67,7 +123,7 @@ grow_vertical = 2
 mouse_filter = 2
 stretch_mode = 5
 
-[node name="LockedOverlay" type="ColorRect" parent="Root/StillFrame/StillStack"]
+[node name="LockedOverlay" type="ColorRect" parent="Root/MainRow/StillFrame/StillStack"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 1
@@ -79,7 +135,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
-[node name="ShardLayer" type="Control" parent="Root/StillFrame/StillStack"]
+[node name="ShardLayer" type="Control" parent="Root/MainRow/StillFrame/StillStack"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -89,7 +145,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="OverlayLabel" type="Label" parent="Root/StillFrame/StillStack"]
+[node name="OverlayLabel" type="Label" parent="Root/MainRow/StillFrame/StillStack"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -183,6 +239,10 @@ horizontal_alignment = 1
 layout_mode = 2
 text = "STAGE SELECT"
 
+[node name="CharacterSelectButton" type="Button" parent="Root/Footer"]
+layout_mode = 2
+text = "CHARACTER SELECT"
+
 [node name="TitleButton" type="Button" parent="Root/Footer"]
 layout_mode = 2
 text = "TITLE"
@@ -192,4 +252,5 @@ text = "TITLE"
 [connection signal="pressed" from="Root/Footer/NavigationRow/FullscreenButton" to="." method="_on_fullscreen_pressed"]
 [connection signal="gui_input" from="FullscreenViewer" to="." method="_on_fullscreen_viewer_gui_input"]
 [connection signal="pressed" from="Root/Footer/StageSelectButton" to="." method="_on_stage_select_pressed"]
+[connection signal="pressed" from="Root/Footer/CharacterSelectButton" to="." method="_on_character_select_pressed"]
 [connection signal="pressed" from="Root/Footer/TitleButton" to="." method="_on_title_pressed"]
