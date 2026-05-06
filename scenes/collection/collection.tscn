@@ -102,6 +102,48 @@ text = "LOCKED"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="FullscreenViewer" type="ColorRect" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 1)
+
+[node name="FullscreenImage" type="TextureRect" parent="FullscreenViewer"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch_mode = 5
+
+[node name="FullscreenHint" type="Label" parent="FullscreenViewer"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -52.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+text = "Click / Esc to close"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Footer" type="VBoxContainer" parent="Root"]
 layout_mode = 2
 mouse_filter = 2
@@ -117,6 +159,11 @@ text = "PREVIOUS"
 [node name="NextButton" type="Button" parent="Root/Footer/NavigationRow"]
 layout_mode = 2
 text = "NEXT"
+
+[node name="FullscreenButton" type="Button" parent="Root/Footer/NavigationRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "FULLSCREEN"
 
 [node name="ProgressLabel" type="Label" parent="Root/Footer"]
 unique_name_in_owner = true
@@ -142,5 +189,7 @@ text = "TITLE"
 
 [connection signal="pressed" from="Root/Footer/NavigationRow/PreviousButton" to="." method="_on_previous_pressed"]
 [connection signal="pressed" from="Root/Footer/NavigationRow/NextButton" to="." method="_on_next_pressed"]
+[connection signal="pressed" from="Root/Footer/NavigationRow/FullscreenButton" to="." method="_on_fullscreen_pressed"]
+[connection signal="gui_input" from="FullscreenViewer" to="." method="_on_fullscreen_viewer_gui_input"]
 [connection signal="pressed" from="Root/Footer/StageSelectButton" to="." method="_on_stage_select_pressed"]
 [connection signal="pressed" from="Root/Footer/TitleButton" to="." method="_on_title_pressed"]
