@@ -56,14 +56,14 @@ func _create_character_card(character_id: String) -> Button:
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	name_label.text = str(data.get("display_name", character_id))
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.theme_override_font_sizes["font_size"] = 34
+	name_label.add_theme_font_size_override("font_size", 34)
 	container.add_child(name_label)
 
 	var count_label: Label = Label.new()
 	count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	count_label.text = "%d Memories" % GameState.get_still_ids_for_character(character_id).size()
 	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	count_label.theme_override_font_sizes["font_size"] = 20
+	count_label.add_theme_font_size_override("font_size", 20)
 	container.add_child(count_label)
 
 	return button
