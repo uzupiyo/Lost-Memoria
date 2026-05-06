@@ -1,6 +1,17 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/title_screen.gd" id="1_title"]
+[ext_resource type="Theme" path="res://assets/ui/theme/main_theme.tres" id="2_theme"]
+
+[sub_resource type="Gradient" id="Gradient_bg"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(0.005, 0.008, 0.018, 1, 0.02, 0.035, 0.08, 1, 0.065, 0.03, 0.12, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_bg"]
+gradient = SubResource("Gradient_bg")
+fill = 1
+fill_from = Vector2(0.15, 0.05)
+fill_to = Vector2(1, 1)
 
 [node name="Title" type="Control"]
 layout_mode = 3
@@ -9,32 +20,195 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_theme")
 script = ExtResource("1_title")
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_bg")
+stretch_mode = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
-layout_mode = 2
+[node name="Vignette" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.28)
+
+[node name="ShardDecorations" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ShardA" type="Polygon2D" parent="ShardDecorations"]
+color = Color(0.38, 0.62, 1, 0.42)
+polygon = PackedVector2Array(170, 130, 235, 82, 278, 162, 206, 198)
+
+[node name="ShardB" type="Polygon2D" parent="ShardDecorations"]
+color = Color(0.75, 0.62, 1, 0.32)
+polygon = PackedVector2Array(1520, 110, 1608, 156, 1544, 226, 1485, 185)
+
+[node name="ShardC" type="Polygon2D" parent="ShardDecorations"]
+color = Color(0.42, 0.78, 1, 0.28)
+polygon = PackedVector2Array(145, 760, 228, 690, 285, 805, 184, 842)
+
+[node name="ShardD" type="Polygon2D" parent="ShardDecorations"]
+color = Color(0.78, 0.82, 1, 0.22)
+polygon = PackedVector2Array(1660, 735, 1740, 700, 1780, 812, 1698, 858)
+
+[node name="Layout" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 120.0
+offset_top = 80.0
+offset_right = -120.0
+offset_bottom = -80.0
+grow_horizontal = 2
+grow_vertical = 2
 alignment = 1
 
-[node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer"]
+[node name="MirrorPanel" type="PanelContainer" parent="Layout"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="MirrorContent" type="CenterContainer" parent="Layout/MirrorPanel"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="MirrorStack" type="Control" parent="Layout/MirrorPanel/MirrorContent"]
+layout_mode = 2
+custom_minimum_size = Vector2(680, 680)
+mouse_filter = 2
+
+[node name="MirrorRing" type="ColorRect" parent="Layout/MirrorPanel/MirrorContent/MirrorStack"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -250.0
+offset_right = 250.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.08, 0.12, 0.22, 0.35)
+
+[node name="CrackLine1" type="Line2D" parent="Layout/MirrorPanel/MirrorContent/MirrorStack"]
+points = PackedVector2Array(340, 90, 310, 250, 360, 345, 318, 510)
+width = 2.0
+default_color = Color(0.75, 0.88, 1, 0.75)
+
+[node name="CrackLine2" type="Line2D" parent="Layout/MirrorPanel/MirrorContent/MirrorStack"]
+points = PackedVector2Array(340, 345, 208, 292, 118, 235)
+width = 1.5
+default_color = Color(0.55, 0.72, 1, 0.55)
+
+[node name="CrackLine3" type="Line2D" parent="Layout/MirrorPanel/MirrorContent/MirrorStack"]
+points = PackedVector2Array(360, 345, 505, 270, 585, 210)
+width = 1.5
+default_color = Color(0.65, 0.78, 1, 0.55)
+
+[node name="TitleLabel" type="Label" parent="Layout/MirrorPanel/MirrorContent/MirrorStack"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -80.0
+offset_right = 300.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 78
 text = "Lost Memoria"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="StartButton" type="Button" parent="CenterContainer/VBoxContainer"]
+[node name="SubtitleLabel" type="Label" parent="Layout/MirrorPanel/MirrorContent/MirrorStack"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = 14.0
+offset_right = 300.0
+offset_bottom = 62.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 26
+text = "Restore the fragments of lost memory"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MenuPanel" type="PanelContainer" parent="Layout"]
+layout_mode = 2
+custom_minimum_size = Vector2(430, 0)
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="MenuCenter" type="CenterContainer" parent="Layout/MenuPanel"]
+layout_mode = 2
+
+[node name="MenuBox" type="VBoxContainer" parent="Layout/MenuPanel/MenuCenter"]
+layout_mode = 2
+theme_override_constants/separation = 28
+alignment = 1
+
+[node name="MenuTitle" type="Label" parent="Layout/MenuPanel/MenuCenter/MenuBox"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 28
+text = "MIRROR ARCHIVE"
+horizontal_alignment = 1
+
+[node name="StartButton" type="Button" parent="Layout/MenuPanel/MenuCenter/MenuBox"]
+custom_minimum_size = Vector2(330, 72)
 layout_mode = 2
 text = "START"
 
-[node name="CollectionButton" type="Button" parent="CenterContainer/VBoxContainer"]
+[node name="CollectionButton" type="Button" parent="Layout/MenuPanel/MenuCenter/MenuBox"]
+custom_minimum_size = Vector2(330, 72)
 layout_mode = 2
 text = "COLLECTION"
 
-[connection signal="pressed" from="CenterContainer/VBoxContainer/StartButton" to="." method="_on_start_pressed"]
-[connection signal="pressed" from="CenterContainer/VBoxContainer/CollectionButton" to="." method="_on_collection_pressed"]
+[node name="OptionsButton" type="Button" parent="Layout/MenuPanel/MenuCenter/MenuBox"]
+custom_minimum_size = Vector2(330, 72)
+layout_mode = 2
+disabled = true
+text = "OPTIONS"
+
+[node name="VersionLabel" type="Label" parent="Layout/MenuPanel/MenuCenter/MenuBox"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 18
+text = "Prototype UI / Mirror Archive"
+horizontal_alignment = 1
+
+[connection signal="pressed" from="Layout/MenuPanel/MenuCenter/MenuBox/StartButton" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="Layout/MenuPanel/MenuCenter/MenuBox/CollectionButton" to="." method="_on_collection_pressed"]
