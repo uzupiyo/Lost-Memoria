@@ -38,17 +38,21 @@ func _create_character_card(character_id: String) -> Button:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.alignment = BoxContainer.ALIGNMENT_CENTER
-	root.add_theme_constant_override("separation", 12)
+	root.add_theme_constant_override("separation", 8)
 	button.add_child(root)
 
 	var card_stack: Control = Control.new()
-	card_stack.custom_minimum_size = Vector2(350, 470)
+	card_stack.custom_minimum_size = Vector2(410, 495)
 	card_stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(card_stack)
 
 	var portrait: TextureRect = TextureRect.new()
 	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
+	portrait.offset_left = 18.0
+	portrait.offset_top = 22.0
+	portrait.offset_right = -18.0
+	portrait.offset_bottom = -18.0
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	portrait.texture = _load_character_texture(character_id, "portrait")
@@ -70,19 +74,30 @@ func _create_character_card(character_id: String) -> Button:
 	frame.texture = _load_character_texture(character_id, "frame")
 	card_stack.add_child(frame)
 
+	var info_box: PanelContainer = PanelContainer.new()
+	info_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	info_box.custom_minimum_size = Vector2(410, 96)
+	root.add_child(info_box)
+
+	var info_inner: VBoxContainer = VBoxContainer.new()
+	info_inner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	info_inner.alignment = BoxContainer.ALIGNMENT_CENTER
+	info_inner.add_theme_constant_override("separation", 2)
+	info_box.add_child(info_inner)
+
 	var name_label: Label = Label.new()
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	name_label.text = str(data.get("display_name", character_id))
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.add_theme_font_size_override("font_size", 34)
-	root.add_child(name_label)
+	info_inner.add_child(name_label)
 
 	var count_label: Label = Label.new()
 	count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	count_label.text = "%d Memories" % GameState.get_still_ids_for_character(character_id).size()
 	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	count_label.add_theme_font_size_override("font_size", 20)
-	root.add_child(count_label)
+	info_inner.add_child(count_label)
 
 	return button
 
