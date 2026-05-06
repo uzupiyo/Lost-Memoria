@@ -19,6 +19,7 @@ var current_total_stages: int = 5
 @onready var fullscreen_viewer: ColorRect = %FullscreenViewer
 @onready var fullscreen_image: TextureRect = %FullscreenImage
 @onready var character_portrait: TextureRect = %CharacterPortrait
+@onready var character_portrait_effect: TextureRect = %CharacterPortraitEffect
 @onready var character_name_label: Label = %CharacterNameLabel
 @onready var character_situation_label: Label = %CharacterSituationLabel
 
@@ -137,22 +138,11 @@ func _update_character_panel(character_id: String, situation: String) -> void:
 	var character_data: Dictionary = GameState.get_character_data(character_id)
 	character_name_label.text = str(character_data.get("display_name", character_id))
 	character_situation_label.text = situation
-	character_portrait.texture = _load_character_portrait(character_id)
+	character_portrait.texture = _load_character_texture(character_id, "portrait")
+	character_portrait_effect.texture = _load_character_texture(character_id, "effect")
 
-func _load_character_portrait(character_id: String) -> Texture2D:
-	var data: Dictionary = GameState.get_character_data(character_id)
-	var candidate_paths: Array[String] = []
-	var portrait_path: String = str(data.get("portrait_path", ""))
-	if not portrait_path.is_empty():
-		candidate_paths.append(portrait_path)
-	candidate_paths.append("res://assets/ui/characters/portraits/%s_portrait.webp" % character_id)
-	candidate_paths.append("res://assets/ui/characters/portraits/%s_portrait.png" % character_id)
-	candidate_paths.append("res://assets/ui/characters/%s_portrait_card.webp" % character_id)
-	candidate_paths.append("res://assets/ui/characters/%s_portrait_card.png" % character_id)
-	candidate_paths.append("res://assets/ui/characters/%s_card.webp" % character_id)
-	candidate_paths.append("res://assets/ui/characters/%s_card.png" % character_id)
-	candidate_paths.append(_get_first_still_image_path(character_id))
-
+func _load_character_texture(character_id: String, texture_kind: String) -> Texture2D:
+	var candidate_paths: Array[String] = _get_character_asset_candidates(character_id, texture_kind)
 	var i: int = 0
 	while i < candidate_paths.size():
 		var path: String = candidate_paths[i]
@@ -162,6 +152,25 @@ func _load_character_portrait(character_id: String) -> Texture2D:
 				return loaded as Texture2D
 		i += 1
 	return null
+
+func _get_character_asset_candidates(character_id: String, texture_kind: String) -> Array[String]:
+	var data: Dictionary = GameState.get_character_data(character_id)
+	var paths: Array[String] = []
+	match texture_kind:
+		"portrait":
+			paths.append(str(data.get("portrait_path", "")))
+			paths.append("res://assets/ui/characters/portraits/%s_portrait.webp" % character_id)
+			paths.append("res://assets/ui/characters/portraits/%s_portrait.png" % character_id)
+			paths.append("res://assets/ui/characters/%s_portrait_card.webp" % character_id)
+			paths.append("res://assets/ui/characters/%s_portrait_card.png" % character_id)
+			paths.append("res://assets/ui/characters/%s_card.webp" % character_id)
+			paths.append("res://assets/ui/characters/%s_card.png" % character_id)
+			paths.append(_get_first_still_image_path(character_id))
+		"effect":
+			paths.append(str(data.get("effect_path", "")))
+			paths.append("res://assets/ui/characters/effects/%s_effect.png" % character_id)
+			paths.append("res://assets/ui/characters/effects/%s_effect.webp" % character_id)
+	return paths
 
 func _get_first_still_image_path(character_id: String) -> String:
 	var ids: Array = GameState.get_still_ids_for_character(character_id)
