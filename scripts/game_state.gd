@@ -23,6 +23,14 @@ var characters: Dictionary = {
 		"frame_path": "res://assets/ui/characters/frames/frame_06_purple.png",
 		"effect_path": "res://assets/ui/characters/effects/portrait_effect_06_purple.png",
 		"description": "A quiet record waiting inside the archive."
+	},
+	"Kaede": {
+		"name": "Kaede",
+		"display_name": "Kaede",
+		"portrait_path": "res://assets/ui/characters/portraits/Kaede_portrait.webp",
+		"frame_path": "res://assets/ui/characters/frames/frame_04_green.png",
+		"effect_path": "res://assets/ui/characters/effects/portrait_effect_04_green.png",
+		"description": "A newly opened record waiting to be restored."
 	}
 }
 
@@ -39,6 +47,8 @@ func _build_stills() -> void:
 	_add_still_series("Rin", "halloween", 5)
 	_add_still_series("Moka", "normal", 5)
 	_add_still_series("Moka", "swimsuit", 5)
+	_add_still_series("Kaede", "normal", 5)
+	_add_still_series("Kaede", "swimsuit", 5)
 
 func _add_still_series(character: String, situation: String, count: int) -> void:
 	var index: int = 1
