@@ -203,10 +203,36 @@ layout_mode = 2
 text = "TARGET ILLUSTRATION"
 horizontal_alignment = 1
 
-[node name="StillPreview" type="TextureRect" parent="MarginContainer/Root/MainRow/PreviewPanel/PreviewBox"]
+[node name="StillPreviewStack" type="Control" parent="MarginContainer/Root/MainRow/PreviewPanel/PreviewBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(260, 360)
+custom_minimum_size = Vector2(260, 390)
 layout_mode = 2
+mouse_filter = 2
+
+[node name="StillPreview" type="TextureRect" parent="MarginContainer/Root/MainRow/PreviewPanel/PreviewBox/StillPreviewStack"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 44.0
+offset_right = -28.0
+offset_bottom = -44.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="StillPreviewFrame" type="TextureRect" parent="MarginContainer/Root/MainRow/PreviewPanel/PreviewBox/StillPreviewStack"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
