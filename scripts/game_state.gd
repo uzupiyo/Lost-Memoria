@@ -10,7 +10,7 @@ var stills: Dictionary = {
 		"character": "Rin",
 		"situation": "水着",
 		"title": "Rin 水着 001",
-		"image_path": "res://assets/stills/Rin/水着/Rin001.png",
+		"image_path": "res://assets/stills/Rin/水着/Rin_水着_001.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
@@ -18,7 +18,7 @@ var stills: Dictionary = {
 		"character": "Rin",
 		"situation": "水着",
 		"title": "Rin 水着 002",
-		"image_path": "res://assets/stills/Rin/水着/Rin002.png",
+		"image_path": "res://assets/stills/Rin/水着/Rin_水着_002.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
@@ -26,7 +26,7 @@ var stills: Dictionary = {
 		"character": "Rin",
 		"situation": "水着",
 		"title": "Rin 水着 003",
-		"image_path": "res://assets/stills/Rin/水着/Rin003.png",
+		"image_path": "res://assets/stills/Rin/水着/Rin_水着_003.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
@@ -34,7 +34,7 @@ var stills: Dictionary = {
 		"character": "Rin",
 		"situation": "水着",
 		"title": "Rin 水着 004",
-		"image_path": "res://assets/stills/Rin/水着/Rin004.png",
+		"image_path": "res://assets/stills/Rin/水着/Rin_水着_004.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
@@ -42,7 +42,7 @@ var stills: Dictionary = {
 		"character": "Rin",
 		"situation": "水着",
 		"title": "Rin 水着 005",
-		"image_path": "res://assets/stills/Rin/水着/Rin005.png",
+		"image_path": "res://assets/stills/Rin/水着/Rin_水着_005.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
@@ -50,7 +50,7 @@ var stills: Dictionary = {
 		"character": "Rin",
 		"situation": "ハロウィン",
 		"title": "Rin ハロウィン 001",
-		"image_path": "res://assets/stills/Rin/ハロウィン/RinHalloween001.png",
+		"image_path": "res://assets/stills/Rin/ハロウィン/Rin_ハロウィン_001.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
@@ -58,7 +58,7 @@ var stills: Dictionary = {
 		"character": "Moka",
 		"situation": "通常",
 		"title": "Moka 通常 001",
-		"image_path": "res://assets/stills/Moka/通常/Moka001.png",
+		"image_path": "res://assets/stills/Moka/通常/Moka_通常_001.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
@@ -66,7 +66,7 @@ var stills: Dictionary = {
 		"character": "Moka",
 		"situation": "水着",
 		"title": "Moka 水着 001",
-		"image_path": "res://assets/stills/Moka/水着/MokaSwimsuit001.png",
+		"image_path": "res://assets/stills/Moka/水着/Moka_水着_001.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	}
