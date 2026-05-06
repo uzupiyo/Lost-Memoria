@@ -46,14 +46,6 @@ func _create_character_card(character_id: String) -> Button:
 	card_stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(card_stack)
 
-	var frame: TextureRect = TextureRect.new()
-	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	frame.set_anchors_preset(Control.PRESET_FULL_RECT)
-	frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	frame.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	frame.texture = _load_character_texture(character_id, "frame")
-	card_stack.add_child(frame)
-
 	var portrait: TextureRect = TextureRect.new()
 	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -77,6 +69,14 @@ func _create_character_card(character_id: String) -> Button:
 	effect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	effect.texture = _load_character_texture(character_id, "effect")
 	card_stack.add_child(effect)
+
+	var frame: TextureRect = TextureRect.new()
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame.set_anchors_preset(Control.PRESET_FULL_RECT)
+	frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	frame.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	frame.texture = _load_character_texture(character_id, "frame")
+	card_stack.add_child(frame)
 
 	var info_box: PanelContainer = PanelContainer.new()
 	info_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
