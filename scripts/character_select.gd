@@ -29,7 +29,7 @@ func _build_character_cards() -> void:
 func _create_character_card(character_id: String) -> Button:
 	var data: Dictionary = GameState.get_character_data(character_id)
 	var button: Button = Button.new()
-	button.custom_minimum_size = Vector2(440, 650)
+	button.custom_minimum_size = Vector2(520, 760)
 	button.focus_mode = Control.FOCUS_NONE
 	button.text = ""
 	button.pressed.connect(_on_character_card_pressed.bind(character_id))
@@ -42,7 +42,7 @@ func _create_character_card(character_id: String) -> Button:
 	button.add_child(root)
 
 	var card_stack: Control = Control.new()
-	card_stack.custom_minimum_size = Vector2(430, 535)
+	card_stack.custom_minimum_size = Vector2(510, 640)
 	card_stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(card_stack)
 
@@ -57,10 +57,10 @@ func _create_character_card(character_id: String) -> Button:
 	var portrait: TextureRect = TextureRect.new()
 	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
-	portrait.offset_left = 54.0
-	portrait.offset_top = 72.0
-	portrait.offset_right = -54.0
-	portrait.offset_bottom = -76.0
+	portrait.offset_left = 70.0
+	portrait.offset_top = 90.0
+	portrait.offset_right = -70.0
+	portrait.offset_bottom = -92.0
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	portrait.texture = _load_character_texture(character_id, "portrait")
@@ -69,10 +69,10 @@ func _create_character_card(character_id: String) -> Button:
 	var effect: TextureRect = TextureRect.new()
 	effect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	effect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	effect.offset_left = 54.0
-	effect.offset_top = 72.0
-	effect.offset_right = -54.0
-	effect.offset_bottom = -76.0
+	effect.offset_left = 70.0
+	effect.offset_top = 90.0
+	effect.offset_right = -70.0
+	effect.offset_bottom = -92.0
 	effect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	effect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	effect.texture = _load_character_texture(character_id, "effect")
@@ -80,7 +80,7 @@ func _create_character_card(character_id: String) -> Button:
 
 	var info_box: PanelContainer = PanelContainer.new()
 	info_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	info_box.custom_minimum_size = Vector2(430, 96)
+	info_box.custom_minimum_size = Vector2(510, 96)
 	root.add_child(info_box)
 
 	var info_inner: VBoxContainer = VBoxContainer.new()
