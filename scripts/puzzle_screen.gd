@@ -5,6 +5,20 @@ const COLOR_COUNT: int = 4
 const CLEAR_SCORE: int = 30
 const MIN_MATCH: int = 3
 
+const DROP_PATHS: Array[String] = [
+	"res://assets/puzzle/drops/memory_orb_red.png",
+	"res://assets/puzzle/drops/memory_orb_blue.png",
+	"res://assets/puzzle/drops/memory_orb_gold.png",
+	"res://assets/puzzle/drops/memory_orb_green.png"
+]
+
+const DROP_PATHS_FALLBACK: Array[String] = [
+	"res://assets/puzzle/drop/memory_orb_red.png",
+	"res://assets/puzzle/drop/memory_orb_blue.png",
+	"res://assets/puzzle/drop/memory_orb_gold.png",
+	"res://assets/puzzle/drop/memory_orb_green.png"
+]
+
 var score: int = 0
 var pieces: Array[int] = []
 var piece_buttons: Array[Button] = []
@@ -13,7 +27,7 @@ var selected_color: int = -1
 var is_selecting: bool = false
 var has_cleared: bool = false
 var pending_scene_change: bool = false
-var drop_textures: Array[Texture2D] = []
+var drop_textures: Dictionary = {}
 
 @onready var stage_label: Label = %StageLabel
 @onready var gauge: ProgressBar = %RestoreGauge
@@ -29,21 +43,23 @@ func _ready() -> void:
 
 func _load_drop_textures() -> void:
 	drop_textures.clear()
-	var paths: Array[String] = [
-		"res://assets/puzzle/drops/memory_orb_red.png",
-		"res://assets/puzzle/drops/memory_orb_blue.png",
-		"res://assets/puzzle/drops/memory_orb_gold.png",
-		"res://assets/puzzle/drops/memory_orb_green.png"
-	]
 	var index: int = 0
-	while index < paths.size():
-		var texture: Texture2D = null
-		if ResourceLoader.exists(paths[index]):
-			var loaded_resource: Resource = load(paths[index])
-			if loaded_resource is Texture2D:
-				texture = loaded_resource as Texture2D
-		drop_textures.append(texture)
+	while index < COLOR_COUNT:
+		var texture: Texture2D = _load_texture_from_paths(DROP_PATHS[index], DROP_PATHS_FALLBACK[index])
+		if texture != null:
+			drop_textures[index] = texture
 		index += 1
+
+func _load_texture_from_paths(primary_path: String, fallback_path: String) -> Texture2D:
+	if ResourceLoader.exists(primary_path):
+		var loaded_primary: Resource = load(primary_path)
+		if loaded_primary is Texture2D:
+			return loaded_primary as Texture2D
+	if ResourceLoader.exists(fallback_path):
+		var loaded_fallback: Resource = load(fallback_path)
+		if loaded_fallback is Texture2D:
+			return loaded_fallback as Texture2D
+	return null
 
 func _process(_delta: float) -> void:
 	if has_cleared or not is_selecting:
@@ -72,7 +88,9 @@ func _generate_board() -> void:
 		button.mouse_filter = Control.MOUSE_FILTER_STOP
 		button.expand_icon = true
 		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
 		button.gui_input.connect(_on_piece_gui_input.bind(create_index))
+		button.mouse_entered.connect(_on_piece_mouse_entered.bind(create_index))
 		piece_buttons.append(button)
 		board.add_child(button)
 		create_index += 1
@@ -106,6 +124,12 @@ func _on_piece_gui_input(event: InputEvent, index: int) -> void:
 		var touch_event: InputEventScreenTouch = event as InputEventScreenTouch
 		if touch_event.pressed:
 			_start_selection(index)
+
+func _on_piece_mouse_entered(index: int) -> void:
+	if has_cleared:
+		return
+	if is_selecting:
+		_try_add_to_selection(index)
 
 func _start_selection(index: int) -> void:
 	is_selecting = true
@@ -230,9 +254,11 @@ func _update_board_view() -> void:
 	while i < piece_buttons.size():
 		var button: Button = piece_buttons[i]
 		var piece_color: int = pieces[i]
-		button.icon = _get_drop_texture(piece_color)
-		if button.icon == null:
+		var texture: Texture2D = _get_drop_texture(piece_color)
+		button.icon = texture
+		if texture == null:
 			button.text = _piece_symbol(piece_color)
+			button.add_theme_color_override("font_color", _piece_font_color(piece_color))
 		else:
 			button.text = ""
 		if selected_indices.has(i):
@@ -241,9 +267,20 @@ func _update_board_view() -> void:
 			button.modulate = Color(1, 1, 1)
 		i += 1
 
+func _piece_font_color(index: int) -> Color:
+	match index:
+		0:
+			return Color(1, 0.2, 0.25)
+		1:
+			return Color(0.25, 0.65, 1)
+		2:
+			return Color(1, 0.85, 0.1)
+		_:
+			return Color(0.25, 1, 0.45)
+
 func _get_drop_texture(index: int) -> Texture2D:
-	if index >= 0 and index < drop_textures.size():
-		return drop_textures[index]
+	if drop_textures.has(index):
+		return drop_textures[index] as Texture2D
 	return null
 
 func _clear_stage() -> void:
