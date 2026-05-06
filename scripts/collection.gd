@@ -14,6 +14,9 @@ var current_total_stages: int = 5
 @onready var shard_layer: Control = %ShardLayer
 @onready var overlay_label: Label = %OverlayLabel
 @onready var counter_label: Label = %CounterLabel
+@onready var fullscreen_button: Button = %FullscreenButton
+@onready var fullscreen_viewer: ColorRect = %FullscreenViewer
+@onready var fullscreen_image: TextureRect = %FullscreenImage
 
 func _ready() -> void:
 	shard_layer.resized.connect(_on_shard_layer_resized)
@@ -21,7 +24,16 @@ func _ready() -> void:
 	still_ids = GameState.get_all_still_ids()
 	if still_ids.is_empty():
 		return
+	var focus_index: int = still_ids.find(GameState.collection_focus_still_id)
+	if focus_index >= 0:
+		current_index = focus_index
 	_update_collection_view(str(still_ids[current_index]))
+
+func _input(event: InputEvent) -> void:
+	if fullscreen_viewer.visible and event is InputEventKey:
+		var key_event: InputEventKey = event as InputEventKey
+		if key_event.pressed and key_event.keycode == KEY_ESCAPE:
+			_hide_fullscreen()
 
 func _on_shard_layer_resized() -> void:
 	_refresh_shard_polygons()
@@ -56,43 +68,18 @@ func _get_shard_polygon(index: int) -> PackedVector2Array:
 	var h: float = max(shard_layer.size.y, 1.0)
 	match index:
 		0:
-			return PackedVector2Array([
-				Vector2(0, 0),
-				Vector2(w * 0.44, 0),
-				Vector2(w * 0.37, h * 0.46),
-				Vector2(0, h * 0.62)
-			])
+			return PackedVector2Array([Vector2(0, 0), Vector2(w * 0.44, 0), Vector2(w * 0.37, h * 0.46), Vector2(0, h * 0.62)])
 		1:
-			return PackedVector2Array([
-				Vector2(w * 0.44, 0),
-				Vector2(w, 0),
-				Vector2(w, h * 0.42),
-				Vector2(w * 0.68, h * 0.58),
-				Vector2(w * 0.37, h * 0.46)
-			])
+			return PackedVector2Array([Vector2(w * 0.44, 0), Vector2(w, 0), Vector2(w, h * 0.42), Vector2(w * 0.68, h * 0.58), Vector2(w * 0.37, h * 0.46)])
 		2:
-			return PackedVector2Array([
-				Vector2(0, h * 0.62),
-				Vector2(w * 0.37, h * 0.46),
-				Vector2(w * 0.48, h),
-				Vector2(0, h)
-			])
+			return PackedVector2Array([Vector2(0, h * 0.62), Vector2(w * 0.37, h * 0.46), Vector2(w * 0.48, h), Vector2(0, h)])
 		3:
-			return PackedVector2Array([
-				Vector2(w * 0.37, h * 0.46),
-				Vector2(w * 0.68, h * 0.58),
-				Vector2(w * 0.72, h),
-				Vector2(w * 0.48, h)
-			])
+			return PackedVector2Array([Vector2(w * 0.37, h * 0.46), Vector2(w * 0.68, h * 0.58), Vector2(w * 0.72, h), Vector2(w * 0.48, h)])
 		_:
-			return PackedVector2Array([
-				Vector2(w * 0.68, h * 0.58),
-				Vector2(w, h * 0.42),
-				Vector2(w, h),
-				Vector2(w * 0.72, h)
-			])
+			return PackedVector2Array([Vector2(w * 0.68, h * 0.58), Vector2(w, h * 0.42), Vector2(w, h), Vector2(w * 0.72, h)])
 
 func _update_collection_view(still_id: String) -> void:
+	GameState.set_collection_focus(still_id)
 	var data: Dictionary = GameState.get_still_data(still_id)
 	title_label.text = str(data.get("title", "Unknown Memory"))
 	counter_label.text = "%d / %d" % [current_index + 1, still_ids.size()]
@@ -105,8 +92,9 @@ func _update_collection_view(still_id: String) -> void:
 	_load_still_texture(str(data.get("image_path", "")))
 	_refresh_shard_polygons()
 	_apply_shard_mask(unlocked_stages, total_stages)
+	fullscreen_button.disabled = not GameState.is_still_complete(still_id)
 	if GameState.is_still_complete(still_id):
-		status_label.text = "Unlocked"
+		status_label.text = "Unlocked - Fullscreen available"
 	else:
 		status_label.text = "%d%% restored" % percent
 
@@ -156,6 +144,25 @@ func _on_next_pressed() -> void:
 		return
 	current_index = (current_index + 1) % still_ids.size()
 	_show_current()
+
+func _on_fullscreen_pressed() -> void:
+	if still_ids.is_empty():
+		return
+	var still_id: String = str(still_ids[current_index])
+	if not GameState.is_still_complete(still_id):
+		return
+	fullscreen_image.texture = still_image.texture
+	fullscreen_viewer.visible = true
+	fullscreen_viewer.move_to_front()
+
+func _on_fullscreen_viewer_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mouse_event: InputEventMouseButton = event as InputEventMouseButton
+		if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
+			_hide_fullscreen()
+
+func _hide_fullscreen() -> void:
+	fullscreen_viewer.visible = false
 
 func _on_stage_select_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/stage_select/stage_select.tscn")
