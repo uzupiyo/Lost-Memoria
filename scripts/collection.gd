@@ -110,12 +110,36 @@ func _update_character_panel(character_id: String, situation: String) -> void:
 	var character_data: Dictionary = GameState.get_character_data(character_id)
 	character_name_label.text = str(character_data.get("display_name", character_id))
 	character_situation_label.text = situation
-	character_portrait.texture = null
-	var portrait_path: String = str(character_data.get("portrait_path", ""))
-	if not portrait_path.is_empty() and ResourceLoader.exists(portrait_path):
-		var loaded: Resource = load(portrait_path)
-		if loaded is Texture2D:
-			character_portrait.texture = loaded as Texture2D
+	character_portrait.texture = _load_character_portrait(character_id)
+
+func _load_character_portrait(character_id: String) -> Texture2D:
+	var data: Dictionary = GameState.get_character_data(character_id)
+	var candidate_paths: Array[String] = []
+	var portrait_path: String = str(data.get("portrait_path", ""))
+	if not portrait_path.is_empty():
+		candidate_paths.append(portrait_path)
+	candidate_paths.append("res://assets/ui/characters/%s_portrait_card.webp" % character_id)
+	candidate_paths.append("res://assets/ui/characters/%s_portrait_card.png" % character_id)
+	candidate_paths.append("res://assets/ui/characters/%s_card.webp" % character_id)
+	candidate_paths.append("res://assets/ui/characters/%s_card.png" % character_id)
+	candidate_paths.append(_get_first_still_image_path(character_id))
+
+	var i: int = 0
+	while i < candidate_paths.size():
+		var path: String = candidate_paths[i]
+		if not path.is_empty() and ResourceLoader.exists(path):
+			var loaded: Resource = load(path)
+			if loaded is Texture2D:
+				return loaded as Texture2D
+		i += 1
+	return null
+
+func _get_first_still_image_path(character_id: String) -> String:
+	var ids: Array = GameState.get_still_ids_for_character(character_id)
+	if ids.is_empty():
+		return ""
+	var first_data: Dictionary = GameState.get_still_data(str(ids[0]))
+	return str(first_data.get("image_path", ""))
 
 func _load_still_texture(path: String) -> void:
 	if path.is_empty() or not ResourceLoader.exists(path):
