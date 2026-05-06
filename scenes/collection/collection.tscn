@@ -77,6 +77,18 @@ layout_mode = 2
 theme_override_constants/separation = 18
 alignment = 1
 
+[node name="CharacterSwitchRow" type="HBoxContainer" parent="Root/MainRow/CharacterPanel/CharacterBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="PreviousCharacterButton" type="Button" parent="Root/MainRow/CharacterPanel/CharacterBox/CharacterSwitchRow"]
+layout_mode = 2
+text = "<"
+
+[node name="NextCharacterButton" type="Button" parent="Root/MainRow/CharacterPanel/CharacterBox/CharacterSwitchRow"]
+layout_mode = 2
+text = ">"
+
 [node name="CharacterPortrait" type="TextureRect" parent="Root/MainRow/CharacterPanel/CharacterBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(280, 360)
@@ -247,6 +259,8 @@ text = "CHARACTER SELECT"
 layout_mode = 2
 text = "TITLE"
 
+[connection signal="pressed" from="Root/MainRow/CharacterPanel/CharacterBox/CharacterSwitchRow/PreviousCharacterButton" to="." method="_on_previous_character_pressed"]
+[connection signal="pressed" from="Root/MainRow/CharacterPanel/CharacterBox/CharacterSwitchRow/NextCharacterButton" to="." method="_on_next_character_pressed"]
 [connection signal="pressed" from="Root/Footer/NavigationRow/PreviousButton" to="." method="_on_previous_pressed"]
 [connection signal="pressed" from="Root/Footer/NavigationRow/NextButton" to="." method="_on_next_pressed"]
 [connection signal="pressed" from="Root/Footer/NavigationRow/FullscreenButton" to="." method="_on_fullscreen_pressed"]
