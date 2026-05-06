@@ -65,10 +65,11 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-stretch_mode = 6
+stretch_mode = 5
 
 [node name="LockedOverlay" type="ColorRect" parent="Root/StillFrame/StillStack"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -87,7 +88,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-visible = false
 
 [node name="OverlayLabel" type="Label" parent="Root/StillFrame/StillStack"]
 unique_name_in_owner = true
