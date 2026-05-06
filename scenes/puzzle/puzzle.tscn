@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/puzzle_screen.gd" id="1_puzzle"]
+[ext_resource type="Theme" path="res://assets/ui/theme/main_theme.tres" id="2_theme"]
 
 [node name="Puzzle" type="Control"]
 layout_mode = 3
@@ -9,7 +10,18 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_theme")
 script = ExtResource("1_puzzle")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.006, 0.01, 0.026, 1)
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -18,32 +30,187 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 32
+theme_override_constants/margin_left = 48
 theme_override_constants/margin_top = 32
-theme_override_constants/margin_right = 32
+theme_override_constants/margin_right = 48
 theme_override_constants/margin_bottom = 32
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="Root" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="TopStatusBar" type="PanelContainer" parent="MarginContainer/Root"]
+custom_minimum_size = Vector2(0, 86)
 layout_mode = 2
 
-[node name="StageLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="TopStatusRow" type="HBoxContainer" parent="MarginContainer/Root/TopStatusBar"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="StageLabel" type="Label" parent="MarginContainer/Root/TopStatusBar/TopStatusRow"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
 text = "Stage 1"
+vertical_alignment = 1
+
+[node name="TargetLabel" type="Label" parent="MarginContainer/Root/TopStatusBar/TopStatusRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+text = "TARGET\nMirror Shards"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MovesLabel" type="Label" parent="MarginContainer/Root/TopStatusBar/TopStatusRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+text = "MOVES\n--"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="MarginContainer/Root/TopStatusBar/TopStatusRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+text = "SCORE\n0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MainRow" type="HBoxContainer" parent="MarginContainer/Root"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 24
+
+[node name="CharacterPanel" type="PanelContainer" parent="MarginContainer/Root/MainRow"]
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CharacterBox" type="VBoxContainer" parent="MarginContainer/Root/MainRow/CharacterPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="CharacterNameLabel" type="Label" parent="MarginContainer/Root/MainRow/CharacterPanel/CharacterBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Kaede"
 horizontal_alignment = 1
 
-[node name="RestoreGauge" type="ProgressBar" parent="MarginContainer/VBoxContainer"]
+[node name="SdFrameStack" type="Control" parent="MarginContainer/Root/MainRow/CharacterPanel/CharacterBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 500)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="SdFrame" type="TextureRect" parent="MarginContainer/Root/MainRow/CharacterPanel/CharacterBox/SdFrameStack"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SdCharacter" type="TextureRect" parent="MarginContainer/Root/MainRow/CharacterPanel/CharacterBox/SdFrameStack"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -130.0
+offset_top = -150.0
+offset_right = 130.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SdMessageLabel" type="Label" parent="MarginContainer/Root/MainRow/CharacterPanel/CharacterBox"]
 unique_name_in_owner = true
 layout_mode = 2
-max_value = 30.0
+text = "一緒に、記憶の欠片を集めましょう。"
+horizontal_alignment = 1
+autowrap_mode = 3
 
-[node name="Board" type="GridContainer" parent="MarginContainer/VBoxContainer"]
+[node name="BoardPanel" type="PanelContainer" parent="MarginContainer/Root/MainRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BoardCenter" type="CenterContainer" parent="MarginContainer/Root/MainRow/BoardPanel"]
+layout_mode = 2
+
+[node name="Board" type="GridContainer" parent="MarginContainer/Root/MainRow/BoardPanel/BoardCenter"]
 unique_name_in_owner = true
 layout_mode = 2
 columns = 6
 
-[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
+[node name="PreviewPanel" type="PanelContainer" parent="MarginContainer/Root/MainRow"]
+custom_minimum_size = Vector2(340, 0)
 layout_mode = 2
-text = "BACK"
+size_flags_vertical = 3
 
-[connection signal="pressed" from="MarginContainer/VBoxContainer/BackButton" to="." method="_on_back_pressed"]
+[node name="PreviewBox" type="VBoxContainer" parent="MarginContainer/Root/MainRow/PreviewPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="PreviewTitle" type="Label" parent="MarginContainer/Root/MainRow/PreviewPanel/PreviewBox"]
+layout_mode = 2
+text = "TARGET ILLUSTRATION"
+horizontal_alignment = 1
+
+[node name="StillPreview" type="TextureRect" parent="MarginContainer/Root/MainRow/PreviewPanel/PreviewBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 360)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RestoreGauge" type="ProgressBar" parent="MarginContainer/Root/MainRow/PreviewPanel/PreviewBox"]
+unique_name_in_owner = true
+layout_mode = 2
+max_value = 30.0
+
+[node name="ProgressLabel" type="Label" parent="MarginContainer/Root/MainRow/PreviewPanel/PreviewBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0% Restoration"
+horizontal_alignment = 1
+
+[node name="FooterRow" type="HBoxContainer" parent="MarginContainer/Root"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 40
+
+[node name="BackButton" type="Button" parent="MarginContainer/Root/FooterRow"]
+custom_minimum_size = Vector2(260, 64)
+layout_mode = 2
+text = "← Back"
+
+[node name="RetryButton" type="Button" parent="MarginContainer/Root/FooterRow"]
+custom_minimum_size = Vector2(260, 64)
+layout_mode = 2
+text = "↻ Retry"
+
+[node name="HintButton" type="Button" parent="MarginContainer/Root/FooterRow"]
+custom_minimum_size = Vector2(260, 64)
+layout_mode = 2
+text = "✦ Hint"
+
+[connection signal="pressed" from="MarginContainer/Root/FooterRow/BackButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="MarginContainer/Root/FooterRow/RetryButton" to="." method="_on_retry_pressed"]
+[connection signal="pressed" from="MarginContainer/Root/FooterRow/HintButton" to="." method="_on_hint_pressed"]
