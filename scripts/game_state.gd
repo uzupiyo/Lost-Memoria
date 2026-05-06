@@ -8,65 +8,65 @@ var selected_stage_index: int = 0
 var stills: Dictionary = {
 	"rin_swimsuit_001": {
 		"character": "Rin",
-		"situation": "水着",
-		"title": "Rin 水着 001",
-		"image_path": "res://assets/stills/Rin/水着/Rin_水着_001.webp",
+		"situation": "swimsuit",
+		"title": "Rin swimsuit 001",
+		"image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_001.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
 	"rin_swimsuit_002": {
 		"character": "Rin",
-		"situation": "水着",
-		"title": "Rin 水着 002",
-		"image_path": "res://assets/stills/Rin/水着/Rin_水着_002.webp",
+		"situation": "swimsuit",
+		"title": "Rin swimsuit 002",
+		"image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_002.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
 	"rin_swimsuit_003": {
 		"character": "Rin",
-		"situation": "水着",
-		"title": "Rin 水着 003",
-		"image_path": "res://assets/stills/Rin/水着/Rin_水着_003.webp",
+		"situation": "swimsuit",
+		"title": "Rin swimsuit 003",
+		"image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_003.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
 	"rin_swimsuit_004": {
 		"character": "Rin",
-		"situation": "水着",
-		"title": "Rin 水着 004",
-		"image_path": "res://assets/stills/Rin/水着/Rin_水着_004.webp",
+		"situation": "swimsuit",
+		"title": "Rin swimsuit 004",
+		"image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_004.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
 	"rin_swimsuit_005": {
 		"character": "Rin",
-		"situation": "水着",
-		"title": "Rin 水着 005",
-		"image_path": "res://assets/stills/Rin/水着/Rin_水着_005.webp",
+		"situation": "swimsuit",
+		"title": "Rin swimsuit 005",
+		"image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_005.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
 	"rin_halloween_001": {
 		"character": "Rin",
-		"situation": "ハロウィン",
-		"title": "Rin ハロウィン 001",
-		"image_path": "res://assets/stills/Rin/ハロウィン/Rin_ハロウィン_001.webp",
+		"situation": "halloween",
+		"title": "Rin halloween 001",
+		"image_path": "res://assets/stills/Rin/halloween/Rin_halloween_001.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
 	"moka_normal_001": {
 		"character": "Moka",
-		"situation": "通常",
-		"title": "Moka 通常 001",
-		"image_path": "res://assets/stills/Moka/通常/Moka_通常_001.webp",
+		"situation": "normal",
+		"title": "Moka normal 001",
+		"image_path": "res://assets/stills/Moka/normal/Moka_normal_001.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	},
 	"moka_swimsuit_001": {
 		"character": "Moka",
-		"situation": "水着",
-		"title": "Moka 水着 001",
-		"image_path": "res://assets/stills/Moka/水着/Moka_水着_001.webp",
+		"situation": "swimsuit",
+		"title": "Moka swimsuit 001",
+		"image_path": "res://assets/stills/Moka/swimsuit/Moka_swimsuit_001.webp",
 		"unlocked_stages": 0,
 		"total_stages": STILL_STAGE_COUNT
 	}
