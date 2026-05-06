@@ -4,208 +4,34 @@ const STILL_STAGE_COUNT: int = 5
 
 var selected_still_id: String = "rin_normal_001"
 var selected_stage_index: int = 0
+var collection_focus_still_id: String = "rin_normal_001"
 
 var stills: Dictionary = {
-	"rin_normal_001": {
-		"character": "Rin",
-		"situation": "normal",
-		"title": "Rin normal 001",
-		"image_path": "res://assets/stills/Rin/normal/Rin_normal_001.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"rin_normal_002": {
-		"character": "Rin",
-		"situation": "normal",
-		"title": "Rin normal 002",
-		"image_path": "res://assets/stills/Rin/normal/Rin_normal_002.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"rin_normal_003": {
-		"character": "Rin",
-		"situation": "normal",
-		"title": "Rin normal 003",
-		"image_path": "res://assets/stills/Rin/normal/Rin_normal_003.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"rin_normal_004": {
-		"character": "Rin",
-		"situation": "normal",
-		"title": "Rin normal 004",
-		"image_path": "res://assets/stills/Rin/normal/Rin_normal_004.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"rin_normal_005": {
-		"character": "Rin",
-		"situation": "normal",
-		"title": "Rin normal 005",
-		"image_path": "res://assets/stills/Rin/normal/Rin_normal_005.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"rin_swimsuit_001": {
-		"character": "Rin",
-		"situation": "swimsuit",
-		"title": "Rin swimsuit 001",
-		"image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_001.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"rin_swimsuit_002": {
-		"character": "Rin",
-		"situation": "swimsuit",
-		"title": "Rin swimsuit 002",
-		"image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_002.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"rin_swimsuit_003": {
-		"character": "Rin",
-		"situation": "swimsuit",
-		"title": "Rin swimsuit 003",
-		"image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_003.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"rin_swimsuit_004": {
-		"character": "Rin",
-		"situation": "swimsuit",
-		"title": "Rin swimsuit 004",
-		"image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_004.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"rin_swimsuit_005": {
-		"character": "Rin",
-		"situation": "swimsuit",
-		"title": "Rin swimsuit 005",
-		"image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_005.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"rin_halloween_001": {
-		"character": "Rin",
-		"situation": "halloween",
-		"title": "Rin halloween 001",
-		"image_path": "res://assets/stills/Rin/halloween/Rin_halloween_001.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"rin_halloween_002": {
-		"character": "Rin",
-		"situation": "halloween",
-		"title": "Rin halloween 002",
-		"image_path": "res://assets/stills/Rin/halloween/Rin_halloween_002.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"rin_halloween_003": {
-		"character": "Rin",
-		"situation": "halloween",
-		"title": "Rin halloween 003",
-		"image_path": "res://assets/stills/Rin/halloween/Rin_halloween_003.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"rin_halloween_004": {
-		"character": "Rin",
-		"situation": "halloween",
-		"title": "Rin halloween 004",
-		"image_path": "res://assets/stills/Rin/halloween/Rin_halloween_004.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"rin_halloween_005": {
-		"character": "Rin",
-		"situation": "halloween",
-		"title": "Rin halloween 005",
-		"image_path": "res://assets/stills/Rin/halloween/Rin_halloween_005.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"moka_normal_001": {
-		"character": "Moka",
-		"situation": "normal",
-		"title": "Moka normal 001",
-		"image_path": "res://assets/stills/Moka/normal/Moka_normal_001.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"moka_normal_002": {
-		"character": "Moka",
-		"situation": "normal",
-		"title": "Moka normal 002",
-		"image_path": "res://assets/stills/Moka/normal/Moka_normal_002.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"moka_normal_003": {
-		"character": "Moka",
-		"situation": "normal",
-		"title": "Moka normal 003",
-		"image_path": "res://assets/stills/Moka/normal/Moka_normal_003.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"moka_normal_004": {
-		"character": "Moka",
-		"situation": "normal",
-		"title": "Moka normal 004",
-		"image_path": "res://assets/stills/Moka/normal/Moka_normal_004.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"moka_normal_005": {
-		"character": "Moka",
-		"situation": "normal",
-		"title": "Moka normal 005",
-		"image_path": "res://assets/stills/Moka/normal/Moka_normal_005.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"moka_swimsuit_001": {
-		"character": "Moka",
-		"situation": "swimsuit",
-		"title": "Moka swimsuit 001",
-		"image_path": "res://assets/stills/Moka/swimsuit/Moka_swimsuit_001.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"moka_swimsuit_002": {
-		"character": "Moka",
-		"situation": "swimsuit",
-		"title": "Moka swimsuit 002",
-		"image_path": "res://assets/stills/Moka/swimsuit/Moka_swimsuit_002.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"moka_swimsuit_003": {
-		"character": "Moka",
-		"situation": "swimsuit",
-		"title": "Moka swimsuit 003",
-		"image_path": "res://assets/stills/Moka/swimsuit/Moka_swimsuit_003.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"moka_swimsuit_004": {
-		"character": "Moka",
-		"situation": "swimsuit",
-		"title": "Moka swimsuit 004",
-		"image_path": "res://assets/stills/Moka/swimsuit/Moka_swimsuit_004.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	},
-	"moka_swimsuit_005": {
-		"character": "Moka",
-		"situation": "swimsuit",
-		"title": "Moka swimsuit 005",
-		"image_path": "res://assets/stills/Moka/swimsuit/Moka_swimsuit_005.webp",
-		"unlocked_stages": 0,
-		"total_stages": STILL_STAGE_COUNT
-	}
+	"rin_normal_001": {"character": "Rin", "situation": "normal", "title": "Rin normal 001", "image_path": "res://assets/stills/Rin/normal/Rin_normal_001.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"rin_normal_002": {"character": "Rin", "situation": "normal", "title": "Rin normal 002", "image_path": "res://assets/stills/Rin/normal/Rin_normal_002.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"rin_normal_003": {"character": "Rin", "situation": "normal", "title": "Rin normal 003", "image_path": "res://assets/stills/Rin/normal/Rin_normal_003.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"rin_normal_004": {"character": "Rin", "situation": "normal", "title": "Rin normal 004", "image_path": "res://assets/stills/Rin/normal/Rin_normal_004.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"rin_normal_005": {"character": "Rin", "situation": "normal", "title": "Rin normal 005", "image_path": "res://assets/stills/Rin/normal/Rin_normal_005.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"rin_swimsuit_001": {"character": "Rin", "situation": "swimsuit", "title": "Rin swimsuit 001", "image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_001.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"rin_swimsuit_002": {"character": "Rin", "situation": "swimsuit", "title": "Rin swimsuit 002", "image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_002.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"rin_swimsuit_003": {"character": "Rin", "situation": "swimsuit", "title": "Rin swimsuit 003", "image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_003.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"rin_swimsuit_004": {"character": "Rin", "situation": "swimsuit", "title": "Rin swimsuit 004", "image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_004.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"rin_swimsuit_005": {"character": "Rin", "situation": "swimsuit", "title": "Rin swimsuit 005", "image_path": "res://assets/stills/Rin/swimsuit/Rin_swimsuit_005.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"rin_halloween_001": {"character": "Rin", "situation": "halloween", "title": "Rin halloween 001", "image_path": "res://assets/stills/Rin/halloween/Rin_halloween_001.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"rin_halloween_002": {"character": "Rin", "situation": "halloween", "title": "Rin halloween 002", "image_path": "res://assets/stills/Rin/halloween/Rin_halloween_002.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"rin_halloween_003": {"character": "Rin", "situation": "halloween", "title": "Rin halloween 003", "image_path": "res://assets/stills/Rin/halloween/Rin_halloween_003.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"rin_halloween_004": {"character": "Rin", "situation": "halloween", "title": "Rin halloween 004", "image_path": "res://assets/stills/Rin/halloween/Rin_halloween_004.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"rin_halloween_005": {"character": "Rin", "situation": "halloween", "title": "Rin halloween 005", "image_path": "res://assets/stills/Rin/halloween/Rin_halloween_005.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"moka_normal_001": {"character": "Moka", "situation": "normal", "title": "Moka normal 001", "image_path": "res://assets/stills/Moka/normal/Moka_normal_001.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"moka_normal_002": {"character": "Moka", "situation": "normal", "title": "Moka normal 002", "image_path": "res://assets/stills/Moka/normal/Moka_normal_002.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"moka_normal_003": {"character": "Moka", "situation": "normal", "title": "Moka normal 003", "image_path": "res://assets/stills/Moka/normal/Moka_normal_003.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"moka_normal_004": {"character": "Moka", "situation": "normal", "title": "Moka normal 004", "image_path": "res://assets/stills/Moka/normal/Moka_normal_004.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"moka_normal_005": {"character": "Moka", "situation": "normal", "title": "Moka normal 005", "image_path": "res://assets/stills/Moka/normal/Moka_normal_005.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"moka_swimsuit_001": {"character": "Moka", "situation": "swimsuit", "title": "Moka swimsuit 001", "image_path": "res://assets/stills/Moka/swimsuit/Moka_swimsuit_001.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"moka_swimsuit_002": {"character": "Moka", "situation": "swimsuit", "title": "Moka swimsuit 002", "image_path": "res://assets/stills/Moka/swimsuit/Moka_swimsuit_002.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"moka_swimsuit_003": {"character": "Moka", "situation": "swimsuit", "title": "Moka swimsuit 003", "image_path": "res://assets/stills/Moka/swimsuit/Moka_swimsuit_003.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"moka_swimsuit_004": {"character": "Moka", "situation": "swimsuit", "title": "Moka swimsuit 004", "image_path": "res://assets/stills/Moka/swimsuit/Moka_swimsuit_004.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT},
+	"moka_swimsuit_005": {"character": "Moka", "situation": "swimsuit", "title": "Moka swimsuit 005", "image_path": "res://assets/stills/Moka/swimsuit/Moka_swimsuit_005.webp", "unlocked_stages": 0, "total_stages": STILL_STAGE_COUNT}
 }
 
 func _ready() -> void:
@@ -231,8 +57,13 @@ func is_still_complete(still_id: String) -> bool:
 		return false
 	return int(data.get("unlocked_stages", 0)) >= int(data.get("total_stages", STILL_STAGE_COUNT))
 
+func set_collection_focus(still_id: String) -> void:
+	if stills.has(still_id):
+		collection_focus_still_id = still_id
+
 func clear_selected_stage() -> void:
 	unlock_stage(selected_still_id, selected_stage_index)
+	set_collection_focus(selected_still_id)
 
 func unlock_stage(still_id: String, stage_index: int) -> void:
 	if not stills.has(still_id):
@@ -247,3 +78,4 @@ func unlock_stage(still_id: String, stage_index: int) -> void:
 func select_stage(still_id: String, stage_index: int) -> void:
 	selected_still_id = still_id
 	selected_stage_index = stage_index
+	set_collection_focus(still_id)
