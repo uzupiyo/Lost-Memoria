@@ -1,32 +1,19 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/title_screen.gd" id="1_title"]
-[ext_resource type="Theme" path="res://assets/ui/theme/main_theme.tres" id="2_theme"]
-
-[sub_resource type="Gradient" id="Gradient_bg"]
-offsets = PackedFloat32Array(0, 0.45, 1)
-colors = PackedColorArray(0.001, 0.003, 0.011, 1, 0.012, 0.018, 0.052, 1, 0.042, 0.026, 0.096, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_bg"]
-gradient = SubResource("Gradient_bg")
-fill = 1
-fill_from = Vector2(0.05, 0.05)
-fill_to = Vector2(1, 1)
-
-[sub_resource type="StyleBoxFlat" id="GlassPanel"]
-bg_color = Color(0.004, 0.008, 0.022, 0.18)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.72, 0.82, 1, 0.22)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-shadow_color = Color(0.18, 0.4, 1, 0.28)
-shadow_size = 28
-shadow_offset = Vector2(0, 0)
+[ext_resource type="Texture2D" path="res://assets/ui/title/title_background.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/ui/title/title_logo_lost_memoria.png" id="3_logo"]
+[ext_resource type="Texture2D" path="res://assets/ui/title/title_tagline_jp.png" id="4_tagline"]
+[ext_resource type="Texture2D" path="res://assets/ui/title/button_start_normal.png" id="5_start_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui/title/button_start_hover.png" id="6_start_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui/title/button_collection_normal.png" id="7_collection_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui/title/button_collection_hover.png" id="8_collection_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui/title/button_options_disabled.png" id="9_options_disabled"]
+[ext_resource type="Texture2D" path="res://assets/ui/title/icon_button_crown.png" id="10_icon_crown"]
+[ext_resource type="Texture2D" path="res://assets/ui/title/icon_button_archive.png" id="11_icon_archive"]
+[ext_resource type="Texture2D" path="res://assets/ui/title/icon_button_gear.png" id="12_icon_gear"]
+[ext_resource type="Texture2D" path="res://assets/ui/title/decor_menu_divider.png" id="13_divider"]
+[ext_resource type="Texture2D" path="res://assets/ui/title/decor_selected_crystal.png" id="14_crystal"]
 
 [node name="Title" type="Control"]
 layout_mode = 3
@@ -35,7 +22,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = ExtResource("2_theme")
 script = ExtResource("1_title")
 
 [node name="Background" type="TextureRect" parent="."]
@@ -46,8 +32,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = SubResource("GradientTexture2D_bg")
-stretch_mode = 1
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
 
 [node name="DarkVeil" type="ColorRect" parent="."]
 layout_mode = 1
@@ -57,238 +44,135 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0, 0, 0, 0.38)
+color = Color(0, 0, 0, 0.08)
 
-[node name="BackdropGlow" type="ColorRect" parent="."]
+[node name="TitleLogo" type="TextureRect" parent="."]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+anchors_preset = 0
+offset_left = 120.0
+offset_top = 170.0
+offset_right = 1020.0
+offset_bottom = 400.0
 mouse_filter = 2
-color = Color(0.02, 0.05, 0.14, 0.28)
+texture = ExtResource("3_logo")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="FrameLines" type="Control" parent="."]
+[node name="Tagline" type="TextureRect" parent="."]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = 0
+offset_left = 215.0
+offset_top = 105.0
+offset_right = 760.0
+offset_bottom = 170.0
 mouse_filter = 2
+texture = ExtResource("4_tagline")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="TopLine" type="Line2D" parent="FrameLines"]
-points = PackedVector2Array(90, 84, 1830, 84)
-width = 1.0
-default_color = Color(0.48, 0.66, 1, 0.32)
-
-[node name="BottomLine" type="Line2D" parent="FrameLines"]
-points = PackedVector2Array(90, 896, 1830, 896)
-width = 1.0
-default_color = Color(0.48, 0.66, 1, 0.22)
-
-[node name="LeftLine" type="Line2D" parent="FrameLines"]
-points = PackedVector2Array(90, 84, 90, 896)
-width = 1.0
-default_color = Color(0.48, 0.66, 1, 0.16)
-
-[node name="RightLine" type="Line2D" parent="FrameLines"]
-points = PackedVector2Array(1830, 84, 1830, 896)
-width = 1.0
-default_color = Color(0.48, 0.66, 1, 0.16)
-
-[node name="FloatingShards" type="Control" parent="."]
+[node name="MenuRoot" type="Control" parent="."]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = 0
+offset_left = 355.0
+offset_top = 475.0
+offset_right = 875.0
+offset_bottom = 805.0
 mouse_filter = 2
 
-[node name="Shard01" type="Polygon2D" parent="FloatingShards"]
-color = Color(0.42, 0.72, 1, 0.38)
-polygon = PackedVector2Array(112, 255, 150, 190, 186, 280, 138, 345)
-
-[node name="Shard02" type="Polygon2D" parent="FloatingShards"]
-color = Color(0.72, 0.62, 1, 0.26)
-polygon = PackedVector2Array(1540, 130, 1636, 196, 1562, 302, 1490, 218)
-
-[node name="Shard03" type="Polygon2D" parent="FloatingShards"]
-color = Color(0.48, 0.82, 1, 0.18)
-polygon = PackedVector2Array(1310, 790, 1420, 735, 1482, 860, 1360, 904)
-
-[node name="Shard04" type="Polygon2D" parent="FloatingShards"]
-color = Color(0.85, 0.9, 1, 0.16)
-polygon = PackedVector2Array(430, 740, 510, 690, 565, 800, 474, 845)
-
-[node name="Shard05" type="Polygon2D" parent="FloatingShards"]
-color = Color(0.56, 0.78, 1, 0.2)
-polygon = PackedVector2Array(960, 118, 1005, 92, 1040, 166, 982, 198)
-
-[node name="LeftContent" type="VBoxContainer" parent="."]
+[node name="SelectedCrystal" type="TextureRect" parent="MenuRoot"]
 layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_left = 155.0
-offset_top = -330.0
-offset_right = 900.0
-offset_bottom = 330.0
-grow_vertical = 2
-theme_override_constants/separation = 24
-alignment = 1
-
-[node name="Tagline" type="Label" parent="LeftContent"]
-layout_mode = 2
+anchors_preset = 0
+offset_left = 220.0
+offset_top = -44.0
+offset_right = 300.0
+offset_bottom = 36.0
 mouse_filter = 2
-theme_override_font_sizes/font_size = 30
-text = "— 失われた記憶を、もう一度 —"
-horizontal_alignment = 1
+texture = ExtResource("14_crystal")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="TitleLabel" type="Label" parent="LeftContent"]
-layout_mode = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 118
-text = "Lost Memoria"
-horizontal_alignment = 1
+[node name="StartButton" type="TextureButton" parent="MenuRoot"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 520.0
+offset_bottom = 96.0
+texture_normal = ExtResource("5_start_normal")
+texture_hover = ExtResource("6_start_hover")
+ignore_texture_size = true
+stretch_mode = 0
 
-[node name="SubtitleLabel" type="Label" parent="LeftContent"]
-layout_mode = 2
-mouse_filter = 2
-theme_override_font_sizes/font_size = 26
-text = "ロスト・メモリア"
-horizontal_alignment = 1
+[node name="CollectionButton" type="TextureButton" parent="MenuRoot"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 0.0
+offset_top = 118.0
+offset_right = 520.0
+offset_bottom = 214.0
+texture_normal = ExtResource("7_collection_normal")
+texture_hover = ExtResource("8_collection_hover")
+ignore_texture_size = true
+stretch_mode = 0
 
-[node name="Spacer" type="Control" parent="LeftContent"]
-custom_minimum_size = Vector2(1, 28)
-layout_mode = 2
-mouse_filter = 2
-
-[node name="MenuBox" type="VBoxContainer" parent="LeftContent"]
-layout_mode = 2
-theme_override_constants/separation = 22
-alignment = 1
-
-[node name="StartButton" type="Button" parent="LeftContent/MenuBox"]
-custom_minimum_size = Vector2(460, 78)
-layout_mode = 2
-text = "START\nゲームをはじめる"
-
-[node name="CollectionButton" type="Button" parent="LeftContent/MenuBox"]
-custom_minimum_size = Vector2(460, 78)
-layout_mode = 2
-text = "COLLECTION\nコレクション"
-
-[node name="OptionsButton" type="Button" parent="LeftContent/MenuBox"]
-custom_minimum_size = Vector2(460, 78)
-layout_mode = 2
+[node name="OptionsButton" type="TextureButton" parent="MenuRoot"]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 0.0
+offset_top = 236.0
+offset_right = 520.0
+offset_bottom = 332.0
 disabled = true
-text = "OPTIONS\nオプション"
+texture_normal = ExtResource("9_options_disabled")
+texture_disabled = ExtResource("9_options_disabled")
+ignore_texture_size = true
+stretch_mode = 0
 
-[node name="IconRow" type="HBoxContainer" parent="LeftContent"]
-layout_mode = 2
-theme_override_constants/separation = 38
+[node name="Divider" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 305.0
+offset_top = 430.0
+offset_right = 925.0
+offset_bottom = 480.0
+mouse_filter = 2
+texture = ExtResource("13_divider")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="IconRow" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 355.0
+offset_top = 835.0
+offset_right = 690.0
+offset_bottom = 900.0
+theme_override_constants/separation = 34
 alignment = 1
 
-[node name="IconA" type="PanelContainer" parent="LeftContent/IconRow"]
-custom_minimum_size = Vector2(72, 50)
+[node name="CrownIcon" type="TextureRect" parent="IconRow"]
+custom_minimum_size = Vector2(94, 64)
 layout_mode = 2
-theme_override_styles/panel = SubResource("GlassPanel")
-
-[node name="IconALabel" type="Label" parent="LeftContent/IconRow/IconA"]
-layout_mode = 2
-text = "♕"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="IconB" type="PanelContainer" parent="LeftContent/IconRow"]
-custom_minimum_size = Vector2(72, 50)
-layout_mode = 2
-theme_override_styles/panel = SubResource("GlassPanel")
-
-[node name="IconBLabel" type="Label" parent="LeftContent/IconRow/IconB"]
-layout_mode = 2
-text = "▣"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="IconC" type="PanelContainer" parent="LeftContent/IconRow"]
-custom_minimum_size = Vector2(72, 50)
-layout_mode = 2
-theme_override_styles/panel = SubResource("GlassPanel")
-
-[node name="IconCLabel" type="Label" parent="LeftContent/IconRow/IconC"]
-layout_mode = 2
-text = "⚙"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="MirrorArea" type="Control" parent="."]
-layout_mode = 1
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -900.0
-offset_top = -420.0
-offset_right = -120.0
-offset_bottom = 420.0
-grow_horizontal = 0
-grow_vertical = 2
 mouse_filter = 2
+texture = ExtResource("10_icon_crown")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="MirrorOuter" type="Polygon2D" parent="MirrorArea"]
-color = Color(0.16, 0.18, 0.28, 0.82)
-polygon = PackedVector2Array(390, 20, 505, 58, 590, 145, 635, 285, 622, 470, 540, 640, 405, 760, 250, 690, 150, 540, 110, 360, 145, 180, 245, 62)
-
-[node name="MirrorInner" type="Polygon2D" parent="MirrorArea"]
-color = Color(0.05, 0.1, 0.19, 0.68)
-polygon = PackedVector2Array(390, 58, 485, 92, 555, 165, 592, 292, 580, 455, 510, 600, 400, 700, 270, 640, 185, 510, 150, 358, 180, 205, 260, 100)
-
-[node name="MirrorLight" type="Polygon2D" parent="MirrorArea"]
-color = Color(0.35, 0.55, 1, 0.16)
-polygon = PackedVector2Array(388, 80, 490, 110, 548, 195, 506, 340, 410, 250, 320, 170)
-
-[node name="MirrorCrack1" type="Line2D" parent="MirrorArea"]
-points = PackedVector2Array(392, 86, 374, 250, 410, 365, 360, 620)
-width = 2.2
-default_color = Color(0.78, 0.9, 1, 0.68)
-
-[node name="MirrorCrack2" type="Line2D" parent="MirrorArea"]
-points = PackedVector2Array(410, 365, 520, 278, 592, 210)
-width = 1.5
-default_color = Color(0.68, 0.84, 1, 0.48)
-
-[node name="MirrorCrack3" type="Line2D" parent="MirrorArea"]
-points = PackedVector2Array(410, 365, 270, 318, 190, 250)
-width = 1.5
-default_color = Color(0.68, 0.84, 1, 0.42)
-
-[node name="MirrorCrack4" type="Line2D" parent="MirrorArea"]
-points = PackedVector2Array(374, 250, 300, 145, 258, 94)
-width = 1.1
-default_color = Color(0.68, 0.84, 1, 0.32)
-
-[node name="FloorShard1" type="Polygon2D" parent="MirrorArea"]
-color = Color(0.36, 0.7, 1, 0.34)
-polygon = PackedVector2Array(110, 785, 195, 745, 250, 820, 160, 855)
-
-[node name="FloorShard2" type="Polygon2D" parent="MirrorArea"]
-color = Color(0.7, 0.6, 1, 0.28)
-polygon = PackedVector2Array(500, 720, 610, 760, 548, 842, 458, 800)
-
-[node name="BookPanel" type="PanelContainer" parent="MirrorArea"]
-layout_mode = 0
-offset_left = 300.0
-offset_top = 710.0
-offset_right = 555.0
-offset_bottom = 790.0
-theme_override_styles/panel = SubResource("GlassPanel")
-
-[node name="BookLabel" type="Label" parent="MirrorArea/BookPanel"]
+[node name="ArchiveIcon" type="TextureRect" parent="IconRow"]
+custom_minimum_size = Vector2(94, 64)
 layout_mode = 2
-text = "MEMORY LOG"
-horizontal_alignment = 1
-vertical_alignment = 1
+mouse_filter = 2
+texture = ExtResource("11_icon_archive")
+expand_mode = 1
+stretch_mode = 5
 
-[connection signal="pressed" from="LeftContent/MenuBox/StartButton" to="." method="_on_start_pressed"]
-[connection signal="pressed" from="LeftContent/MenuBox/CollectionButton" to="." method="_on_collection_pressed"]
+[node name="GearIcon" type="TextureRect" parent="IconRow"]
+custom_minimum_size = Vector2(94, 64)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("12_icon_gear")
+expand_mode = 1
+stretch_mode = 5
+
+[connection signal="pressed" from="MenuRoot/StartButton" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="MenuRoot/CollectionButton" to="." method="_on_collection_pressed"]
