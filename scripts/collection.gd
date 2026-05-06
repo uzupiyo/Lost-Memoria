@@ -7,6 +7,7 @@ var current_unlocked_stages: int = 0
 var current_total_stages: int = 5
 
 @onready var title_label: Label = %StillTitle
+@onready var collection_title_label: Label = %TitleLabel
 @onready var progress_label: Label = %ProgressLabel
 @onready var status_label: Label = %StatusLabel
 @onready var still_image: TextureRect = %StillImage
@@ -17,11 +18,15 @@ var current_total_stages: int = 5
 @onready var fullscreen_button: Button = %FullscreenButton
 @onready var fullscreen_viewer: ColorRect = %FullscreenViewer
 @onready var fullscreen_image: TextureRect = %FullscreenImage
+@onready var character_portrait: TextureRect = %CharacterPortrait
+@onready var character_name_label: Label = %CharacterNameLabel
+@onready var character_situation_label: Label = %CharacterSituationLabel
 
 func _ready() -> void:
 	shard_layer.resized.connect(_on_shard_layer_resized)
 	_setup_shards()
-	still_ids = GameState.get_all_still_ids()
+	still_ids = GameState.get_still_ids_for_character(GameState.selected_character_id)
+	collection_title_label.text = "%s Collection" % GameState.selected_character_id
 	if still_ids.is_empty():
 		return
 	var focus_index: int = still_ids.find(GameState.collection_focus_still_id)
@@ -83,6 +88,9 @@ func _update_collection_view(still_id: String) -> void:
 	var data: Dictionary = GameState.get_still_data(still_id)
 	title_label.text = str(data.get("title", "Unknown Memory"))
 	counter_label.text = "%d / %d" % [current_index + 1, still_ids.size()]
+	var character_id: String = str(data.get("character", GameState.selected_character_id))
+	var situation: String = str(data.get("situation", ""))
+	_update_character_panel(character_id, situation)
 	var unlocked_stages: int = int(data.get("unlocked_stages", 0))
 	var total_stages: int = int(data.get("total_stages", GameState.STILL_STAGE_COUNT))
 	current_unlocked_stages = unlocked_stages
@@ -97,6 +105,17 @@ func _update_collection_view(still_id: String) -> void:
 		status_label.text = "Unlocked - Fullscreen available"
 	else:
 		status_label.text = "%d%% restored" % percent
+
+func _update_character_panel(character_id: String, situation: String) -> void:
+	var character_data: Dictionary = GameState.get_character_data(character_id)
+	character_name_label.text = str(character_data.get("display_name", character_id))
+	character_situation_label.text = situation
+	character_portrait.texture = null
+	var portrait_path: String = str(character_data.get("portrait_path", ""))
+	if not portrait_path.is_empty() and ResourceLoader.exists(portrait_path):
+		var loaded: Resource = load(portrait_path)
+		if loaded is Texture2D:
+			character_portrait.texture = loaded as Texture2D
 
 func _load_still_texture(path: String) -> void:
 	if path.is_empty() or not ResourceLoader.exists(path):
@@ -166,6 +185,9 @@ func _hide_fullscreen() -> void:
 
 func _on_stage_select_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/stage_select/stage_select.tscn")
+
+func _on_character_select_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/character_select/character_select.tscn")
 
 func _on_title_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/title/title.tscn")
