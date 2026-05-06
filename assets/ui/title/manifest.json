@@ -1,0 +1,28 @@
+{
+  "style": "Lost Memoria / Mirror Archive transparent UI parts",
+  "transparent_background": true,
+  "recommended_path": "assets/ui/title/",
+  "files": [
+    "button_collection_hover.png",
+    "button_collection_normal.png",
+    "button_options_disabled.png",
+    "button_start_hover.png",
+    "button_start_normal.png",
+    "decor_menu_divider.png",
+    "decor_selected_crystal.png",
+    "decor_shard_blue_01.png",
+    "decor_shard_floor_01.png",
+    "decor_shard_purple_01.png",
+    "decor_shard_small_01.png",
+    "icon_button_archive.png",
+    "icon_button_crown.png",
+    "icon_button_gear.png",
+    "title_logo_lost_memoria.png",
+    "title_tagline_jp.png"
+  ],
+  "notes": [
+    "All PNGs are RGBA with transparent background.",
+    "Designed to be placed over the generated title background image.",
+    "Buttons include normal/hover/disabled variants where useful."
+  ]
+}
