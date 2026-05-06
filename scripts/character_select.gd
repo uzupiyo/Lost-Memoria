@@ -29,53 +29,65 @@ func _build_character_cards() -> void:
 func _create_character_card(character_id: String) -> Button:
 	var data: Dictionary = GameState.get_character_data(character_id)
 	var button: Button = Button.new()
-	button.custom_minimum_size = Vector2(380, 560)
+	button.custom_minimum_size = Vector2(420, 620)
 	button.focus_mode = Control.FOCUS_NONE
 	button.text = ""
 	button.pressed.connect(_on_character_card_pressed.bind(character_id))
 
-	var container: VBoxContainer = VBoxContainer.new()
-	container.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	container.set_anchors_preset(Control.PRESET_FULL_RECT)
-	container.alignment = BoxContainer.ALIGNMENT_CENTER
-	button.add_child(container)
+	var root: VBoxContainer = VBoxContainer.new()
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.alignment = BoxContainer.ALIGNMENT_CENTER
+	root.add_theme_constant_override("separation", 12)
+	button.add_child(root)
+
+	var card_stack: Control = Control.new()
+	card_stack.custom_minimum_size = Vector2(350, 470)
+	card_stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(card_stack)
 
 	var portrait: TextureRect = TextureRect.new()
-	portrait.custom_minimum_size = Vector2(320, 410)
 	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	portrait.texture = _load_character_portrait(character_id)
-	container.add_child(portrait)
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	portrait.texture = _load_character_texture(character_id, "portrait")
+	card_stack.add_child(portrait)
+
+	var effect: TextureRect = TextureRect.new()
+	effect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	effect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	effect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	effect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	effect.texture = _load_character_texture(character_id, "effect")
+	card_stack.add_child(effect)
+
+	var frame: TextureRect = TextureRect.new()
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame.set_anchors_preset(Control.PRESET_FULL_RECT)
+	frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	frame.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	frame.texture = _load_character_texture(character_id, "frame")
+	card_stack.add_child(frame)
 
 	var name_label: Label = Label.new()
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	name_label.text = str(data.get("display_name", character_id))
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.add_theme_font_size_override("font_size", 34)
-	container.add_child(name_label)
+	root.add_child(name_label)
 
 	var count_label: Label = Label.new()
 	count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	count_label.text = "%d Memories" % GameState.get_still_ids_for_character(character_id).size()
 	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	count_label.add_theme_font_size_override("font_size", 20)
-	container.add_child(count_label)
+	root.add_child(count_label)
 
 	return button
 
-func _load_character_portrait(character_id: String) -> Texture2D:
-	var data: Dictionary = GameState.get_character_data(character_id)
-	var candidate_paths: Array[String] = []
-	var portrait_path: String = str(data.get("portrait_path", ""))
-	if not portrait_path.is_empty():
-		candidate_paths.append(portrait_path)
-	candidate_paths.append("res://assets/ui/characters/%s_portrait_card.webp" % character_id)
-	candidate_paths.append("res://assets/ui/characters/%s_portrait_card.png" % character_id)
-	candidate_paths.append("res://assets/ui/characters/%s_card.webp" % character_id)
-	candidate_paths.append("res://assets/ui/characters/%s_card.png" % character_id)
-	candidate_paths.append(_get_first_still_image_path(character_id))
-
+func _load_character_texture(character_id: String, texture_kind: String) -> Texture2D:
+	var candidate_paths: Array[String] = _get_character_asset_candidates(character_id, texture_kind)
 	var i: int = 0
 	while i < candidate_paths.size():
 		var path: String = candidate_paths[i]
@@ -85,6 +97,29 @@ func _load_character_portrait(character_id: String) -> Texture2D:
 				return loaded as Texture2D
 		i += 1
 	return null
+
+func _get_character_asset_candidates(character_id: String, texture_kind: String) -> Array[String]:
+	var data: Dictionary = GameState.get_character_data(character_id)
+	var paths: Array[String] = []
+	match texture_kind:
+		"portrait":
+			paths.append(str(data.get("portrait_path", "")))
+			paths.append("res://assets/ui/characters/portraits/%s_portrait.webp" % character_id)
+			paths.append("res://assets/ui/characters/portraits/%s_portrait.png" % character_id)
+			paths.append("res://assets/ui/characters/portraits/%s.webp" % character_id)
+			paths.append("res://assets/ui/characters/portraits/%s.png" % character_id)
+			paths.append("res://assets/ui/characters/%s_portrait_card.webp" % character_id)
+			paths.append("res://assets/ui/characters/%s_portrait_card.png" % character_id)
+			paths.append(_get_first_still_image_path(character_id))
+		"frame":
+			paths.append(str(data.get("frame_path", "")))
+			paths.append("res://assets/ui/characters/frames/%s_frame.png" % character_id)
+			paths.append("res://assets/ui/characters/frames/%s_frame.webp" % character_id)
+		"effect":
+			paths.append(str(data.get("effect_path", "")))
+			paths.append("res://assets/ui/characters/effects/%s_effect.png" % character_id)
+			paths.append("res://assets/ui/characters/effects/%s_effect.webp" % character_id)
+	return paths
 
 func _get_first_still_image_path(character_id: String) -> String:
 	var still_ids: Array = GameState.get_still_ids_for_character(character_id)
