@@ -10,6 +10,9 @@ const SD_FRAME_PATH: String = "res://assets/puzzle/ui/sd_character_frame.png"
 const BOARD_FRAME_PATH: String = "res://assets/puzzle/ui/puzzle_board_frame.png"
 const STILL_PREVIEW_FRAME_PATH: String = "res://assets/puzzle/ui/still_preview_frame.png"
 const PUZZLE_BACKGROUND_PATH: String = "res://assets/puzzle/ui/puzzle_scene_background.png"
+const SD_IDLE_AMPLITUDE: float = 8.0
+const SD_IDLE_SPEED: float = 2.4
+const SD_MATCH_BUMP_SCALE: Vector2 = Vector2(1.08, 1.08)
 
 const DROP_PATHS: Array[String] = [
 	"res://assets/puzzle/drops/memory_orb_red.png",
@@ -35,6 +38,9 @@ var is_selecting: bool = false
 var has_cleared: bool = false
 var pending_scene_change: bool = false
 var drop_textures: Dictionary = {}
+var sd_idle_time: float = 0.0
+var sd_base_position: Vector2 = Vector2.ZERO
+var sd_has_base_position: bool = false
 
 @onready var stage_label: Label = %StageLabel
 @onready var target_label: Label = %TargetLabel
@@ -56,6 +62,7 @@ func _ready() -> void:
 	_setup_background()
 	_load_drop_textures()
 	_setup_stage_info()
+	_setup_sd_animation_base()
 	_generate_board()
 
 func _setup_background() -> void:
@@ -79,6 +86,12 @@ func _setup_background() -> void:
 		background_node.move_child(background_image, 0)
 	background_image.texture = background_texture
 	background_image.show()
+
+func _setup_sd_animation_base() -> void:
+	sd_base_position = sd_character.position
+	sd_character.pivot_offset = sd_character.size * 0.5
+	sd_character.scale = Vector2.ONE
+	sd_has_base_position = true
 
 func _setup_stage_info() -> void:
 	var still_data: Dictionary = GameState.get_still_data(GameState.selected_still_id)
@@ -139,12 +152,28 @@ func _load_texture_from_paths(primary_path: String, fallback_path: String) -> Te
 		return primary
 	return _load_texture_optional(fallback_path)
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_update_sd_idle_animation(delta)
 	if has_cleared or not is_selecting:
 		return
 	var hovered_index: int = _get_piece_index_at_position(get_global_mouse_position())
 	if hovered_index >= 0:
 		_try_add_to_selection(hovered_index)
+
+func _update_sd_idle_animation(delta: float) -> void:
+	if not sd_has_base_position:
+		return
+	sd_idle_time += delta
+	var offset_y: float = sin(sd_idle_time * SD_IDLE_SPEED) * SD_IDLE_AMPLITUDE
+	sd_character.position = sd_base_position + Vector2(0, offset_y)
+
+func _play_sd_match_feedback() -> void:
+	if sd_character == null:
+		return
+	var tween: Tween = create_tween()
+	tween.set_parallel(false)
+	tween.tween_property(sd_character, "scale", SD_MATCH_BUMP_SCALE, 0.08)
+	tween.tween_property(sd_character, "scale", Vector2.ONE, 0.12)
 
 func _generate_board() -> void:
 	board.columns = BOARD_SIZE
@@ -285,6 +314,7 @@ func _resolve_match(indices: Array[int]) -> bool:
 	moves_label.text = "MOVES\n%d" % moves
 	score_label.text = "SCORE\n%d" % score
 	progress_label.text = "%d%% Restoration" % percent
+	_play_sd_match_feedback()
 	if score >= CLEAR_SCORE:
 		_clear_stage()
 		return true
@@ -394,6 +424,8 @@ func _clear_stage() -> void:
 	is_selecting = false
 	selected_indices.clear()
 	selected_color = -1
+	sd_message_label.text = "記憶の欠片が、またひとつ戻りました。"
+	_play_sd_match_feedback()
 	GameState.clear_selected_stage()
 	if not pending_scene_change:
 		pending_scene_change = true
@@ -414,6 +446,7 @@ func _on_retry_pressed() -> void:
 	moves_label.text = "MOVES\n%d" % moves
 	score_label.text = "SCORE\n0"
 	progress_label.text = "0% Restoration"
+	sd_message_label.text = "一緒に、記憶の欠片を集めましょう。"
 	_generate_board()
 
 func _on_hint_pressed() -> void:
