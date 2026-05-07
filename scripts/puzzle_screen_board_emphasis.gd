@@ -28,8 +28,6 @@ func _clear_stage() -> void:
 	super._clear_stage()
 	_reset_board_frame_emphasis()
 	_reset_retry_button_emphasis()
-	_clear_chain_burst_popup()
-	_clear_chain_bonus_popup()
 
 func _go_to_collection() -> void:
 	if collection_transition_delay_started:
@@ -54,11 +52,13 @@ func _resolve_match(indices: Array[int]) -> bool:
 	var did_clear: bool = super._resolve_match(indices)
 	if score >= CLEAR_SCORE:
 		_play_board_frame_complete_emphasis()
+		if combo_count >= 5:
+			_play_final_chain_bonus_popup()
 	else:
 		_play_board_frame_match_emphasis()
-	if combo_count >= 5 and not did_clear:
-		_play_chain_burst_popup()
-		_play_chain_bonus_popup()
+		if combo_count >= 5:
+			_play_chain_burst_popup()
+			_play_chain_bonus_popup()
 	return did_clear
 
 func _play_chain_burst_popup() -> void:
@@ -93,33 +93,44 @@ func _play_chain_burst_popup() -> void:
 	chain_burst_tween.tween_callback(_clear_chain_burst_popup)
 
 func _play_chain_bonus_popup() -> void:
-	_clear_chain_bonus_popup()
+	_play_chain_bonus_popup_with_text(_chain_bonus_text("BONUS"), Color(0.76, 0.96, 1.0, 1.0), Vector2(130, 52), 0.48)
+
+func _play_final_chain_bonus_popup() -> void:
+	_play_chain_bonus_popup_with_text(_chain_bonus_text("FINAL BONUS"), Color(1.0, 0.96, 0.62, 1.0), Vector2(160, 42), 0.68)
+
+func _chain_bonus_text(prefix: String) -> String:
 	var bonus_score: int = max(0, combo_count - 1) * COMBO_SCORE_BONUS_PER_STEP
 	if bonus_score <= 0:
+		return ""
+	return "%s +%d" % [prefix, bonus_score]
+
+func _play_chain_bonus_popup_with_text(text_value: String, font_color: Color, offset_from_center: Vector2, float_duration: float) -> void:
+	_clear_chain_bonus_popup()
+	if text_value.is_empty():
 		return
 	var popup: Label = Label.new()
 	popup.name = "ChainBonusPopup"
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	popup.text = "BONUS +%d" % bonus_score
+	popup.text = text_value
 	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	popup.add_theme_font_size_override("font_size", 30)
-	popup.add_theme_color_override("font_color", Color(0.76, 0.96, 1.0, 1.0))
+	popup.add_theme_color_override("font_color", font_color)
 	popup.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.16, 1.0))
 	popup.add_theme_constant_override("outline_size", 7)
-	popup.custom_minimum_size = Vector2(260, 72)
+	popup.custom_minimum_size = Vector2(320, 72)
 	popup.modulate = Color(1, 1, 1, 0)
 	add_child(popup)
 	move_child(popup, get_child_count() - 1)
 	var center_position: Vector2 = board.global_position + board.size * 0.5
-	popup.global_position = center_position - Vector2(130, 52)
+	popup.global_position = center_position - offset_from_center
 	popup.pivot_offset = popup.custom_minimum_size * 0.5
 	popup.scale = Vector2(0.80, 0.80)
 	chain_bonus_tween = create_tween()
 	chain_bonus_tween.set_parallel(true)
 	chain_bonus_tween.tween_property(popup, "modulate", Color(1, 1, 1, 1), 0.10)
 	chain_bonus_tween.tween_property(popup, "scale", Vector2(1.08, 1.08), 0.12)
-	chain_bonus_tween.tween_property(popup, "position", popup.position + Vector2(0, -28), 0.48)
+	chain_bonus_tween.tween_property(popup, "position", popup.position + Vector2(0, -28), float_duration)
 	chain_bonus_tween.set_parallel(false)
 	chain_bonus_tween.tween_property(popup, "modulate", Color(1, 1, 1, 0), 0.22)
 	chain_bonus_tween.tween_callback(_clear_chain_bonus_popup)
