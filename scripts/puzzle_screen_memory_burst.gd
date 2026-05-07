@@ -4,17 +4,25 @@ const MEMORY_BURST_MIN_MATCH: int = 5
 const MEMORY_BURST_BONUS_PER_EXTRA: int = 1
 
 var memory_burst_tween: Tween = null
+var memory_burst_tip_tween: Tween = null
 
 func _setup_stage_info() -> void:
 	super._setup_stage_info()
 	_clear_memory_burst_popup()
+	_play_memory_burst_tip()
 
 func _on_retry_pressed() -> void:
 	super._on_retry_pressed()
 	_clear_memory_burst_popup()
+	_play_memory_burst_tip()
+
+func _on_hint_pressed() -> void:
+	super._on_hint_pressed()
+	_play_memory_burst_hint()
 
 func _clear_stage() -> void:
 	_clear_memory_burst_popup()
+	_clear_memory_burst_tip()
 	super._clear_stage()
 
 func _get_memory_burst_bonus(match_count: int) -> int:
@@ -71,6 +79,47 @@ func _resolve_match(indices: Array[int]) -> bool:
 	is_resolving_match = true
 	get_tree().create_timer(MATCH_EFFECT_DELAY).timeout.connect(_finish_match_resolution.bind(removed))
 	return false
+
+func _play_memory_burst_tip() -> void:
+	_clear_memory_burst_tip()
+	var popup: Label = Label.new()
+	popup.name = "MemoryBurstTip"
+	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	popup.text = "TIP: 5つ以上つなげると MEMORY BURST"
+	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	popup.add_theme_font_size_override("font_size", 22)
+	popup.add_theme_color_override("font_color", Color(1.0, 0.90, 0.58, 1.0))
+	popup.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.16, 1.0))
+	popup.add_theme_constant_override("outline_size", 6)
+	popup.custom_minimum_size = Vector2(520, 64)
+	popup.modulate = Color(1, 1, 1, 0)
+	add_child(popup)
+	move_child(popup, get_child_count() - 1)
+	var center_position: Vector2 = board.global_position + board.size * 0.5
+	popup.global_position = center_position - Vector2(260, 286)
+	popup.pivot_offset = popup.custom_minimum_size * 0.5
+	popup.scale = Vector2(0.94, 0.94)
+	memory_burst_tip_tween = create_tween()
+	memory_burst_tip_tween.set_parallel(true)
+	memory_burst_tip_tween.tween_property(popup, "modulate", Color(1, 1, 1, 1), 0.18)
+	memory_burst_tip_tween.tween_property(popup, "scale", Vector2.ONE, 0.18)
+	memory_burst_tip_tween.set_parallel(false)
+	memory_burst_tip_tween.tween_interval(1.35)
+	memory_burst_tip_tween.tween_property(popup, "modulate", Color(1, 1, 1, 0), 0.30)
+	memory_burst_tip_tween.tween_callback(_clear_memory_burst_tip)
+
+func _play_memory_burst_hint() -> void:
+	_play_passive_effect_popup("MEMORY BURST TIP\n5つ以上を長くつなげると追加ボーナス", Color(1.0, 0.90, 0.58, 1.0))
+	_play_board_frame_feedback(1.025, Color(1.0, 0.92, 0.60, 1.0), 0.10, 0.22)
+
+func _clear_memory_burst_tip() -> void:
+	if memory_burst_tip_tween != null:
+		memory_burst_tip_tween.kill()
+		memory_burst_tip_tween = null
+	var popup: Node = get_node_or_null("MemoryBurstTip")
+	if popup != null:
+		popup.queue_free()
 
 func _play_memory_burst_popup(bonus_score: int) -> void:
 	_clear_memory_burst_popup()
