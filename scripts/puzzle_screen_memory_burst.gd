@@ -4,21 +4,26 @@ const MEMORY_BURST_MIN_MATCH: int = 5
 const MEMORY_BURST_BONUS_PER_EXTRA: int = 1
 const PRISM_BURST_MIN_MATCH: int = 7
 const PRISM_BURST_BONUS: int = 3
+const LUMINA_BURST_MIN_MATCH: int = 10
+const LUMINA_BURST_BONUS: int = 6
 
 var memory_burst_tween: Tween = null
 var memory_burst_tip_tween: Tween = null
 var prism_burst_tween: Tween = null
+var lumina_burst_tween: Tween = null
 
 func _setup_stage_info() -> void:
 	super._setup_stage_info()
 	_clear_memory_burst_popup()
 	_clear_prism_burst_popup()
+	_clear_lumina_burst_popup()
 	_play_memory_burst_tip()
 
 func _on_retry_pressed() -> void:
 	super._on_retry_pressed()
 	_clear_memory_burst_popup()
 	_clear_prism_burst_popup()
+	_clear_lumina_burst_popup()
 	_play_memory_burst_tip()
 
 func _on_hint_pressed() -> void:
@@ -29,6 +34,7 @@ func _clear_stage() -> void:
 	_clear_memory_burst_popup()
 	_clear_memory_burst_tip()
 	_clear_prism_burst_popup()
+	_clear_lumina_burst_popup()
 	super._clear_stage()
 
 func _get_memory_burst_bonus(match_count: int) -> int:
@@ -41,18 +47,24 @@ func _get_prism_burst_bonus(match_count: int) -> int:
 		return 0
 	return PRISM_BURST_BONUS
 
+func _get_lumina_burst_bonus(match_count: int) -> int:
+	if match_count < LUMINA_BURST_MIN_MATCH:
+		return 0
+	return LUMINA_BURST_BONUS
+
 func _resolve_match(indices: Array[int]) -> bool:
 	var current_combo: int = _register_combo()
 	var combo_bonus: int = max(0, current_combo - 1) * COMBO_SCORE_BONUS_PER_STEP
 	var rin_passive_bonus: int = _get_rin_long_chain_bonus(indices.size())
 	var memory_burst_bonus: int = _get_memory_burst_bonus(indices.size())
 	var prism_burst_bonus: int = _get_prism_burst_bonus(indices.size())
+	var lumina_burst_bonus: int = _get_lumina_burst_bonus(indices.size())
 	var removed: Dictionary = {}
 	var index_cursor: int = 0
 	while index_cursor < indices.size():
 		removed[indices[index_cursor]] = true
 		index_cursor += 1
-	score += indices.size() + combo_bonus + rin_passive_bonus + memory_burst_bonus + prism_burst_bonus
+	score += indices.size() + combo_bonus + rin_passive_bonus + memory_burst_bonus + prism_burst_bonus + lumina_burst_bonus
 	moves = max(0, moves - 1)
 	var recovered_by_moka: bool = _try_moka_recovery()
 	gauge.value = min(score, stage_clear_score)
@@ -71,6 +83,8 @@ func _resolve_match(indices: Array[int]) -> bool:
 		_play_memory_burst_popup(memory_burst_bonus)
 	if prism_burst_bonus > 0:
 		_play_prism_burst_popup(prism_burst_bonus)
+	if lumina_burst_bonus > 0:
+		_play_lumina_burst_popup(lumina_burst_bonus)
 	if rin_passive_bonus > 0:
 		_play_passive_effect_popup("ロングチェインボーナス\n+%d" % rin_passive_bonus, Color(1.0, 0.94, 0.54, 1.0))
 	if recovered_by_moka:
@@ -99,7 +113,7 @@ func _play_memory_burst_tip() -> void:
 	var popup: Label = Label.new()
 	popup.name = "MemoryBurstTip"
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	popup.text = "TIP: 5つ以上で MEMORY BURST / 7つ以上で PRISM BURST"
+	popup.text = "TIP: 5+ MEMORY / 7+ PRISM / 10+ LUMINA BURST"
 	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	popup.add_theme_font_size_override("font_size", 22)
@@ -124,7 +138,7 @@ func _play_memory_burst_tip() -> void:
 	memory_burst_tip_tween.tween_callback(_clear_memory_burst_tip)
 
 func _play_memory_burst_hint() -> void:
-	_play_passive_effect_popup("BURST TIP\n5つ以上で追加ボーナス / 7つ以上でさらに+%d" % PRISM_BURST_BONUS, Color(1.0, 0.90, 0.58, 1.0))
+	_play_passive_effect_popup("BURST TIP\n5+追加 / 7+さらに+%d / 10+さらに+%d" % [PRISM_BURST_BONUS, LUMINA_BURST_BONUS], Color(1.0, 0.90, 0.58, 1.0))
 	_play_board_frame_feedback(1.025, Color(1.0, 0.92, 0.60, 1.0), 0.10, 0.22)
 
 func _clear_memory_burst_tip() -> void:
@@ -198,6 +212,38 @@ func _play_prism_burst_popup(bonus_score: int) -> void:
 	prism_burst_tween.tween_property(popup, "modulate", Color(1, 1, 1, 0), 0.26)
 	prism_burst_tween.tween_callback(_clear_prism_burst_popup)
 
+func _play_lumina_burst_popup(bonus_score: int) -> void:
+	_clear_lumina_burst_popup()
+	_play_screen_shake(6.5)
+	_play_board_frame_feedback(1.08, Color(1.0, 0.98, 0.72, 1.0), 0.14, 0.32)
+	var popup: Label = Label.new()
+	popup.name = "LuminaBurstPopup"
+	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	popup.text = "LUMINA BURST\n+%d" % bonus_score
+	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	popup.add_theme_font_size_override("font_size", 42)
+	popup.add_theme_color_override("font_color", Color(1.0, 0.98, 0.66, 1.0))
+	popup.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.16, 1.0))
+	popup.add_theme_constant_override("outline_size", 9)
+	popup.custom_minimum_size = Vector2(430, 128)
+	popup.modulate = Color(1, 1, 1, 0)
+	add_child(popup)
+	move_child(popup, get_child_count() - 1)
+	var center_position: Vector2 = board.global_position + board.size * 0.5
+	popup.global_position = center_position - Vector2(215, 318)
+	popup.pivot_offset = popup.custom_minimum_size * 0.5
+	popup.scale = Vector2(0.72, 0.72)
+	lumina_burst_tween = create_tween()
+	lumina_burst_tween.set_parallel(true)
+	lumina_burst_tween.tween_property(popup, "modulate", Color(1, 1, 1, 1), 0.10)
+	lumina_burst_tween.tween_property(popup, "scale", Vector2(1.18, 1.18), 0.16)
+	lumina_burst_tween.tween_property(popup, "position", popup.position + Vector2(0, -38), 0.62)
+	lumina_burst_tween.set_parallel(false)
+	lumina_burst_tween.tween_property(popup, "scale", Vector2.ONE, 0.12)
+	lumina_burst_tween.tween_property(popup, "modulate", Color(1, 1, 1, 0), 0.30)
+	lumina_burst_tween.tween_callback(_clear_lumina_burst_popup)
+
 func _clear_memory_burst_popup() -> void:
 	if memory_burst_tween != null:
 		memory_burst_tween.kill()
@@ -211,5 +257,13 @@ func _clear_prism_burst_popup() -> void:
 		prism_burst_tween.kill()
 		prism_burst_tween = null
 	var popup: Node = get_node_or_null("PrismBurstPopup")
+	if popup != null:
+		popup.queue_free()
+
+func _clear_lumina_burst_popup() -> void:
+	if lumina_burst_tween != null:
+		lumina_burst_tween.kill()
+		lumina_burst_tween = null
+	var popup: Node = get_node_or_null("LuminaBurstPopup")
 	if popup != null:
 		popup.queue_free()
