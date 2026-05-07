@@ -17,12 +17,15 @@ const UI_COLOR_DREAM_VIOLET: Color = Color(0.72, 0.61, 1.0, 1.0)
 var selected_character_id: String = "Rin"
 var character_cards: Dictionary = {}
 var card_tweens: Dictionary = {}
+var card_intro_tween: Tween = null
+var selected_info_tween: Tween = null
 
 func _ready() -> void:
 	selected_character_id = GameState.selected_character_id
 	_build_character_cards()
 	_update_selected_info()
 	_update_card_selection_styles()
+	_play_card_intro()
 
 func _build_character_cards() -> void:
 	character_cards.clear()
@@ -48,6 +51,7 @@ func _create_character_card(character_id: String) -> Button:
 	button.custom_minimum_size = Vector2(420, 800)
 	button.focus_mode = Control.FOCUS_NONE
 	button.text = ""
+	button.modulate = Color(1, 1, 1, 0)
 	button.add_theme_stylebox_override("normal", _make_card_style(false, _character_accent_color(character_id)))
 	button.add_theme_stylebox_override("hover", _make_card_style(true, _character_accent_color(character_id)))
 	button.add_theme_stylebox_override("pressed", _make_card_style(true, UI_COLOR_SELECTED_EDGE))
@@ -197,6 +201,21 @@ func _make_info_style(accent: Color) -> StyleBoxFlat:
 	style.content_margin_bottom = 8
 	return style
 
+func _make_selected_info_style(accent: Color) -> StyleBoxFlat:
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(0.04, 0.06, 0.13, 0.76)
+	style.border_color = Color(accent.r, accent.g, accent.b, 0.42)
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(18)
+	style.content_margin_left = 16
+	style.content_margin_right = 16
+	style.content_margin_top = 12
+	style.content_margin_bottom = 12
+	style.shadow_color = Color(0, 0, 0, 0.32)
+	style.shadow_size = 8
+	style.shadow_offset = Vector2(0, 3)
+	return style
+
 func _make_badge_style(edge_color: Color, fill_color: Color) -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = fill_color
@@ -219,6 +238,26 @@ func _character_accent_color(character_id: String) -> Color:
 			return UI_COLOR_MIRROR_CYAN
 		_:
 			return UI_COLOR_DREAM_VIOLET
+
+func _play_card_intro() -> void:
+	if card_intro_tween != null:
+		card_intro_tween.kill()
+	card_intro_tween = create_tween()
+	var index: int = 0
+	for character_id in character_cards.keys():
+		var card: Button = character_cards[character_id]
+		var original_position: Vector2 = card.position
+		card.position = original_position + Vector2(0, 18)
+		card.modulate = Color(1, 1, 1, 0)
+		card_intro_tween.set_parallel(true)
+		card_intro_tween.tween_property(card, "modulate", Color(1, 1, 1, 1), 0.22).set_delay(float(index) * 0.06)
+		card_intro_tween.tween_property(card, "position", original_position, 0.24).set_delay(float(index) * 0.06)
+		card_intro_tween.set_parallel(false)
+		index += 1
+	card_intro_tween.tween_callback(_on_card_intro_finished)
+
+func _on_card_intro_finished() -> void:
+	card_intro_tween = null
 
 func _on_character_card_mouse_entered(button: Button) -> void:
 	_tween_card_scale(button, Vector2(1.025, 1.025), 0.12)
@@ -341,14 +380,39 @@ func _on_character_card_pressed(character_id: String) -> void:
 
 func _update_selected_info() -> void:
 	var data: Dictionary = GameState.get_character_data(selected_character_id)
+	var accent: Color = _character_accent_color(selected_character_id)
 	selected_name_label.text = str(data.get("display_name", selected_character_id))
-	selected_name_label.add_theme_color_override("font_color", _character_accent_color(selected_character_id))
+	selected_name_label.add_theme_color_override("font_color", accent)
 	selected_name_label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
 	selected_name_label.add_theme_constant_override("outline_size", 4)
 	selected_description_label.text = "%s\n%s" % [str(data.get("description", "")), _character_progress_text(selected_character_id)]
 	selected_description_label.add_theme_color_override("font_color", UI_COLOR_MEMORY_WHITE)
 	selected_description_label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
 	selected_description_label.add_theme_constant_override("outline_size", 3)
+	_apply_selected_info_panel_style(accent)
+	_play_selected_info_feedback()
+
+func _apply_selected_info_panel_style(accent: Color) -> void:
+	var parent_panel: PanelContainer = selected_name_label.get_parent() as PanelContainer
+	if parent_panel == null:
+		parent_panel = selected_description_label.get_parent() as PanelContainer
+	if parent_panel != null:
+		parent_panel.add_theme_stylebox_override("panel", _make_selected_info_style(accent))
+
+func _play_selected_info_feedback() -> void:
+	var panel: Control = selected_name_label.get_parent() as Control
+	if panel == null:
+		return
+	if selected_info_tween != null:
+		selected_info_tween.kill()
+	panel.pivot_offset = panel.size * 0.5
+	panel.scale = Vector2(0.985, 0.985)
+	selected_info_tween = create_tween()
+	selected_info_tween.tween_property(panel, "scale", Vector2.ONE, 0.16)
+	selected_info_tween.tween_callback(_on_selected_info_tween_finished)
+
+func _on_selected_info_tween_finished() -> void:
+	selected_info_tween = null
 
 func _on_start_pressed() -> void:
 	GameState.select_character(selected_character_id)
