@@ -1,61 +1,152 @@
 extends Control
 
+const UI_COLOR_BACKGROUND_PANEL: Color = Color(0.063, 0.098, 0.212, 0.88)
+const UI_COLOR_PANEL_EDGE: Color = Color(0.56, 0.92, 1.0, 0.34)
+const UI_COLOR_MEMORY_WHITE: Color = Color(0.96, 0.98, 1.0, 1.0)
+const UI_COLOR_MIST_BLUE: Color = Color(0.75, 0.84, 0.95, 1.0)
+const UI_COLOR_RESTORATION_GOLD: Color = Color(1.0, 0.85, 0.42, 1.0)
+const UI_COLOR_MIRROR_CYAN: Color = Color(0.51, 0.96, 1.0, 1.0)
+
 var progress_panel: PanelContainer = null
+var title_panel_tween: Tween = null
 
 func _ready() -> void:
 	_add_global_progress_panel()
 
 func _add_global_progress_panel() -> void:
 	_clear_global_progress_panel()
+	var summary: Dictionary = _progress_summary_for_all()
 	progress_panel = PanelContainer.new()
 	progress_panel.name = "GlobalProgressPanel"
 	progress_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	progress_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	progress_panel.offset_left = -580.0
-	progress_panel.offset_top = 520.0
-	progress_panel.offset_right = -60.0
-	progress_panel.offset_bottom = 800.0
+	progress_panel.offset_left = -600.0
+	progress_panel.offset_top = 500.0
+	progress_panel.offset_right = -58.0
+	progress_panel.offset_bottom = 805.0
+	progress_panel.add_theme_stylebox_override("panel", _make_status_panel_style())
+	progress_panel.modulate = Color(1, 1, 1, 0)
 	add_child(progress_panel)
+
+	var margin: MarginContainer = MarginContainer.new()
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	margin.add_theme_constant_override("margin_left", 22)
+	margin.add_theme_constant_override("margin_top", 18)
+	margin.add_theme_constant_override("margin_right", 22)
+	margin.add_theme_constant_override("margin_bottom", 18)
+	progress_panel.add_child(margin)
 
 	var box: VBoxContainer = VBoxContainer.new()
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 8)
-	progress_panel.add_child(box)
+	box.add_theme_constant_override("separation", 10)
+	margin.add_child(box)
 
 	var title: Label = Label.new()
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	title.text = "RESTORATION STATUS"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 24)
-	title.add_theme_color_override("font_color", Color(1.0, 0.92, 0.58, 1.0))
+	title.add_theme_font_size_override("font_size", 28)
+	title.add_theme_color_override("font_color", UI_COLOR_RESTORATION_GOLD)
+	title.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
+	title.add_theme_constant_override("outline_size", 5)
 	box.add_child(title)
+
+	var achievement_badge: Label = Label.new()
+	achievement_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	achievement_badge.text = "ACHIEVEMENT  ·  %s" % _achievement_title(summary)
+	achievement_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	achievement_badge.add_theme_font_size_override("font_size", 18)
+	achievement_badge.add_theme_color_override("font_color", UI_COLOR_RESTORATION_GOLD)
+	achievement_badge.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.02, 1.0))
+	achievement_badge.add_theme_constant_override("outline_size", 4)
+	achievement_badge.add_theme_stylebox_override("normal", _make_badge_style(UI_COLOR_RESTORATION_GOLD, Color(0.22, 0.15, 0.04, 0.78)))
+	box.add_child(achievement_badge)
+
+	var divider: ColorRect = ColorRect.new()
+	divider.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	divider.custom_minimum_size = Vector2(0, 2)
+	divider.color = Color(0.56, 0.92, 1.0, 0.28)
+	box.add_child(divider)
 
 	var body: Label = Label.new()
 	body.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	body.text = _global_progress_text()
+	body.text = _global_progress_text(summary)
 	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	body.add_theme_font_size_override("font_size", 20)
-	body.add_theme_color_override("font_color", Color(0.90, 0.96, 1.0, 1.0))
+	body.add_theme_color_override("font_color", UI_COLOR_MEMORY_WHITE)
+	body.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
+	body.add_theme_constant_override("outline_size", 3)
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(body)
 
+	var character_line: Label = Label.new()
+	character_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	character_line.text = _character_progress_line()
+	character_line.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	character_line.add_theme_font_size_override("font_size", 17)
+	character_line.add_theme_color_override("font_color", UI_COLOR_MIRROR_CYAN)
+	character_line.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
+	character_line.add_theme_constant_override("outline_size", 3)
+	character_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(character_line)
+
+	_play_status_panel_intro()
+
+func _make_status_panel_style() -> StyleBoxFlat:
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = UI_COLOR_BACKGROUND_PANEL
+	style.border_color = UI_COLOR_PANEL_EDGE
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(18)
+	style.shadow_color = Color(0.0, 0.0, 0.0, 0.40)
+	style.shadow_size = 10
+	style.shadow_offset = Vector2(0, 4)
+	return style
+
+func _make_badge_style(edge_color: Color, fill_color: Color) -> StyleBoxFlat:
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = fill_color
+	style.border_color = edge_color
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(12)
+	style.content_margin_left = 14
+	style.content_margin_right = 14
+	style.content_margin_top = 6
+	style.content_margin_bottom = 6
+	return style
+
+func _play_status_panel_intro() -> void:
+	if title_panel_tween != null:
+		title_panel_tween.kill()
+	progress_panel.scale = Vector2(0.97, 0.97)
+	progress_panel.pivot_offset = Vector2(270, 150)
+	title_panel_tween = create_tween()
+	title_panel_tween.set_parallel(true)
+	title_panel_tween.tween_property(progress_panel, "modulate", Color(1, 1, 1, 1), 0.22)
+	title_panel_tween.tween_property(progress_panel, "scale", Vector2.ONE, 0.22)
+	title_panel_tween.set_parallel(false)
+	title_panel_tween.tween_callback(_on_status_panel_intro_finished)
+
+func _on_status_panel_intro_finished() -> void:
+	title_panel_tween = null
+
 func _clear_global_progress_panel() -> void:
+	if title_panel_tween != null:
+		title_panel_tween.kill()
+		title_panel_tween = null
 	var existing: Node = get_node_or_null("GlobalProgressPanel")
 	if existing != null:
 		existing.queue_free()
 	progress_panel = null
 
-func _global_progress_text() -> String:
-	var summary: Dictionary = _progress_summary_for_all()
-	return "Restored %d%%\nComplete Memories %d/%d\nPerfect Memories %d/%d\n%s\nAchievement: %s" % [
+func _global_progress_text(summary: Dictionary) -> String:
+	return "Restored %d%%\nComplete Memories %d/%d\nPerfect Memories %d/%d" % [
 		int(summary.get("percent", 0)),
 		int(summary.get("complete_memories", 0)),
 		int(summary.get("total_memories", 0)),
 		int(summary.get("perfect_memories", 0)),
-		int(summary.get("total_memories", 0)),
-		_character_progress_line(),
-		_achievement_title(summary)
+		int(summary.get("total_memories", 0))
 	]
 
 func _achievement_title(summary: Dictionary) -> String:
