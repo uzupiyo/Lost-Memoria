@@ -9,6 +9,7 @@ const ORB_SIZE: Vector2 = Vector2(78, 78)
 const SD_FRAME_PATH: String = "res://assets/puzzle/ui/sd_character_frame.png"
 const BOARD_FRAME_PATH: String = "res://assets/puzzle/ui/puzzle_board_frame.png"
 const STILL_PREVIEW_FRAME_PATH: String = "res://assets/puzzle/ui/still_preview_frame.png"
+const PUZZLE_BACKGROUND_PATH: String = "res://assets/puzzle/ui/puzzle_scene_background.png"
 
 const DROP_PATHS: Array[String] = [
 	"res://assets/puzzle/drops/memory_orb_red.png",
@@ -52,9 +53,32 @@ var drop_textures: Dictionary = {}
 
 func _ready() -> void:
 	randomize()
+	_setup_background()
 	_load_drop_textures()
 	_setup_stage_info()
 	_generate_board()
+
+func _setup_background() -> void:
+	var background_texture: Texture2D = _load_texture_optional(PUZZLE_BACKGROUND_PATH)
+	if background_texture == null:
+		return
+	var background_node: Control = get_node_or_null("Background") as Control
+	if background_node == null:
+		return
+	var background_image: TextureRect = background_node.get_node_or_null("BackgroundImage") as TextureRect
+	if background_image == null:
+		background_image = TextureRect.new()
+		background_image.name = "BackgroundImage"
+		background_image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		background_image.set_anchors_preset(Control.PRESET_FULL_RECT)
+		background_image.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		background_image.grow_vertical = Control.GROW_DIRECTION_BOTH
+		background_image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		background_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		background_node.add_child(background_image)
+		background_node.move_child(background_image, 0)
+	background_image.texture = background_texture
+	background_image.show()
 
 func _setup_stage_info() -> void:
 	var still_data: Dictionary = GameState.get_still_data(GameState.selected_still_id)
