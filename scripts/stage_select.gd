@@ -43,11 +43,12 @@ func _build_stage_list() -> void:
 		var percent: int = GameState.get_unlock_percent(still_id)
 		var total_stages: int = int(data.get("total_stages", GameState.STILL_STAGE_COUNT))
 		var unlocked_stages: int = int(data.get("unlocked_stages", 0))
+		var s_count: int = _rank_count(still_id, total_stages, "S")
 		var is_perfect: bool = _is_perfect_memory(still_id, total_stages)
 		var is_complete: bool = unlocked_stages >= total_stages
 
 		var panel: PanelContainer = PanelContainer.new()
-		panel.custom_minimum_size = Vector2(0, 174)
+		panel.custom_minimum_size = Vector2(0, 190)
 		panel.add_theme_stylebox_override("panel", _make_still_card_style(is_complete, is_perfect))
 		panel.modulate = Color(1, 1, 1, 0)
 		still_list.add_child(panel)
@@ -79,6 +80,12 @@ func _build_stage_list() -> void:
 
 		var percent_badge: Label = _make_badge("%d%%" % percent, _status_title_color(is_complete, is_perfect), Color(0.04, 0.06, 0.13, 0.82))
 		header_row.add_child(percent_badge)
+
+		var badge_row: HBoxContainer = HBoxContainer.new()
+		badge_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		badge_row.add_theme_constant_override("separation", 8)
+		row.add_child(badge_row)
+		_add_mastery_badges(badge_row, is_complete, is_perfect, s_count, total_stages)
 
 		var unlock_label: Label = Label.new()
 		unlock_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -121,6 +128,15 @@ func _build_stage_list() -> void:
 			stage_index += 1
 		still_index += 1
 
+func _add_mastery_badges(parent: HBoxContainer, is_complete: bool, is_perfect: bool, s_count: int, total_stages: int) -> void:
+	if is_perfect:
+		parent.add_child(_make_badge("PERFECT MEMORY", UI_COLOR_RESTORATION_GOLD, Color(0.22, 0.15, 0.04, 0.86)))
+	elif is_complete:
+		parent.add_child(_make_badge("COMPLETE", UI_COLOR_MIRROR_CYAN, Color(0.02, 0.16, 0.22, 0.82)))
+	else:
+		parent.add_child(_make_badge("IN PROGRESS", UI_COLOR_MIST_BLUE, Color(0.05, 0.07, 0.13, 0.78)))
+	parent.add_child(_make_badge("S %d/%d" % [s_count, total_stages], UI_COLOR_RESTORATION_GOLD if s_count > 0 else UI_COLOR_LOCKED, Color(0.04, 0.06, 0.13, 0.82)))
+
 func _make_still_card_style(is_complete: bool, is_perfect: bool) -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = UI_COLOR_BACKGROUND_PANEL
@@ -139,7 +155,6 @@ func _make_still_card_style(is_complete: bool, is_perfect: bool) -> StyleBoxFlat
 
 func _make_stage_button_style(still_id: String, stage_index: int, unlocked_stages: int, is_hover: bool) -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
-	var rank: String = GameState.get_stage_rank(still_id, stage_index)
 	var edge: Color = _stage_button_text_color(still_id, stage_index, unlocked_stages)
 	if stage_index > unlocked_stages:
 		style.bg_color = Color(0.04, 0.05, 0.08, 0.70)
