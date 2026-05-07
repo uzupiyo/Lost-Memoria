@@ -107,28 +107,28 @@ func _rin_stage_clear_message(stage_index: int) -> String:
 func _moka_stage_opening_message(stage_index: int) -> String:
 	match stage_index:
 		0:
-			return "よーし、まずは気楽にいこ！ たくさんつなげてみよう！"
+			return "えへへ、まずはゆっくりでいいよぉ。きらきら集めよ？"
 		1:
-			return "ちょっと難しくなったね。でも勢いでいけるいける！"
+			return "ちょっとだけむずかしいねぇ。でも、だいじょうぶだよぉ。"
 		2:
-			return "ここから盛り上がってきたよ！ 大きいチェイン狙ってこ！"
+			return "ふわぁ、欠片がいっぱいだね。ながーくつなげてみよ？"
 		3:
-			return "手数少なめだよ！ でも大逆転、狙えるからね！"
+			return "手数が少ないみたい……でも、あわてなくていいよぉ。"
 		_:
-			return "ここまで来たら全力だよ！ 最高のチェイン見せちゃお！"
+			return "ここまで来たんだねぇ。モカもいっしょに、がんばるよぉ。"
 
 func _moka_stage_clear_message(stage_index: int) -> String:
 	match stage_index:
 		0:
-			return "やったー！ まずはばっちりクリアだね！"
+			return "わぁい、できたぁ。欠片、ひとつ戻ったねぇ。"
 		1:
-			return "いいねいいね！ 難しくなっても全然いける！"
+			return "えへへ、むずかしくてもできたねぇ。すごいすごい。"
 		2:
-			return "すごい勢い！ チェインも記憶もいい感じ！"
+			return "きらきら、いっぱい戻ってきたよぉ。なんだかぽかぽかするね。"
 		3:
-			return "手数少なくても勝てたね！ 大逆転成功！"
+			return "手数少なかったのに、ちゃんとできたねぇ。えらいえらい。"
 		_:
-			return "最高！ ここまで来たら次も全力でいこ！"
+			return "ふわぁ……記憶の光、すごくきれい。もう少しだねぇ。"
 
 func _kaede_stage_opening_message(stage_index: int) -> String:
 	match stage_index:
