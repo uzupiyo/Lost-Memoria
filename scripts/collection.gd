@@ -125,19 +125,62 @@ func _update_collection_view(still_id: String) -> void:
 	current_unlocked_stages = unlocked_stages
 	current_total_stages = total_stages
 	var percent: int = GameState.get_unlock_percent(still_id)
-	progress_label.text = "Mirror Shards: %d / %d" % [unlocked_stages, total_stages]
+	progress_label.text = _collection_progress_text(still_id, unlocked_stages, total_stages)
 	_load_still_texture(str(data.get("image_path", "")))
 	_refresh_shard_polygons()
 	_apply_shard_mask(unlocked_stages, total_stages)
 	fullscreen_button.disabled = not GameState.is_still_complete(still_id)
 	if GameState.is_still_complete(still_id):
-		status_label.text = "COMPLETE - Fullscreen available"
+		status_label.text = "COMPLETE - Fullscreen available / %s" % _best_rank_text(still_id, total_stages)
 		_show_unlock_notice("MEMORY COMPLETE")
 	elif unlocked_stages > 0:
-		status_label.text = "NEW MEMORY SHARD - %d%% restored" % percent
+		status_label.text = "NEW MEMORY SHARD - %d%% restored / %s" % [percent, _best_rank_text(still_id, total_stages)]
 		_show_unlock_notice("NEW MEMORY SHARD")
 	else:
 		status_label.text = "LOCKED - Clear stages to restore"
+
+func _collection_progress_text(still_id: String, unlocked_stages: int, total_stages: int) -> String:
+	var rank_line: String = _rank_progress_text(still_id, total_stages)
+	if rank_line.is_empty():
+		return "Mirror Shards: %d / %d" % [unlocked_stages, total_stages]
+	return "Mirror Shards: %d / %d\nRanks: %s" % [unlocked_stages, total_stages, rank_line]
+
+func _rank_progress_text(still_id: String, total_stages: int) -> String:
+	var parts: Array[String] = []
+	var stage_index: int = 0
+	while stage_index < total_stages:
+		var rank: String = GameState.get_stage_rank(still_id, stage_index)
+		if rank.is_empty():
+			parts.append("%d:-" % (stage_index + 1))
+		else:
+			parts.append("%d:%s" % [stage_index + 1, rank])
+		stage_index += 1
+	return "  ".join(parts)
+
+func _best_rank_text(still_id: String, total_stages: int) -> String:
+	var best_rank: String = ""
+	var stage_index: int = 0
+	while stage_index < total_stages:
+		var rank: String = GameState.get_stage_rank(still_id, stage_index)
+		if _rank_value(rank) > _rank_value(best_rank):
+			best_rank = rank
+		stage_index += 1
+	if best_rank.is_empty():
+		return "Best Rank: -"
+	return "Best Rank: %s" % best_rank
+
+func _rank_value(rank: String) -> int:
+	match rank:
+		"S":
+			return 4
+		"A":
+			return 3
+		"B":
+			return 2
+		"C":
+			return 1
+		_:
+			return 0
 
 func _show_unlock_notice(text_value: String) -> void:
 	if unlock_notice_tween != null:
