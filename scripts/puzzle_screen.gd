@@ -104,12 +104,6 @@ func _setup_background() -> void:
 	background_image.texture = background_texture
 	background_image.show()
 
-func _setup_sd_animation_base() -> void:
-	sd_base_position = sd_character.position
-	sd_character.pivot_offset = sd_character.size * 0.5
-	sd_character.scale = Vector2.ONE
-	sd_has_base_position = true
-
 func _setup_stage_info() -> void:
 	var still_data: Dictionary = GameState.get_still_data(GameState.selected_still_id)
 	var character_id: String = str(still_data.get("character", GameState.selected_character_id))
@@ -134,6 +128,12 @@ func _setup_stage_info() -> void:
 		sd_character.texture = null
 	still_preview.texture = _load_texture_optional(str(still_data.get("image_path", "")))
 
+func _setup_sd_animation_base() -> void:
+	sd_base_position = sd_character.position
+	sd_character.pivot_offset = sd_character.size * 0.5
+	sd_character.scale = Vector2.ONE
+	sd_has_base_position = true
+
 func _load_drop_textures() -> void:
 	drop_textures.clear()
 	var index: int = 0
@@ -150,6 +150,21 @@ func _load_texture_optional(path: String) -> Texture2D:
 	if loaded is Texture2D:
 		return loaded as Texture2D
 	return null
+
+func _load_texture_from_candidates(candidate_paths: Array[String]) -> Texture2D:
+	var i: int = 0
+	while i < candidate_paths.size():
+		var texture: Texture2D = _load_texture_optional(candidate_paths[i])
+		if texture != null:
+			return texture
+		i += 1
+	return null
+
+func _load_texture_from_paths(primary_path: String, fallback_path: String) -> Texture2D:
+	var primary: Texture2D = _load_texture_optional(primary_path)
+	if primary != null:
+		return primary
+	return _load_texture_optional(fallback_path)
 
 func _load_sd_character_textures(character_id: String) -> void:
 	sd_idle_textures = _load_sd_textures_for_action(character_id, "idle", SD_MAX_IDLE_FRAMES)
@@ -177,21 +192,6 @@ func _load_sd_textures_for_action(character_id: String, action_name: String, max
 			textures.append(texture)
 		frame_index += 1
 	return textures
-
-func _load_texture_from_candidates(candidate_paths: Array[String]) -> Texture2D:
-	var i: int = 0
-	while i < candidate_paths.size():
-		var texture: Texture2D = _load_texture_optional(candidate_paths[i])
-		if texture != null:
-			return texture
-		i += 1
-	return null
-
-func _load_texture_from_paths(primary_path: String, fallback_path: String) -> Texture2D:
-	var primary: Texture2D = _load_texture_optional(primary_path)
-	if primary != null:
-		return primary
-	return _load_texture_optional(fallback_path)
 
 func _process(delta: float) -> void:
 	_update_sd_animation(delta)
@@ -304,6 +304,41 @@ func _play_match_cell_effect(indices: Array[int]) -> void:
 			tween.tween_property(piece, "scale", Vector2.ONE, 0.08)
 		cursor += 1
 
+func _play_match_popup(match_count: int) -> void:
+	var popup: Label = Label.new()
+	popup.name = "MatchPopup"
+	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	popup.text = _match_popup_text(match_count)
+	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	popup.add_theme_font_size_override("font_size", 42)
+	popup.add_theme_color_override("font_color", Color(1.0, 0.92, 0.48, 1.0))
+	popup.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.16, 1.0))
+	popup.add_theme_constant_override("outline_size", 8)
+	popup.custom_minimum_size = Vector2(260, 80)
+	popup.modulate = Color(1, 1, 1, 0)
+	add_child(popup)
+	move_child(popup, get_child_count() - 1)
+	var center_position: Vector2 = board.global_position + board.size * 0.5
+	popup.global_position = center_position - Vector2(130, 70)
+	popup.pivot_offset = popup.custom_minimum_size * 0.5
+	popup.scale = Vector2(0.85, 0.85)
+	var tween: Tween = create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(popup, "modulate", Color(1, 1, 1, 1), 0.08)
+	tween.tween_property(popup, "scale", Vector2(1.08, 1.08), 0.10)
+	tween.tween_property(popup, "position", popup.position + Vector2(0, -18), 0.34)
+	tween.set_parallel(false)
+	tween.tween_property(popup, "modulate", Color(1, 1, 1, 0), 0.20)
+	tween.tween_callback(popup.queue_free)
+
+func _match_popup_text(match_count: int) -> String:
+	if match_count >= 7:
+		return "%d MATCH!\nEXCELLENT" % match_count
+	if match_count >= 5:
+		return "%d MATCH!\nGREAT" % match_count
+	return "%d MATCH" % match_count
+
 func _finish_match_resolution(removed: Dictionary) -> void:
 	_drop_and_refill(removed)
 	is_resolving_match = false
@@ -336,13 +371,11 @@ func _create_piece_control(index: int) -> PanelContainer:
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	panel.gui_input.connect(_on_piece_gui_input.bind(index))
 	panel.mouse_entered.connect(_on_piece_mouse_entered.bind(index))
-
 	var center: CenterContainer = CenterContainer.new()
 	center.name = "PieceCenter"
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	panel.add_child(center)
-
 	var texture_rect: TextureRect = TextureRect.new()
 	texture_rect.name = "DropImage"
 	texture_rect.custom_minimum_size = ORB_SIZE
@@ -350,7 +383,6 @@ func _create_piece_control(index: int) -> PanelContainer:
 	texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	center.add_child(texture_rect)
-
 	var label: Label = Label.new()
 	label.name = "FallbackLabel"
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -358,7 +390,6 @@ func _create_piece_control(index: int) -> PanelContainer:
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.hide()
 	center.add_child(label)
-
 	return panel
 
 func _input(event: InputEvent) -> void:
@@ -437,8 +468,7 @@ func _resolve_match(indices: Array[int]) -> bool:
 	var removed: Dictionary = {}
 	var index_cursor: int = 0
 	while index_cursor < indices.size():
-		var remove_index: int = indices[index_cursor]
-		removed[remove_index] = true
+		removed[indices[index_cursor]] = true
 		index_cursor += 1
 	score += indices.size()
 	moves = max(0, moves - 1)
@@ -449,6 +479,7 @@ func _resolve_match(indices: Array[int]) -> bool:
 	progress_label.text = "%d%% Restoration" % percent
 	_play_sd_match_feedback()
 	_play_match_cell_effect(indices)
+	_play_match_popup(indices.size())
 	if score >= CLEAR_SCORE:
 		_clear_stage()
 		return true
