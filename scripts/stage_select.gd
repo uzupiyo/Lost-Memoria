@@ -1,13 +1,31 @@
 extends Control
 
+const UI_COLOR_BACKGROUND_PANEL: Color = Color(0.063, 0.098, 0.212, 0.88)
+const UI_COLOR_PANEL_EDGE: Color = Color(0.56, 0.92, 1.0, 0.32)
+const UI_COLOR_MEMORY_WHITE: Color = Color(0.96, 0.98, 1.0, 1.0)
+const UI_COLOR_MIST_BLUE: Color = Color(0.75, 0.84, 0.95, 1.0)
+const UI_COLOR_RESTORATION_GOLD: Color = Color(1.0, 0.85, 0.42, 1.0)
+const UI_COLOR_MIRROR_CYAN: Color = Color(0.51, 0.96, 1.0, 1.0)
+const UI_COLOR_DREAM_VIOLET: Color = Color(0.72, 0.61, 1.0, 1.0)
+const UI_COLOR_LOCKED: Color = Color(0.48, 0.52, 0.62, 1.0)
+
 @onready var still_list: VBoxContainer = %StillList
 @onready var title_label: Label = %TitleLabel
 @onready var hint_label: Label = %HintLabel
 
+var panel_intro_tween: Tween = null
+
 func _ready() -> void:
 	title_label.text = "%s Stage Select" % GameState.selected_character_id
+	title_label.add_theme_color_override("font_color", _character_accent_color(GameState.selected_character_id))
+	title_label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
+	title_label.add_theme_constant_override("outline_size", 5)
 	hint_label.text = "Clear stages to restore %s's memories. Best ranks are saved per stage." % GameState.selected_character_id
+	hint_label.add_theme_color_override("font_color", UI_COLOR_MIST_BLUE)
+	hint_label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
+	hint_label.add_theme_constant_override("outline_size", 3)
 	_build_stage_list()
+	_play_panel_intro()
 
 func _build_stage_list() -> void:
 	var child_index: int = still_list.get_child_count() - 1
@@ -23,44 +41,212 @@ func _build_stage_list() -> void:
 		var data: Dictionary = GameState.get_still_data(still_id)
 		var title: String = str(data.get("title", still_id))
 		var percent: int = GameState.get_unlock_percent(still_id)
+		var total_stages: int = int(data.get("total_stages", GameState.STILL_STAGE_COUNT))
+		var unlocked_stages: int = int(data.get("unlocked_stages", 0))
+		var is_perfect: bool = _is_perfect_memory(still_id, total_stages)
+		var is_complete: bool = unlocked_stages >= total_stages
 
 		var panel: PanelContainer = PanelContainer.new()
-		panel.custom_minimum_size = Vector2(0, 156)
+		panel.custom_minimum_size = Vector2(0, 174)
+		panel.add_theme_stylebox_override("panel", _make_still_card_style(is_complete, is_perfect))
+		panel.modulate = Color(1, 1, 1, 0)
 		still_list.add_child(panel)
 
+		var margin: MarginContainer = MarginContainer.new()
+		margin.add_theme_constant_override("margin_left", 18)
+		margin.add_theme_constant_override("margin_top", 14)
+		margin.add_theme_constant_override("margin_right", 18)
+		margin.add_theme_constant_override("margin_bottom", 14)
+		panel.add_child(margin)
+
 		var row: VBoxContainer = VBoxContainer.new()
-		panel.add_child(row)
+		row.add_theme_constant_override("separation", 8)
+		margin.add_child(row)
+
+		var header_row: HBoxContainer = HBoxContainer.new()
+		header_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		header_row.add_theme_constant_override("separation", 12)
+		row.add_child(header_row)
 
 		var label: Label = Label.new()
-		label.text = "%s - %d%% restored" % [title, percent]
+		label.text = "%s" % title
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		row.add_child(label)
+		label.add_theme_font_size_override("font_size", 24)
+		label.add_theme_color_override("font_color", _status_title_color(is_complete, is_perfect))
+		label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
+		label.add_theme_constant_override("outline_size", 4)
+		header_row.add_child(label)
+
+		var percent_badge: Label = _make_badge("%d%%" % percent, _status_title_color(is_complete, is_perfect), Color(0.04, 0.06, 0.13, 0.82))
+		header_row.add_child(percent_badge)
 
 		var unlock_label: Label = Label.new()
 		unlock_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		unlock_label.text = _unlock_status_text(unlocked_stages, total_stages)
+		unlock_label.add_theme_font_size_override("font_size", 18)
+		unlock_label.add_theme_color_override("font_color", _status_title_color(is_complete, is_perfect))
+		unlock_label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
+		unlock_label.add_theme_constant_override("outline_size", 3)
 		row.add_child(unlock_label)
 
 		var mastery_label: Label = Label.new()
 		mastery_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		mastery_label.text = _mastery_status_text(still_id, unlocked_stages, total_stages)
+		mastery_label.add_theme_font_size_override("font_size", 17)
+		mastery_label.add_theme_color_override("font_color", UI_COLOR_MIST_BLUE)
+		mastery_label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
+		mastery_label.add_theme_constant_override("outline_size", 3)
 		row.add_child(mastery_label)
 
 		var button_row: HBoxContainer = HBoxContainer.new()
 		button_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		button_row.add_theme_constant_override("separation", 10)
 		row.add_child(button_row)
 
-		var total_stages: int = int(data.get("total_stages", GameState.STILL_STAGE_COUNT))
-		var unlocked_stages: int = int(data.get("unlocked_stages", 0))
-		unlock_label.text = _unlock_status_text(unlocked_stages, total_stages)
-		mastery_label.text = _mastery_status_text(still_id, unlocked_stages, total_stages)
 		var stage_index: int = 0
 		while stage_index < total_stages:
 			var button: Button = Button.new()
+			button.custom_minimum_size = Vector2(130, 42)
 			button.text = _stage_button_text(still_id, stage_index, unlocked_stages)
 			button.disabled = stage_index > unlocked_stages
+			button.add_theme_stylebox_override("normal", _make_stage_button_style(still_id, stage_index, unlocked_stages, false))
+			button.add_theme_stylebox_override("hover", _make_stage_button_style(still_id, stage_index, unlocked_stages, true))
+			button.add_theme_stylebox_override("pressed", _make_stage_button_style(still_id, stage_index, unlocked_stages, true))
+			button.add_theme_stylebox_override("disabled", _make_stage_button_style(still_id, stage_index, unlocked_stages, false))
+			button.add_theme_color_override("font_color", _stage_button_text_color(still_id, stage_index, unlocked_stages))
+			button.add_theme_color_override("font_disabled_color", UI_COLOR_LOCKED)
+			button.add_theme_font_size_override("font_size", 16)
 			button.pressed.connect(_start_stage.bind(still_id, stage_index))
 			button_row.add_child(button)
 			stage_index += 1
 		still_index += 1
+
+func _make_still_card_style(is_complete: bool, is_perfect: bool) -> StyleBoxFlat:
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = UI_COLOR_BACKGROUND_PANEL
+	if is_perfect:
+		style.border_color = Color(UI_COLOR_RESTORATION_GOLD.r, UI_COLOR_RESTORATION_GOLD.g, UI_COLOR_RESTORATION_GOLD.b, 0.78)
+	elif is_complete:
+		style.border_color = Color(UI_COLOR_MIRROR_CYAN.r, UI_COLOR_MIRROR_CYAN.g, UI_COLOR_MIRROR_CYAN.b, 0.52)
+	else:
+		style.border_color = UI_COLOR_PANEL_EDGE
+	style.set_border_width_all(3 if is_perfect else 2)
+	style.set_corner_radius_all(18)
+	style.shadow_color = Color(0, 0, 0, 0.34)
+	style.shadow_size = 12 if is_perfect else 8
+	style.shadow_offset = Vector2(0, 4)
+	return style
+
+func _make_stage_button_style(still_id: String, stage_index: int, unlocked_stages: int, is_hover: bool) -> StyleBoxFlat:
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	var rank: String = GameState.get_stage_rank(still_id, stage_index)
+	var edge: Color = _stage_button_text_color(still_id, stage_index, unlocked_stages)
+	if stage_index > unlocked_stages:
+		style.bg_color = Color(0.04, 0.05, 0.08, 0.70)
+		style.border_color = Color(UI_COLOR_LOCKED.r, UI_COLOR_LOCKED.g, UI_COLOR_LOCKED.b, 0.35)
+	elif stage_index == unlocked_stages:
+		style.bg_color = Color(0.02, 0.16, 0.22, 0.78)
+		style.border_color = Color(UI_COLOR_MIRROR_CYAN.r, UI_COLOR_MIRROR_CYAN.g, UI_COLOR_MIRROR_CYAN.b, 0.72)
+	else:
+		style.bg_color = Color(0.05, 0.07, 0.13, 0.80)
+		style.border_color = Color(edge.r, edge.g, edge.b, 0.68)
+	if is_hover:
+		style.bg_color = Color(style.bg_color.r + 0.04, style.bg_color.g + 0.04, style.bg_color.b + 0.04, style.bg_color.a)
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(12)
+	style.content_margin_left = 10
+	style.content_margin_right = 10
+	style.content_margin_top = 7
+	style.content_margin_bottom = 7
+	return style
+
+func _make_badge(text_value: String, edge_color: Color, fill_color: Color) -> Label:
+	var badge: Label = Label.new()
+	badge.text = text_value
+	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	badge.add_theme_font_size_override("font_size", 15)
+	badge.add_theme_color_override("font_color", edge_color)
+	badge.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
+	badge.add_theme_constant_override("outline_size", 3)
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = fill_color
+	style.border_color = edge_color
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(12)
+	style.content_margin_left = 10
+	style.content_margin_right = 10
+	style.content_margin_top = 4
+	style.content_margin_bottom = 4
+	badge.add_theme_stylebox_override("normal", style)
+	return badge
+
+func _status_title_color(is_complete: bool, is_perfect: bool) -> Color:
+	if is_perfect:
+		return UI_COLOR_RESTORATION_GOLD
+	if is_complete:
+		return UI_COLOR_MIRROR_CYAN
+	return UI_COLOR_MEMORY_WHITE
+
+func _stage_button_text_color(still_id: String, stage_index: int, unlocked_stages: int) -> Color:
+	if stage_index > unlocked_stages:
+		return UI_COLOR_LOCKED
+	if stage_index == unlocked_stages:
+		return UI_COLOR_MIRROR_CYAN
+	var rank: String = GameState.get_stage_rank(still_id, stage_index)
+	match rank:
+		"S":
+			return UI_COLOR_RESTORATION_GOLD
+		"A":
+			return UI_COLOR_MIRROR_CYAN
+		"B":
+			return UI_COLOR_DREAM_VIOLET
+		"C":
+			return UI_COLOR_LOCKED
+		_:
+			return UI_COLOR_MEMORY_WHITE
+
+func _character_accent_color(character_id: String) -> Color:
+	match character_id:
+		"Rin":
+			return UI_COLOR_RESTORATION_GOLD
+		"Moka":
+			return Color(1.0, 0.62, 0.86, 1.0)
+		"Kaede":
+			return UI_COLOR_MIRROR_CYAN
+		_:
+			return UI_COLOR_DREAM_VIOLET
+
+func _is_perfect_memory(still_id: String, total_stages: int) -> bool:
+	if total_stages <= 0:
+		return false
+	var stage_index: int = 0
+	while stage_index < total_stages:
+		if GameState.get_stage_rank(still_id, stage_index) != "S":
+			return false
+		stage_index += 1
+	return true
+
+func _play_panel_intro() -> void:
+	if panel_intro_tween != null:
+		panel_intro_tween.kill()
+	panel_intro_tween = create_tween()
+	var index: int = 0
+	for child in still_list.get_children():
+		if child is Control:
+			var panel: Control = child as Control
+			var original_position: Vector2 = panel.position
+			panel.position = original_position + Vector2(0, 14)
+			panel.modulate = Color(1, 1, 1, 0)
+			panel_intro_tween.set_parallel(true)
+			panel_intro_tween.tween_property(panel, "modulate", Color(1, 1, 1, 1), 0.20).set_delay(float(index) * 0.04)
+			panel_intro_tween.tween_property(panel, "position", original_position, 0.22).set_delay(float(index) * 0.04)
+			panel_intro_tween.set_parallel(false)
+			index += 1
+	panel_intro_tween.tween_callback(_on_panel_intro_finished)
+
+func _on_panel_intro_finished() -> void:
+	panel_intro_tween = null
 
 func _unlock_status_text(unlocked_stages: int, total_stages: int) -> String:
 	if unlocked_stages >= total_stages:
