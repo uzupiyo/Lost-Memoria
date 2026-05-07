@@ -20,6 +20,9 @@ func _on_retry_pressed() -> void:
 	progress_label.text = "0% Restoration"
 	_apply_stage_opening_message()
 
+func _on_hint_pressed() -> void:
+	sd_message_label.text = _stage_hint_message(character_name_label.text, GameState.selected_stage_index)
+
 func _clear_stage() -> void:
 	var character_id: String = character_name_label.text
 	var stage_index: int = GameState.selected_stage_index
@@ -67,6 +70,17 @@ func _stage_opening_message(character_id: String, stage_index: int) -> String:
 		_:
 			return "記憶の欠片を集めましょう。ステージが進むほど、少しずつ難しくなります。"
 
+func _stage_hint_message(character_id: String, stage_index: int) -> String:
+	match character_id:
+		"Rin":
+			return _rin_stage_hint_message(stage_index)
+		"Moka":
+			return _moka_stage_hint_message(stage_index)
+		"Kaede":
+			return _kaede_stage_hint_message(stage_index)
+		_:
+			return "同じ色を3つ以上つなげましょう。ステージが進むほど、長いつながりが重要です。"
+
 func _stage_clear_message(character_id: String, stage_index: int) -> String:
 	match character_id:
 		"Rin":
@@ -90,6 +104,19 @@ func _rin_stage_opening_message(stage_index: int) -> String:
 			return "手数だいじにいこ！ 長くつながるとこ、見逃さないで！"
 		_:
 			return "最後まであきらめないから！ 記憶の光、絶対取り戻そ！"
+
+func _rin_stage_hint_message(stage_index: int) -> String:
+	match stage_index:
+		0:
+			return "まずは3つ以上ね！ ななめも使って、気楽につなげよ！"
+		1:
+			return "目標ちょい高め！ 短く消すより、長めにまとめた方がいいかも！"
+		2:
+			return "でっかいチェイン狙お！ 端っこから見ると見つけやすいよ！"
+		3:
+			return "手数だいじ！ 1手でいっぱい消せる場所、先に探そ！"
+		_:
+			return "ここは効率勝負じゃん！ 5チェイン以上狙って一気にいこ！"
 
 func _rin_stage_clear_message(stage_index: int) -> String:
 	match stage_index:
@@ -117,6 +144,19 @@ func _moka_stage_opening_message(stage_index: int) -> String:
 		_:
 			return "ここまで来たんだねぇ。モカもいっしょに、がんばるよぉ。"
 
+func _moka_stage_hint_message(stage_index: int) -> String:
+	match stage_index:
+		0:
+			return "おんなじ色を、みっつ以上だよぉ。ななめも、すーっとつながるよ。"
+		1:
+			return "ちょっとだけ多めに集めよぉ。ながくつなぐと、きらきら増えるよ。"
+		2:
+			return "はしっこから、そーっと見てみよ？ かくれた道があるかもぉ。"
+		3:
+			return "手数、だいじだねぇ。いちばん長い道を、ゆっくり探そ？"
+		_:
+			return "ふわぁ……大きなチェイン、見つけられたらすごいねぇ。"
+
 func _moka_stage_clear_message(stage_index: int) -> String:
 	match stage_index:
 		0:
@@ -142,6 +182,19 @@ func _kaede_stage_opening_message(stage_index: int) -> String:
 			return "残り手数の管理が重要です。一手ごとの価値を意識しましょう。"
 		_:
 			return "難しい局面です。落ち着いて、最も効率の良い経路を選びましょう。"
+
+func _kaede_stage_hint_message(stage_index: int) -> String:
+	match stage_index:
+		0:
+			return "同じ色を3つ以上、ななめにもつなげられます。まずは基本を確認しましょう。"
+		1:
+			return "目標数が上がっています。短い連結より、長い連結を優先しましょう。"
+		2:
+			return "盤面の端から見ると、長い経路を見つけやすくなります。"
+		3:
+			return "残り手数を意識しましょう。一手あたりの回収量が重要です。"
+		_:
+			return "5連鎖以上のボーナスを狙うと、終盤の目標に届きやすくなります。"
 
 func _kaede_stage_clear_message(stage_index: int) -> String:
 	match stage_index:
