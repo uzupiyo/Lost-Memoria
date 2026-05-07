@@ -16,6 +16,21 @@ func _clear_stage() -> void:
 	super._clear_stage()
 	sd_message_label.text = _clear_message(character_id)
 
+func _finish_match_resolution(removed: Dictionary) -> void:
+	super._finish_match_resolution(removed)
+	_update_move_pressure_message()
+
+func _update_move_pressure_message() -> void:
+	if has_cleared:
+		return
+	var character_id: String = character_name_label.text
+	if moves <= 0:
+		is_resolving_match = true
+		sd_message_label.text = _no_moves_message(character_id)
+		return
+	if moves <= 5:
+		sd_message_label.text = _low_moves_message(character_id, moves)
+
 func _opening_message(character_id: String) -> String:
 	match character_id:
 		"Rin":
@@ -48,6 +63,28 @@ func _clear_message(character_id: String) -> String:
 			return "よくできました。記憶が静かに戻ってきています。"
 		_:
 			return "記憶の欠片が、またひとつ戻りました。"
+
+func _low_moves_message(character_id: String, remaining_moves: int) -> String:
+	match character_id:
+		"Rin":
+			return "残り%d手です。最後まであきらめず、いちばん大きくつなげましょう！" % remaining_moves
+		"Moka":
+			return "あと%d手！ ここから大逆転、狙っていこう！" % remaining_moves
+		"Kaede":
+			return "残り%d手です。無理に急がず、確実につながる場所を選びましょう。" % remaining_moves
+		_:
+			return "残り%d手です。大きくつなげられる場所を探しましょう。" % remaining_moves
+
+func _no_moves_message(character_id: String) -> String:
+	match character_id:
+		"Rin":
+			return "手数が尽きてしまいました。Retryで、もう一度いきましょう。"
+		"Moka":
+			return "うーん、今回はここまで！ Retryでリベンジしよ！"
+		"Kaede":
+			return "手数切れです。盤面を見直して、もう一度落ち着いて挑みましょう。"
+		_:
+			return "手数が尽きました。Retryでもう一度挑戦できます。"
 
 func _update_sd_combo_message(current_combo: int) -> void:
 	var character_id: String = character_name_label.text
