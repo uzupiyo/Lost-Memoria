@@ -1,18 +1,29 @@
 extends "res://scripts/puzzle_screen_memory_burst.gd"
 
 var clear_rank_tween: Tween = null
+var last_clear_rank: String = ""
 
 func _setup_stage_info() -> void:
+	last_clear_rank = ""
 	super._setup_stage_info()
 	_clear_rank_popup()
 
 func _on_retry_pressed() -> void:
+	last_clear_rank = ""
 	super._on_retry_pressed()
 	_clear_rank_popup()
 
 func _clear_stage() -> void:
+	last_clear_rank = _get_clear_rank()
+	GameState.clear_selected_stage_with_rank(last_clear_rank)
 	super._clear_stage()
-	_play_clear_rank_popup()
+	_play_clear_rank_popup(last_clear_rank)
+
+func _go_to_collection() -> void:
+	if collection_transition_delay_started:
+		return
+	collection_transition_delay_started = true
+	get_tree().create_timer(COLLECTION_TRANSITION_EXTRA_DELAY).timeout.connect(_go_to_collection_after_clear_delay)
 
 func _get_clear_rank() -> String:
 	var rank_points: int = 0
@@ -74,13 +85,15 @@ func _get_clear_rank_comment(rank: String) -> String:
 		_:
 			return "Memory restored."
 
-func _play_clear_rank_popup() -> void:
+func _play_clear_rank_popup(rank: String = "") -> void:
 	_clear_rank_popup()
-	var rank: String = _get_clear_rank()
+	var resolved_rank: String = rank
+	if resolved_rank.is_empty():
+		resolved_rank = _get_clear_rank()
 	var popup: Label = Label.new()
 	popup.name = "ClearRankPopup"
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	popup.text = "CLEAR RANK %s\n%s" % [rank, _get_clear_rank_comment(rank)]
+	popup.text = "CLEAR RANK %s\n%s" % [resolved_rank, _get_clear_rank_comment(resolved_rank)]
 	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	popup.add_theme_font_size_override("font_size", 34)
