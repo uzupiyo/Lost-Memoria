@@ -6,7 +6,7 @@ extends Control
 
 func _ready() -> void:
 	title_label.text = "%s Stage Select" % GameState.selected_character_id
-	hint_label.text = "Clear stages to restore %s's memories. Next stages unlock in order." % GameState.selected_character_id
+	hint_label.text = "Clear stages to restore %s's memories. Best ranks are saved per stage." % GameState.selected_character_id
 	_build_stage_list()
 
 func _build_stage_list() -> void:
@@ -53,16 +53,19 @@ func _build_stage_list() -> void:
 		var stage_index: int = 0
 		while stage_index < total_stages:
 			var button: Button = Button.new()
-			button.text = _stage_button_text(stage_index, unlocked_stages)
+			button.text = _stage_button_text(still_id, stage_index, unlocked_stages)
 			button.disabled = stage_index > unlocked_stages
 			button.pressed.connect(_start_stage.bind(still_id, stage_index))
 			button_row.add_child(button)
 			stage_index += 1
 		still_index += 1
 
-func _stage_button_text(stage_index: int, unlocked_stages: int) -> String:
+func _stage_button_text(still_id: String, stage_index: int, unlocked_stages: int) -> String:
+	var rank: String = GameState.get_stage_rank(still_id, stage_index)
 	if stage_index < unlocked_stages:
-		return "Stage %d ✓" % (stage_index + 1)
+		if rank.is_empty():
+			return "Stage %d ✓" % (stage_index + 1)
+		return "Stage %d ✓ %s" % [stage_index + 1, rank]
 	if stage_index == unlocked_stages:
 		return "Stage %d ▶" % (stage_index + 1)
 	return "Stage %d 🔒" % (stage_index + 1)
