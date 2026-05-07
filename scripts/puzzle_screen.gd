@@ -18,6 +18,8 @@ const SD_MATCH_BUMP_SCALE: Vector2 = Vector2(1.08, 1.08)
 const SD_MAX_IDLE_FRAMES: int = 8
 const SD_MAX_ACTION_FRAMES: int = 4
 const CLEAR_FLASH_PEAK_ALPHA: float = 0.38
+const MATCH_EFFECT_DELAY: float = 0.16
+const MATCH_EFFECT_SCALE: Vector2 = Vector2(1.12, 1.12)
 
 const DROP_PATHS: Array[String] = [
 	"res://assets/puzzle/drops/memory_orb_red.png",
@@ -40,6 +42,7 @@ var piece_controls: Array[PanelContainer] = []
 var selected_indices: Array[int] = []
 var selected_color: int = -1
 var is_selecting: bool = false
+var is_resolving_match: bool = false
 var has_cleared: bool = false
 var pending_scene_change: bool = false
 var drop_textures: Dictionary = {}
@@ -192,7 +195,7 @@ func _load_texture_from_paths(primary_path: String, fallback_path: String) -> Te
 
 func _process(delta: float) -> void:
 	_update_sd_animation(delta)
-	if has_cleared or not is_selecting:
+	if has_cleared or is_resolving_match or not is_selecting:
 		return
 	var hovered_index: int = _get_piece_index_at_position(get_global_mouse_position())
 	if hovered_index >= 0:
@@ -286,6 +289,25 @@ func _play_clear_flash() -> void:
 	tween.tween_property(flash, "color", Color(1.0, 0.92, 0.55, 0.0), 0.36)
 	tween.tween_callback(flash.queue_free)
 
+func _play_match_cell_effect(indices: Array[int]) -> void:
+	var cursor: int = 0
+	while cursor < indices.size():
+		var effect_index: int = indices[cursor]
+		if effect_index >= 0 and effect_index < piece_controls.size():
+			var piece: PanelContainer = piece_controls[effect_index]
+			piece.pivot_offset = piece.size * 0.5
+			var tween: Tween = create_tween()
+			tween.set_parallel(true)
+			tween.tween_property(piece, "scale", MATCH_EFFECT_SCALE, 0.08)
+			tween.tween_property(piece, "modulate", Color(1.8, 1.65, 0.85, 1.0), 0.08)
+			tween.set_parallel(false)
+			tween.tween_property(piece, "scale", Vector2.ONE, 0.08)
+		cursor += 1
+
+func _finish_match_resolution(removed: Dictionary) -> void:
+	_drop_and_refill(removed)
+	is_resolving_match = false
+
 func _generate_board() -> void:
 	board.columns = BOARD_SIZE
 	board.add_theme_constant_override("h_separation", 2)
@@ -340,7 +362,7 @@ func _create_piece_control(index: int) -> PanelContainer:
 	return panel
 
 func _input(event: InputEvent) -> void:
-	if has_cleared or not is_selecting:
+	if has_cleared or is_resolving_match or not is_selecting:
 		return
 	if event is InputEventMouseButton:
 		var mouse_event: InputEventMouseButton = event as InputEventMouseButton
@@ -357,7 +379,7 @@ func _input(event: InputEvent) -> void:
 			_try_add_to_selection(hovered_index)
 
 func _on_piece_gui_input(event: InputEvent, index: int) -> void:
-	if has_cleared:
+	if has_cleared or is_resolving_match:
 		return
 	if event is InputEventMouseButton:
 		var mouse_event: InputEventMouseButton = event as InputEventMouseButton
@@ -369,7 +391,7 @@ func _on_piece_gui_input(event: InputEvent, index: int) -> void:
 			_start_selection(index)
 
 func _on_piece_mouse_entered(index: int) -> void:
-	if has_cleared:
+	if has_cleared or is_resolving_match:
 		return
 	if is_selecting:
 		_try_add_to_selection(index)
@@ -426,10 +448,12 @@ func _resolve_match(indices: Array[int]) -> bool:
 	score_label.text = "SCORE\n%d" % score
 	progress_label.text = "%d%% Restoration" % percent
 	_play_sd_match_feedback()
+	_play_match_cell_effect(indices)
 	if score >= CLEAR_SCORE:
 		_clear_stage()
 		return true
-	_drop_and_refill(removed)
+	is_resolving_match = true
+	get_tree().create_timer(MATCH_EFFECT_DELAY).timeout.connect(_finish_match_resolution.bind(removed))
 	return false
 
 func _drop_and_refill(removed: Dictionary) -> void:
@@ -451,6 +475,7 @@ func _drop_and_refill(removed: Dictionary) -> void:
 				pieces[fill_index] = randi() % COLOR_COUNT
 			row -= 1
 		col += 1
+	_update_board_view()
 
 func _get_piece_index_at_position(global_position: Vector2) -> int:
 	var i: int = 0
@@ -495,6 +520,7 @@ func _update_board_view() -> void:
 		var texture: Texture2D = _get_drop_texture(piece_color)
 		var texture_rect: TextureRect = piece.get_node_or_null("PieceCenter/DropImage") as TextureRect
 		var label: Label = piece.get_node_or_null("PieceCenter/FallbackLabel") as Label
+		piece.scale = Vector2.ONE
 		if texture_rect != null and label != null:
 			if texture != null:
 				texture_rect.texture = texture
@@ -533,6 +559,7 @@ func _clear_stage() -> void:
 		return
 	has_cleared = true
 	is_selecting = false
+	is_resolving_match = false
 	selected_indices.clear()
 	selected_color = -1
 	sd_message_label.text = "記憶の欠片が、またひとつ戻りました。"
@@ -554,6 +581,7 @@ func _on_retry_pressed() -> void:
 	moves = 25
 	has_cleared = false
 	pending_scene_change = false
+	is_resolving_match = false
 	gauge.value = 0
 	moves_label.text = "MOVES\n%d" % moves
 	score_label.text = "SCORE\n0"
