@@ -131,19 +131,20 @@ func _update_collection_view(still_id: String) -> void:
 	_apply_shard_mask(unlocked_stages, total_stages)
 	fullscreen_button.disabled = not GameState.is_still_complete(still_id)
 	if GameState.is_still_complete(still_id):
-		status_label.text = "COMPLETE - Fullscreen available / %s" % _best_rank_text(still_id, total_stages)
-		_show_unlock_notice("MEMORY COMPLETE")
+		status_label.text = "COMPLETE - Fullscreen available / %s" % _mastery_summary_text(still_id, total_stages)
+		_show_unlock_notice(_complete_notice_text(still_id, total_stages))
 	elif unlocked_stages > 0:
-		status_label.text = "NEW MEMORY SHARD - %d%% restored / %s" % [percent, _best_rank_text(still_id, total_stages)]
+		status_label.text = "NEW MEMORY SHARD - %d%% restored / %s" % [percent, _mastery_summary_text(still_id, total_stages)]
 		_show_unlock_notice("NEW MEMORY SHARD")
 	else:
 		status_label.text = "LOCKED - Clear stages to restore"
 
 func _collection_progress_text(still_id: String, unlocked_stages: int, total_stages: int) -> String:
 	var rank_line: String = _rank_progress_text(still_id, total_stages)
+	var mastery_line: String = _mastery_summary_text(still_id, total_stages)
 	if rank_line.is_empty():
 		return "Mirror Shards: %d / %d" % [unlocked_stages, total_stages]
-	return "Mirror Shards: %d / %d\nRanks: %s" % [unlocked_stages, total_stages, rank_line]
+	return "Mirror Shards: %d / %d\nRanks: %s\n%s" % [unlocked_stages, total_stages, rank_line, mastery_line]
 
 func _rank_progress_text(still_id: String, total_stages: int) -> String:
 	var parts: Array[String] = []
@@ -157,7 +158,21 @@ func _rank_progress_text(still_id: String, total_stages: int) -> String:
 		stage_index += 1
 	return "  ".join(parts)
 
-func _best_rank_text(still_id: String, total_stages: int) -> String:
+func _mastery_summary_text(still_id: String, total_stages: int) -> String:
+	var best_rank: String = _best_rank(still_id, total_stages)
+	var s_count: int = _rank_count(still_id, total_stages, "S")
+	if s_count >= total_stages:
+		return "PERFECT MEMORY - All S"
+	if best_rank.is_empty():
+		return "Best Rank: - / S Ranks 0/%d" % total_stages
+	return "Best Rank: %s / S Ranks %d/%d" % [best_rank, s_count, total_stages]
+
+func _complete_notice_text(still_id: String, total_stages: int) -> String:
+	if _rank_count(still_id, total_stages, "S") >= total_stages:
+		return "PERFECT MEMORY"
+	return "MEMORY COMPLETE"
+
+func _best_rank(still_id: String, total_stages: int) -> String:
 	var best_rank: String = ""
 	var stage_index: int = 0
 	while stage_index < total_stages:
@@ -165,9 +180,16 @@ func _best_rank_text(still_id: String, total_stages: int) -> String:
 		if _rank_value(rank) > _rank_value(best_rank):
 			best_rank = rank
 		stage_index += 1
-	if best_rank.is_empty():
-		return "Best Rank: -"
-	return "Best Rank: %s" % best_rank
+	return best_rank
+
+func _rank_count(still_id: String, total_stages: int, target_rank: String) -> int:
+	var count: int = 0
+	var stage_index: int = 0
+	while stage_index < total_stages:
+		if GameState.get_stage_rank(still_id, stage_index) == target_rank:
+			count += 1
+		stage_index += 1
+	return count
 
 func _rank_value(rank: String) -> int:
 	match rank:
