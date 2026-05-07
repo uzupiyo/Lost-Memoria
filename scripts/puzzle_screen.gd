@@ -17,6 +17,7 @@ const SD_ACTION_FRAME_INTERVAL: float = 0.12
 const SD_MATCH_BUMP_SCALE: Vector2 = Vector2(1.08, 1.08)
 const SD_MAX_IDLE_FRAMES: int = 8
 const SD_MAX_ACTION_FRAMES: int = 4
+const CLEAR_FLASH_PEAK_ALPHA: float = 0.38
 
 const DROP_PATHS: Array[String] = [
 	"res://assets/puzzle/drops/memory_orb_red.png",
@@ -270,6 +271,21 @@ func _play_sd_clear_feedback() -> void:
 	tween.tween_property(sd_character, "scale", Vector2(1.12, 1.12), 0.10)
 	tween.tween_property(sd_character, "scale", Vector2.ONE, 0.16)
 
+func _play_clear_flash() -> void:
+	var flash: ColorRect = ColorRect.new()
+	flash.name = "ClearFlash"
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flash.color = Color(1.0, 0.92, 0.55, 0.0)
+	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	flash.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	flash.grow_vertical = Control.GROW_DIRECTION_BOTH
+	add_child(flash)
+	move_child(flash, get_child_count() - 1)
+	var tween: Tween = create_tween()
+	tween.tween_property(flash, "color", Color(1.0, 0.92, 0.55, CLEAR_FLASH_PEAK_ALPHA), 0.08)
+	tween.tween_property(flash, "color", Color(1.0, 0.92, 0.55, 0.0), 0.36)
+	tween.tween_callback(flash.queue_free)
+
 func _generate_board() -> void:
 	board.columns = BOARD_SIZE
 	board.add_theme_constant_override("h_separation", 2)
@@ -521,10 +537,11 @@ func _clear_stage() -> void:
 	selected_color = -1
 	sd_message_label.text = "記憶の欠片が、またひとつ戻りました。"
 	_play_sd_clear_feedback()
+	_play_clear_flash()
 	GameState.clear_selected_stage()
 	if not pending_scene_change:
 		pending_scene_change = true
-		get_tree().create_timer(0.25).timeout.connect(_go_to_collection)
+		get_tree().create_timer(0.45).timeout.connect(_go_to_collection)
 
 func _go_to_collection() -> void:
 	get_tree().change_scene_to_file("res://scenes/collection/collection.tscn")
