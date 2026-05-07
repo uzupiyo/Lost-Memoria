@@ -10,8 +10,9 @@ Core mood:
 
 - Deep night blue
 - Soft cyan glow
-- Gold restoration light
-- Gentle pink/purple accents
+- Yellow restoration light
+- Gentle pink accents
+- Calm green character accent
 - Dark locked/unknown states
 
 ## 2. Core Palette
@@ -23,9 +24,10 @@ Core mood:
 | Panel Edge | Soft Cyan Edge | `#8FEAFF` | Thin borders, active frames |
 | Primary Text | Memory White | `#F4F8FF` | Main readable text |
 | Secondary Text | Mist Blue | `#BFD6F2` | Sub labels, progress details |
-| Gold Accent | Restoration Gold | `#FFD86A` | Clear, complete, achievement, S rank |
+| Yellow Accent | Rin Yellow | `#FFD86A` | Rin accent, clear, complete, achievement, S rank |
 | Cyan Accent | Mirror Cyan | `#83F4FF` | A rank, active hints, selected states |
-| Pink Accent | Fragment Pink | `#FF9EDB` | Gentle emphasis, Moka accents |
+| Pink Accent | Moka Pink | `#FF9EDB` | Moka accent, gentle emphasis |
+| Green Accent | Kaede Green | `#8CFF9A` | Kaede accent, calm/supportive UI |
 | Purple Accent | Dream Violet | `#B89CFF` | B rank, magical secondary effects |
 | Warning | Warm Amber | `#FFAD5C` | Low moves, caution |
 | Locked | Locked Gray | `#5C6477` | Locked state, disabled text |
@@ -35,7 +37,7 @@ Core mood:
 
 | Rank | Color | Hex | Tone |
 | --- | --- | --- | --- |
-| S | Restoration Gold | `#FFD86A` | Premium, perfect, glowing |
+| S | Rin Yellow | `#FFD86A` | Premium, perfect, glowing |
 | A | Mirror Cyan | `#83F4FF` | Clean, strong |
 | B | Dream Violet | `#B89CFF` | Good, magical |
 | C | Locked Gray | `#8C93A6` | Cleared but basic |
@@ -43,8 +45,8 @@ Core mood:
 Rules:
 
 - S rank should be the most visually rewarding.
-- PERFECT MEMORY should use S-rank gold plus a soft glow.
-- Locked content should never use gold or cyan as the main color.
+- PERFECT MEMORY should use S-rank yellow plus a soft glow.
+- Locked content should never use yellow, pink, green, or cyan as the main color.
 
 ## 4. Typography Scale
 
@@ -87,7 +89,7 @@ Default panel:
 - Border: `Soft Cyan Edge` at low opacity
 - Text: `Memory White`
 - Secondary text: `Mist Blue`
-- Highlight text: `Restoration Gold`
+- Highlight text: `Rin Yellow`
 
 Use for:
 
@@ -113,9 +115,9 @@ Common badges:
 Badge rules:
 
 - Use uppercase English for compact system labels.
-- Use gold for `PERFECT`, `S`, `ACHIEVEMENT`.
+- Use yellow for `PERFECT`, `S`, `ACHIEVEMENT`.
 - Use gray for `LOCKED`.
-- Use cyan for selected/active/available states.
+- Use cyan for selected/active/available states unless the UI is explicitly character-accented.
 
 ## 8. Button Rules
 
@@ -130,7 +132,7 @@ Use for:
 Visual:
 
 - Wide, clear, strong hover
-- Gold or cyan highlight on hover
+- Yellow or cyan highlight on hover
 
 ### Medium Buttons
 
@@ -195,9 +197,9 @@ Visual:
 
 | Character | Accent | Tone |
 | --- | --- | --- |
-| Rin | Gold + cyan | Bright gyaru, confident, energetic |
-| Moka | Pink + soft cyan | Soft, fluffy, childlike |
-| Kaede | Green/cyan + navy | Calm, intelligent, supportive |
+| Rin | Yellow | Bright gyaru, confident, energetic |
+| Moka | Pink | Soft, fluffy, childlike |
+| Kaede | Green | Calm, intelligent, supportive |
 
 ## 11. Implementation Order
 
