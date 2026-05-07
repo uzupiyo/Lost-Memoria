@@ -387,6 +387,14 @@ func _match_popup_text(match_count: int) -> String:
 		return "%d MATCH!\nGREAT" % match_count
 	return "%d MATCH" % match_count
 
+func _update_sd_combo_message(current_combo: int) -> void:
+	if current_combo >= 5:
+		sd_message_label.text = "すごい連鎖です。この調子で記憶を一気に戻しましょう。"
+	elif current_combo >= 3:
+		sd_message_label.text = "つながってきました。記憶の流れが強くなっています。"
+	elif current_combo >= 2:
+		sd_message_label.text = "連続成功です。今の流れ、逃さないでください。"
+
 func _finish_match_resolution(removed: Dictionary) -> void:
 	_drop_and_refill(removed)
 	is_resolving_match = false
@@ -528,6 +536,7 @@ func _resolve_match(indices: Array[int]) -> bool:
 	score_label.text = "SCORE\n%d" % score
 	progress_label.text = "%d%% Restoration" % percent
 	_play_sd_match_feedback()
+	_update_sd_combo_message(current_combo)
 	_play_match_cell_effect(indices)
 	_play_match_popup(indices.size())
 	_play_combo_popup(current_combo)
