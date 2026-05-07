@@ -11,19 +11,28 @@ var memory_burst_tween: Tween = null
 var memory_burst_tip_tween: Tween = null
 var prism_burst_tween: Tween = null
 var lumina_burst_tween: Tween = null
+var burst_result_tween: Tween = null
+var best_burst_name: String = ""
+var best_burst_match_count: int = 0
 
 func _setup_stage_info() -> void:
+	best_burst_name = ""
+	best_burst_match_count = 0
 	super._setup_stage_info()
 	_clear_memory_burst_popup()
 	_clear_prism_burst_popup()
 	_clear_lumina_burst_popup()
+	_clear_burst_result_popup()
 	_play_memory_burst_tip()
 
 func _on_retry_pressed() -> void:
+	best_burst_name = ""
+	best_burst_match_count = 0
 	super._on_retry_pressed()
 	_clear_memory_burst_popup()
 	_clear_prism_burst_popup()
 	_clear_lumina_burst_popup()
+	_clear_burst_result_popup()
 	_play_memory_burst_tip()
 
 func _on_hint_pressed() -> void:
@@ -36,6 +45,7 @@ func _clear_stage() -> void:
 	_clear_prism_burst_popup()
 	_clear_lumina_burst_popup()
 	super._clear_stage()
+	_play_burst_result_popup()
 
 func _get_memory_burst_bonus(match_count: int) -> int:
 	if match_count < MEMORY_BURST_MIN_MATCH:
@@ -52,6 +62,17 @@ func _get_lumina_burst_bonus(match_count: int) -> int:
 		return 0
 	return LUMINA_BURST_BONUS
 
+func _register_best_burst(match_count: int) -> void:
+	if match_count >= LUMINA_BURST_MIN_MATCH:
+		best_burst_name = "LUMINA BURST"
+		best_burst_match_count = max(best_burst_match_count, match_count)
+	elif match_count >= PRISM_BURST_MIN_MATCH and best_burst_name != "LUMINA BURST":
+		best_burst_name = "PRISM BURST"
+		best_burst_match_count = max(best_burst_match_count, match_count)
+	elif match_count >= MEMORY_BURST_MIN_MATCH and best_burst_name.is_empty():
+		best_burst_name = "MEMORY BURST"
+		best_burst_match_count = max(best_burst_match_count, match_count)
+
 func _resolve_match(indices: Array[int]) -> bool:
 	var current_combo: int = _register_combo()
 	var combo_bonus: int = max(0, current_combo - 1) * COMBO_SCORE_BONUS_PER_STEP
@@ -59,6 +80,7 @@ func _resolve_match(indices: Array[int]) -> bool:
 	var memory_burst_bonus: int = _get_memory_burst_bonus(indices.size())
 	var prism_burst_bonus: int = _get_prism_burst_bonus(indices.size())
 	var lumina_burst_bonus: int = _get_lumina_burst_bonus(indices.size())
+	_register_best_burst(indices.size())
 	var removed: Dictionary = {}
 	var index_cursor: int = 0
 	while index_cursor < indices.size():
@@ -113,7 +135,7 @@ func _play_memory_burst_tip() -> void:
 	var popup: Label = Label.new()
 	popup.name = "MemoryBurstTip"
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	popup.text = "TIP: 5+ MEMORY / 7+ PRISM / 10+ LUMINA BURST"
+	popup.text = _stage_burst_tip_text()
 	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	popup.add_theme_font_size_override("font_size", 22)
@@ -137,9 +159,25 @@ func _play_memory_burst_tip() -> void:
 	memory_burst_tip_tween.tween_property(popup, "modulate", Color(1, 1, 1, 0), 0.30)
 	memory_burst_tip_tween.tween_callback(_clear_memory_burst_tip)
 
+func _stage_burst_tip_text() -> String:
+	var stage_index: int = GameState.selected_stage_index
+	if stage_index >= 4:
+		return "TIP: 終盤は 10+ LUMINA BURST が大チャンス"
+	if stage_index >= 2:
+		return "TIP: 7+ PRISM / 10+ LUMINA を狙うと楽になる"
+	return "TIP: 5+ MEMORY / 7+ PRISM / 10+ LUMINA BURST"
+
 func _play_memory_burst_hint() -> void:
-	_play_passive_effect_popup("BURST TIP\n5+追加 / 7+さらに+%d / 10+さらに+%d" % [PRISM_BURST_BONUS, LUMINA_BURST_BONUS], Color(1.0, 0.90, 0.58, 1.0))
+	_play_passive_effect_popup(_stage_burst_hint_text(), Color(1.0, 0.90, 0.58, 1.0))
 	_play_board_frame_feedback(1.025, Color(1.0, 0.92, 0.60, 1.0), 0.10, 0.22)
+
+func _stage_burst_hint_text() -> String:
+	var stage_index: int = GameState.selected_stage_index
+	if stage_index >= 4:
+		return "BURST TIP\n10+ LUMINAを狙うと一気に届くよ"
+	if stage_index >= 2:
+		return "BURST TIP\n7+ PRISM以上を狙うと後半が楽"
+	return "BURST TIP\n5+追加 / 7+さらに+%d / 10+さらに+%d" % [PRISM_BURST_BONUS, LUMINA_BURST_BONUS]
 
 func _clear_memory_burst_tip() -> void:
 	if memory_burst_tip_tween != null:
@@ -148,6 +186,36 @@ func _clear_memory_burst_tip() -> void:
 	var popup: Node = get_node_or_null("MemoryBurstTip")
 	if popup != null:
 		popup.queue_free()
+
+func _play_burst_result_popup() -> void:
+	_clear_burst_result_popup()
+	if best_burst_name.is_empty():
+		return
+	var popup: Label = Label.new()
+	popup.name = "BurstResultPopup"
+	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	popup.text = "BEST: %s\n%d CONNECT" % [best_burst_name, best_burst_match_count]
+	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	popup.add_theme_font_size_override("font_size", 28)
+	popup.add_theme_color_override("font_color", Color(1.0, 0.95, 0.62, 1.0))
+	popup.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.16, 1.0))
+	popup.add_theme_constant_override("outline_size", 7)
+	popup.custom_minimum_size = Vector2(420, 96)
+	popup.modulate = Color(1, 1, 1, 0)
+	add_child(popup)
+	move_child(popup, get_child_count() - 1)
+	var center_position: Vector2 = board.global_position + board.size * 0.5
+	popup.global_position = center_position - Vector2(210, 24)
+	popup.pivot_offset = popup.custom_minimum_size * 0.5
+	popup.scale = Vector2(0.84, 0.84)
+	burst_result_tween = create_tween()
+	burst_result_tween.set_parallel(true)
+	burst_result_tween.tween_property(popup, "modulate", Color(1, 1, 1, 1), 0.14)
+	burst_result_tween.tween_property(popup, "scale", Vector2(1.06, 1.06), 0.16)
+	burst_result_tween.set_parallel(false)
+	burst_result_tween.tween_interval(0.62)
+	burst_result_tween.tween_property(popup, "scale", Vector2.ONE, 0.12)
 
 func _play_memory_burst_popup(bonus_score: int) -> void:
 	_clear_memory_burst_popup()
@@ -265,5 +333,13 @@ func _clear_lumina_burst_popup() -> void:
 		lumina_burst_tween.kill()
 		lumina_burst_tween = null
 	var popup: Node = get_node_or_null("LuminaBurstPopup")
+	if popup != null:
+		popup.queue_free()
+
+func _clear_burst_result_popup() -> void:
+	if burst_result_tween != null:
+		burst_result_tween.kill()
+		burst_result_tween = null
+	var popup: Node = get_node_or_null("BurstResultPopup")
 	if popup != null:
 		popup.queue_free()
