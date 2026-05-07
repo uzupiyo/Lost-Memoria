@@ -1,0 +1,123 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/options_screen.gd" id="1_options"]
+[ext_resource type="Theme" path="res://assets/ui/theme/main_theme.tres" id="2_theme"]
+
+[node name="Options" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_options")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.006, 0.01, 0.026, 1)
+
+[node name="Root" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 280.0
+offset_top = 90.0
+offset_right = -280.0
+offset_bottom = -90.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 56
+text = "Options / Help"
+horizontal_alignment = 1
+
+[node name="ContentPanel" type="PanelContainer" parent="Root"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ContentBox" type="VBoxContainer" parent="Root/ContentPanel"]
+layout_mode = 2
+theme_override_constants/separation = 22
+alignment = 1
+
+[node name="HelpLabel" type="Label" parent="Root/ContentPanel/ContentBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "How to Play\n\n- Choose a character from Character Archive.\n- Select a memory and clear stages in order.\n- Connect matching memory orbs to restore shards.\n- Higher score, remaining moves, and stronger bursts improve your Clear Rank.\n- Complete all stages to unlock a memory in Collection.\n- Earn S on every stage for PERFECT MEMORY.\n\nControls\n\nMouse / Touch: select orbs and buttons\nEsc: close fullscreen memory preview"
+horizontal_alignment = 0
+autowrap_mode = 3
+
+[node name="ResetMessageLabel" type="Label" parent="Root/ContentPanel/ContentBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Reset Save deletes restored memories and saved ranks."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ResetSaveButton" type="Button" parent="Root/ContentPanel/ContentBox"]
+custom_minimum_size = Vector2(420, 64)
+layout_mode = 2
+text = "RESET SAVE DATA"
+
+[node name="BackButton" type="Button" parent="Root/ContentPanel/ContentBox"]
+custom_minimum_size = Vector2(420, 64)
+layout_mode = 2
+text = "BACK TO TITLE"
+
+[node name="ResetConfirmPanel" type="PanelContainer" parent="Root"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+
+[node name="ConfirmBox" type="VBoxContainer" parent="Root/ResetConfirmPanel"]
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="ConfirmTitle" type="Label" parent="Root/ResetConfirmPanel/ConfirmBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Reset Save Data?"
+horizontal_alignment = 1
+
+[node name="ConfirmBody" type="Label" parent="Root/ResetConfirmPanel/ConfirmBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "This will remove all restored memories, saved ranks, Complete progress, and Perfect Memory progress. This cannot be undone."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ConfirmRow" type="HBoxContainer" parent="Root/ResetConfirmPanel/ConfirmBox"]
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="CancelResetButton" type="Button" parent="Root/ResetConfirmPanel/ConfirmBox/ConfirmRow"]
+custom_minimum_size = Vector2(240, 56)
+layout_mode = 2
+text = "CANCEL"
+
+[node name="ConfirmResetButton" type="Button" parent="Root/ResetConfirmPanel/ConfirmBox/ConfirmRow"]
+custom_minimum_size = Vector2(240, 56)
+layout_mode = 2
+text = "RESET"
+
+[connection signal="pressed" from="Root/ContentPanel/ContentBox/ResetSaveButton" to="." method="_on_reset_save_pressed"]
+[connection signal="pressed" from="Root/ContentPanel/ContentBox/BackButton" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="Root/ResetConfirmPanel/ConfirmBox/ConfirmRow/CancelResetButton" to="." method="_on_cancel_reset_pressed"]
+[connection signal="pressed" from="Root/ResetConfirmPanel/ConfirmBox/ConfirmRow/ConfirmResetButton" to="." method="_on_confirm_reset_pressed"]
