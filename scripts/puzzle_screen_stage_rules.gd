@@ -7,6 +7,7 @@ func _setup_stage_info() -> void:
 	_apply_stage_rules()
 	super._setup_stage_info()
 	_apply_stage_rule_labels()
+	_apply_stage_opening_message()
 
 func _on_retry_pressed() -> void:
 	super._on_retry_pressed()
@@ -17,6 +18,7 @@ func _on_retry_pressed() -> void:
 	moves_label.text = "MOVES\n%d" % moves
 	score_label.text = "SCORE\n0"
 	progress_label.text = "0% Restoration"
+	_apply_stage_opening_message()
 
 func _apply_stage_rules() -> void:
 	var stage_index: int = GameState.selected_stage_index
@@ -44,6 +46,59 @@ func _apply_stage_rule_labels() -> void:
 	target_label.text = "TARGET\n%d Shards" % stage_clear_score
 	moves_label.text = "MOVES\n%d" % moves
 	progress_label.text = "0% Restoration"
+
+func _apply_stage_opening_message() -> void:
+	sd_message_label.text = _stage_opening_message(character_name_label.text, GameState.selected_stage_index)
+
+func _stage_opening_message(character_id: String, stage_index: int) -> String:
+	match character_id:
+		"Rin":
+			return _rin_stage_opening_message(stage_index)
+		"Moka":
+			return _moka_stage_opening_message(stage_index)
+		"Kaede":
+			return _kaede_stage_opening_message(stage_index)
+		_:
+			return "記憶の欠片を集めましょう。ステージが進むほど、少しずつ難しくなります。"
+
+func _rin_stage_opening_message(stage_index: int) -> String:
+	match stage_index:
+		0:
+			return "まずは感覚をつかみましょう。記憶の欠片を一緒に集めます。"
+		1:
+			return "少し目標が上がりました。でも、落ち着けば大丈夫です。"
+		2:
+			return "ここからが本番です。大きくつなげて、一気に取り戻しましょう。"
+		3:
+			return "手数を大切にしましょう。長いつながりを見逃さないでください。"
+		_:
+			return "最後まであきらめません。記憶の光を、必ず取り戻しましょう。"
+
+func _moka_stage_opening_message(stage_index: int) -> String:
+	match stage_index:
+		0:
+			return "よーし、まずは気楽にいこ！ たくさんつなげてみよう！"
+		1:
+			return "ちょっと難しくなったね。でも勢いでいけるいける！"
+		2:
+			return "ここから盛り上がってきたよ！ 大きいチェイン狙ってこ！"
+		3:
+			return "手数少なめだよ！ でも大逆転、狙えるからね！"
+		_:
+			return "ここまで来たら全力だよ！ 最高のチェイン見せちゃお！"
+
+func _kaede_stage_opening_message(stage_index: int) -> String:
+	match stage_index:
+		0:
+			return "まずは基本確認です。無理せず、確実につなげましょう。"
+		1:
+			return "目標が少し上がりました。盤面全体を見ることが大切です。"
+		2:
+			return "焦る必要はありません。長くつながる色を丁寧に探しましょう。"
+		3:
+			return "残り手数の管理が重要です。一手ごとの価値を意識しましょう。"
+		_:
+			return "難しい局面です。落ち着いて、最も効率の良い経路を選びましょう。"
 
 func _resolve_match(indices: Array[int]) -> bool:
 	var current_combo: int = _register_combo()
