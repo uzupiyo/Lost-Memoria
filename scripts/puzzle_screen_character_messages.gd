@@ -187,7 +187,7 @@ func _low_moves_popup_text(character_id: String, remaining_moves: int) -> String
 func _stage_clear_popup_text(character_id: String) -> String:
 	match character_id:
 		"Rin":
-			return "STAGE CLEAR\nMEMORY RESTORED"
+			return "STAGE CLEAR\nMEMORY GET!"
 		"Moka":
 			return "CLEAR!\nNICE MEMORY!"
 		"Kaede":
@@ -209,7 +209,7 @@ func _no_moves_popup_text(character_id: String) -> String:
 func _opening_message(character_id: String) -> String:
 	match character_id:
 		"Rin":
-			return "一緒に、記憶の欠片を集めましょう。"
+			return "記憶の欠片、ウチと一緒に集めよ！"
 		"Moka":
 			return "よーし、どんどん欠片を集めていこう！"
 		"Kaede":
@@ -220,7 +220,7 @@ func _opening_message(character_id: String) -> String:
 func _hint_message(character_id: String) -> String:
 	match character_id:
 		"Rin":
-			return "同じ色を3つ以上、ななめにもつなげられます。焦らず大きくつなげましょう。"
+			return "同じ色を3つ以上ね！ ななめもいけるから、でっかくつなげよ！"
 		"Moka":
 			return "ななめもOKだよ！ いっぱいつなげたら一気に進めるかも！"
 		"Kaede":
@@ -231,7 +231,7 @@ func _hint_message(character_id: String) -> String:
 func _clear_message(character_id: String) -> String:
 	match character_id:
 		"Rin":
-			return "記憶の欠片が、またひとつ戻りました。"
+			return "やったじゃん！ 記憶の欠片、またひとつ戻ったよ！"
 		"Moka":
 			return "やったね！ 記憶の欠片、ばっちり戻ったよ！"
 		"Kaede":
@@ -242,7 +242,7 @@ func _clear_message(character_id: String) -> String:
 func _low_moves_message(character_id: String, remaining_moves: int) -> String:
 	match character_id:
 		"Rin":
-			return "残り%d手です。最後まであきらめず、いちばん大きくつなげましょう！" % remaining_moves
+			return "あと%d手！ まだ全然いけるっしょ、でっかくつなげよ！" % remaining_moves
 		"Moka":
 			return "あと%d手！ ここから大逆転、狙っていこう！" % remaining_moves
 		"Kaede":
@@ -253,7 +253,7 @@ func _low_moves_message(character_id: String, remaining_moves: int) -> String:
 func _no_moves_message(character_id: String) -> String:
 	match character_id:
 		"Rin":
-			return "手数が尽きてしまいました。Retryで、もう一度いきましょう。"
+			return "手数なくなっちゃった！ Retryで、もっかいいこ！"
 		"Moka":
 			return "うーん、今回はここまで！ Retryでリベンジしよ！"
 		"Kaede":
@@ -275,11 +275,11 @@ func _update_sd_combo_message(current_combo: int) -> void:
 
 func _update_rin_combo_message(current_combo: int) -> void:
 	if current_combo >= 5:
-		sd_message_label.text = "すごい連鎖です！ この調子で一気に取り戻しましょう！"
+		sd_message_label.text = "やば、連鎖すご！ このまま一気に取り戻そ！"
 	elif current_combo >= 3:
-		sd_message_label.text = "いい流れです。記憶の光が強くなっています！"
+		sd_message_label.text = "いい流れきてる！ 記憶の光、強くなってるじゃん！"
 	elif current_combo >= 2:
-		sd_message_label.text = "連続成功です。今の流れ、逃さないでください！"
+		sd_message_label.text = "連続成功！ その流れ、逃さないでいこ！"
 
 func _update_moka_combo_message(current_combo: int) -> void:
 	if current_combo >= 5:
