@@ -113,13 +113,14 @@ func _show_reset_confirm(show: bool) -> void:
 	reset_confirm_panel.visible = show
 
 func _on_reset_save_pressed() -> void:
+	reset_message_label.text = "This will delete all restored memories and saved ranks."
 	_show_reset_confirm(true)
 
 func _on_cancel_reset_pressed() -> void:
 	_show_reset_confirm(false)
 
 func _on_confirm_reset_pressed() -> void:
-	GameState.reset_save_data()
+	SaveManager.reset_save()
 	_show_reset_confirm(false)
 	reset_message_label.text = "Save data has been reset. Return to Title and start again."
 
