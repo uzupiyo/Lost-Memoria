@@ -5,6 +5,7 @@ var current_index: int = 0
 var shard_overlays: Array[Polygon2D] = []
 var current_unlocked_stages: int = 0
 var current_total_stages: int = 5
+var unlock_notice_tween: Tween = null
 
 @onready var title_label: Label = %StillTitle
 @onready var collection_title_label: Label = %TitleLabel
@@ -130,9 +131,31 @@ func _update_collection_view(still_id: String) -> void:
 	_apply_shard_mask(unlocked_stages, total_stages)
 	fullscreen_button.disabled = not GameState.is_still_complete(still_id)
 	if GameState.is_still_complete(still_id):
-		status_label.text = "Unlocked - Fullscreen available"
+		status_label.text = "COMPLETE - Fullscreen available"
+		_show_unlock_notice("MEMORY COMPLETE")
+	elif unlocked_stages > 0:
+		status_label.text = "NEW MEMORY SHARD - %d%% restored" % percent
+		_show_unlock_notice("NEW MEMORY SHARD")
 	else:
-		status_label.text = "%d%% restored" % percent
+		status_label.text = "LOCKED - Clear stages to restore"
+
+func _show_unlock_notice(text_value: String) -> void:
+	if unlock_notice_tween != null:
+		unlock_notice_tween.kill()
+		unlock_notice_tween = null
+	status_label.pivot_offset = status_label.size * 0.5
+	status_label.text = text_value + " / " + status_label.text
+	unlock_notice_tween = create_tween()
+	unlock_notice_tween.set_parallel(true)
+	unlock_notice_tween.tween_property(status_label, "scale", Vector2(1.08, 1.08), 0.10)
+	unlock_notice_tween.tween_property(status_label, "modulate", Color(1.0, 0.94, 0.58, 1.0), 0.10)
+	unlock_notice_tween.set_parallel(false)
+	unlock_notice_tween.tween_property(status_label, "scale", Vector2.ONE, 0.16)
+	unlock_notice_tween.tween_property(status_label, "modulate", Color(1, 1, 1, 1), 0.22)
+	unlock_notice_tween.tween_callback(_on_unlock_notice_finished)
+
+func _on_unlock_notice_finished() -> void:
+	unlock_notice_tween = null
 
 func _update_character_panel(character_id: String, situation: String) -> void:
 	var character_data: Dictionary = GameState.get_character_data(character_id)
