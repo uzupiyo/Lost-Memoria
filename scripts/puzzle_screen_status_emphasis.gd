@@ -4,18 +4,22 @@ var moves_label_tween: Tween = null
 var score_label_tween: Tween = null
 var gauge_tween: Tween = null
 var progress_label_tween: Tween = null
+var preview_tween: Tween = null
+var preview_frame_tween: Tween = null
 
 func _setup_stage_info() -> void:
 	super._setup_stage_info()
 	_reset_moves_label_emphasis()
 	_reset_score_label_emphasis()
 	_reset_restore_gauge_emphasis()
+	_reset_preview_emphasis()
 
 func _on_retry_pressed() -> void:
 	super._on_retry_pressed()
 	_reset_moves_label_emphasis()
 	_reset_score_label_emphasis()
 	_reset_restore_gauge_emphasis()
+	_reset_preview_emphasis()
 
 func _clear_stage() -> void:
 	super._clear_stage()
@@ -26,8 +30,10 @@ func _resolve_match(indices: Array[int]) -> bool:
 	_play_score_label_emphasis()
 	if score >= CLEAR_SCORE:
 		_play_restore_complete_emphasis()
+		_play_preview_complete_emphasis()
 	else:
 		_play_restore_gauge_emphasis()
+		_play_preview_emphasis()
 	return did_clear
 
 func _update_move_pressure_message() -> void:
@@ -149,3 +155,55 @@ func _reset_restore_gauge_emphasis() -> void:
 	if progress_label != null:
 		progress_label.scale = Vector2.ONE
 		progress_label.modulate = Color(1, 1, 1, 1)
+
+func _play_preview_emphasis() -> void:
+	_play_preview_feedback(1.035, 1.04, Color(1.0, 0.92, 0.58, 1.0), 0.08, 0.16)
+
+func _play_preview_complete_emphasis() -> void:
+	_play_preview_feedback(1.08, 1.10, Color(1.0, 0.98, 0.66, 1.0), 0.12, 0.26)
+
+func _play_preview_feedback(preview_scale: float, frame_scale: float, highlight_color: Color, up_duration: float, down_duration: float) -> void:
+	if still_preview != null:
+		if preview_tween != null:
+			preview_tween.kill()
+		still_preview.pivot_offset = still_preview.size * 0.5
+		preview_tween = create_tween()
+		preview_tween.set_parallel(true)
+		preview_tween.tween_property(still_preview, "scale", Vector2(preview_scale, preview_scale), up_duration)
+		preview_tween.tween_property(still_preview, "modulate", highlight_color, up_duration)
+		preview_tween.set_parallel(false)
+		preview_tween.tween_property(still_preview, "scale", Vector2.ONE, down_duration)
+		preview_tween.tween_property(still_preview, "modulate", Color(1, 1, 1, 1), down_duration)
+		preview_tween.tween_callback(_on_preview_emphasis_finished)
+	if still_preview_frame != null:
+		if preview_frame_tween != null:
+			preview_frame_tween.kill()
+		still_preview_frame.pivot_offset = still_preview_frame.size * 0.5
+		preview_frame_tween = create_tween()
+		preview_frame_tween.set_parallel(true)
+		preview_frame_tween.tween_property(still_preview_frame, "scale", Vector2(frame_scale, frame_scale), up_duration)
+		preview_frame_tween.tween_property(still_preview_frame, "modulate", highlight_color, up_duration)
+		preview_frame_tween.set_parallel(false)
+		preview_frame_tween.tween_property(still_preview_frame, "scale", Vector2.ONE, down_duration)
+		preview_frame_tween.tween_property(still_preview_frame, "modulate", Color(1, 1, 1, 1), down_duration)
+		preview_frame_tween.tween_callback(_on_preview_frame_emphasis_finished)
+
+func _on_preview_emphasis_finished() -> void:
+	preview_tween = null
+
+func _on_preview_frame_emphasis_finished() -> void:
+	preview_frame_tween = null
+
+func _reset_preview_emphasis() -> void:
+	if preview_tween != null:
+		preview_tween.kill()
+		preview_tween = null
+	if preview_frame_tween != null:
+		preview_frame_tween.kill()
+		preview_frame_tween = null
+	if still_preview != null:
+		still_preview.scale = Vector2.ONE
+		still_preview.modulate = Color(1, 1, 1, 1)
+	if still_preview_frame != null:
+		still_preview_frame.scale = Vector2.ONE
+		still_preview_frame.modulate = Color(1, 1, 1, 1)
