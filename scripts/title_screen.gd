@@ -9,9 +9,13 @@ const UI_COLOR_MIRROR_CYAN: Color = Color(0.51, 0.96, 1.0, 1.0)
 
 var progress_panel: PanelContainer = null
 var title_panel_tween: Tween = null
+var menu_intro_tween: Tween = null
+var crystal_tween: Tween = null
+var button_tweens: Dictionary = {}
 
 func _ready() -> void:
 	_add_global_progress_panel()
+	_setup_title_menu_polish()
 
 func _add_global_progress_panel() -> void:
 	_clear_global_progress_panel()
@@ -92,6 +96,73 @@ func _add_global_progress_panel() -> void:
 	box.add_child(character_line)
 
 	_play_status_panel_intro()
+
+func _setup_title_menu_polish() -> void:
+	var menu_root: Control = get_node_or_null("MenuRoot") as Control
+	if menu_root != null:
+		menu_root.modulate = Color(1, 1, 1, 0)
+		menu_root.position += Vector2(0, 14)
+		menu_intro_tween = create_tween()
+		menu_intro_tween.set_parallel(true)
+		menu_intro_tween.tween_property(menu_root, "modulate", Color(1, 1, 1, 1), 0.28)
+		menu_intro_tween.tween_property(menu_root, "position", menu_root.position - Vector2(0, 14), 0.28)
+		menu_intro_tween.set_parallel(false)
+		menu_intro_tween.tween_callback(_on_menu_intro_finished)
+	_setup_title_button_hover("MenuRoot/StartButton")
+	_setup_title_button_hover("MenuRoot/CollectionButton")
+	_setup_title_button_hover("MenuRoot/OptionsButton")
+	_play_selected_crystal_idle()
+
+func _setup_title_button_hover(button_path: String) -> void:
+	var button: TextureButton = get_node_or_null(button_path) as TextureButton
+	if button == null:
+		return
+	button.pivot_offset = button.size * 0.5
+	if not button.mouse_entered.is_connected(_on_title_button_mouse_entered.bind(button)):
+		button.mouse_entered.connect(_on_title_button_mouse_entered.bind(button))
+	if not button.mouse_exited.is_connected(_on_title_button_mouse_exited.bind(button)):
+		button.mouse_exited.connect(_on_title_button_mouse_exited.bind(button))
+
+func _on_title_button_mouse_entered(button: TextureButton) -> void:
+	if button.disabled:
+		return
+	_tween_button_scale(button, Vector2(1.035, 1.035), 0.10)
+
+func _on_title_button_mouse_exited(button: TextureButton) -> void:
+	_tween_button_scale(button, Vector2.ONE, 0.12)
+
+func _tween_button_scale(button: TextureButton, target_scale: Vector2, duration: float) -> void:
+	if button_tweens.has(button):
+		var old_tween: Tween = button_tweens[button]
+		if old_tween != null:
+			old_tween.kill()
+	var tween: Tween = create_tween()
+	button_tweens[button] = tween
+	tween.tween_property(button, "scale", target_scale, duration)
+	tween.tween_callback(_on_button_tween_finished.bind(button))
+
+func _on_button_tween_finished(button: TextureButton) -> void:
+	button_tweens.erase(button)
+
+func _play_selected_crystal_idle() -> void:
+	var crystal: TextureRect = get_node_or_null("MenuRoot/SelectedCrystal") as TextureRect
+	if crystal == null:
+		return
+	if crystal_tween != null:
+		crystal_tween.kill()
+	crystal.pivot_offset = crystal.size * 0.5
+	crystal_tween = create_tween()
+	crystal_tween.set_loops()
+	crystal_tween.set_parallel(true)
+	crystal_tween.tween_property(crystal, "position", crystal.position + Vector2(0, -7), 0.95)
+	crystal_tween.tween_property(crystal, "modulate", Color(1.0, 0.94, 0.72, 0.88), 0.95)
+	crystal_tween.set_parallel(false)
+	crystal_tween.set_parallel(true)
+	crystal_tween.tween_property(crystal, "position", crystal.position, 0.95)
+	crystal_tween.tween_property(crystal, "modulate", Color(1, 1, 1, 1), 0.95)
+
+func _on_menu_intro_finished() -> void:
+	menu_intro_tween = null
 
 func _make_status_panel_style() -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
