@@ -24,7 +24,10 @@ func _clear_stage() -> void:
 func _resolve_match(indices: Array[int]) -> bool:
 	var did_clear: bool = super._resolve_match(indices)
 	_play_score_label_emphasis()
-	_play_restore_gauge_emphasis()
+	if score >= CLEAR_SCORE:
+		_play_restore_complete_emphasis()
+	else:
+		_play_restore_gauge_emphasis()
 	return did_clear
 
 func _update_move_pressure_message() -> void:
@@ -96,17 +99,23 @@ func _reset_score_label_emphasis() -> void:
 		score_label.modulate = Color(1, 1, 1, 1)
 
 func _play_restore_gauge_emphasis() -> void:
+	_play_restore_feedback(1.04, 1.08, Color(1.0, 0.92, 0.52, 1.0), 0.08, 0.14)
+
+func _play_restore_complete_emphasis() -> void:
+	_play_restore_feedback(1.10, 1.16, Color(1.0, 0.98, 0.62, 1.0), 0.12, 0.24)
+
+func _play_restore_feedback(gauge_scale: float, label_scale: float, highlight_color: Color, up_duration: float, down_duration: float) -> void:
 	if gauge != null:
 		if gauge_tween != null:
 			gauge_tween.kill()
 		gauge.pivot_offset = gauge.size * 0.5
 		gauge_tween = create_tween()
 		gauge_tween.set_parallel(true)
-		gauge_tween.tween_property(gauge, "scale", Vector2(1.04, 1.04), 0.08)
-		gauge_tween.tween_property(gauge, "modulate", Color(1.0, 0.92, 0.52, 1.0), 0.08)
+		gauge_tween.tween_property(gauge, "scale", Vector2(gauge_scale, gauge_scale), up_duration)
+		gauge_tween.tween_property(gauge, "modulate", highlight_color, up_duration)
 		gauge_tween.set_parallel(false)
-		gauge_tween.tween_property(gauge, "scale", Vector2.ONE, 0.14)
-		gauge_tween.tween_property(gauge, "modulate", Color(1, 1, 1, 1), 0.14)
+		gauge_tween.tween_property(gauge, "scale", Vector2.ONE, down_duration)
+		gauge_tween.tween_property(gauge, "modulate", Color(1, 1, 1, 1), down_duration)
 		gauge_tween.tween_callback(_on_restore_gauge_emphasis_finished)
 	if progress_label != null:
 		if progress_label_tween != null:
@@ -114,11 +123,11 @@ func _play_restore_gauge_emphasis() -> void:
 		progress_label.pivot_offset = progress_label.size * 0.5
 		progress_label_tween = create_tween()
 		progress_label_tween.set_parallel(true)
-		progress_label_tween.tween_property(progress_label, "scale", Vector2(1.08, 1.08), 0.08)
-		progress_label_tween.tween_property(progress_label, "modulate", Color(1.0, 0.92, 0.52, 1.0), 0.08)
+		progress_label_tween.tween_property(progress_label, "scale", Vector2(label_scale, label_scale), up_duration)
+		progress_label_tween.tween_property(progress_label, "modulate", highlight_color, up_duration)
 		progress_label_tween.set_parallel(false)
-		progress_label_tween.tween_property(progress_label, "scale", Vector2.ONE, 0.12)
-		progress_label_tween.tween_property(progress_label, "modulate", Color(1, 1, 1, 1), 0.12)
+		progress_label_tween.tween_property(progress_label, "scale", Vector2.ONE, down_duration)
+		progress_label_tween.tween_property(progress_label, "modulate", Color(1, 1, 1, 1), down_duration)
 		progress_label_tween.tween_callback(_on_progress_label_emphasis_finished)
 
 func _on_restore_gauge_emphasis_finished() -> void:
