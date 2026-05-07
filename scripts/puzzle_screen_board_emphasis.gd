@@ -1,15 +1,20 @@
 extends "res://scripts/puzzle_screen_status_emphasis.gd"
 
+const COLLECTION_TRANSITION_EXTRA_DELAY: float = 0.85
+
 var board_frame_tween: Tween = null
 var retry_button_tween: Tween = null
+var collection_transition_delay_started: bool = false
 
 func _setup_stage_info() -> void:
 	super._setup_stage_info()
+	collection_transition_delay_started = false
 	_reset_board_frame_emphasis()
 	_reset_retry_button_emphasis()
 
 func _on_retry_pressed() -> void:
 	super._on_retry_pressed()
+	collection_transition_delay_started = false
 	_reset_board_frame_emphasis()
 	_reset_retry_button_emphasis()
 
@@ -17,6 +22,15 @@ func _clear_stage() -> void:
 	super._clear_stage()
 	_reset_board_frame_emphasis()
 	_reset_retry_button_emphasis()
+
+func _go_to_collection() -> void:
+	if collection_transition_delay_started:
+		return
+	collection_transition_delay_started = true
+	get_tree().create_timer(COLLECTION_TRANSITION_EXTRA_DELAY).timeout.connect(_go_to_collection_after_clear_delay)
+
+func _go_to_collection_after_clear_delay() -> void:
+	get_tree().change_scene_to_file("res://scenes/collection/collection.tscn")
 
 func _update_move_pressure_message() -> void:
 	super._update_move_pressure_message()
