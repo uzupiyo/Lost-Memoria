@@ -1,11 +1,17 @@
 extends "res://scripts/puzzle_screen_board_emphasis.gd"
 
+const RIN_LONG_CHAIN_MIN: int = 5
+const RIN_LONG_CHAIN_BONUS_PER_EXTRA: int = 2
+
 var stage_clear_score: int = 30
 var stage_move_limit: int = 25
 var passive_message_tween: Tween = null
+var passive_effect_tween: Tween = null
+var moka_recovery_used: bool = false
 
 func _setup_stage_info() -> void:
 	_apply_stage_rules()
+	moka_recovery_used = false
 	super._setup_stage_info()
 	_apply_stage_rule_labels()
 	_apply_stage_opening_message()
@@ -14,6 +20,7 @@ func _setup_stage_info() -> void:
 func _on_retry_pressed() -> void:
 	super._on_retry_pressed()
 	_apply_stage_rules()
+	moka_recovery_used = false
 	moves = stage_move_limit
 	gauge.max_value = stage_clear_score
 	gauge.value = 0
@@ -25,11 +32,15 @@ func _on_retry_pressed() -> void:
 
 func _on_hint_pressed() -> void:
 	sd_message_label.text = _stage_hint_message(character_name_label.text, GameState.selected_stage_index)
+	if character_name_label.text == "Kaede":
+		_play_passive_effect_popup("おちつきヒント\n盤面をゆっくり見てみましょう", Color(0.72, 1.0, 0.78, 1.0))
+		_play_board_frame_feedback(1.025, Color(0.80, 1.0, 0.82, 1.0), 0.10, 0.22)
 
 func _clear_stage() -> void:
 	var character_id: String = character_name_label.text
 	var stage_index: int = GameState.selected_stage_index
 	_clear_passive_intro_message()
+	_clear_passive_effect_popup()
 	super._clear_stage()
 	sd_message_label.text = _stage_clear_message(character_id, stage_index)
 
@@ -103,16 +114,73 @@ func _clear_passive_intro_message() -> void:
 	if popup != null:
 		popup.queue_free()
 
+func _play_passive_effect_popup(text_value: String, font_color: Color) -> void:
+	_clear_passive_effect_popup()
+	var popup: Label = Label.new()
+	popup.name = "PassiveEffectPopup"
+	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	popup.text = text_value
+	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	popup.add_theme_font_size_override("font_size", 30)
+	popup.add_theme_color_override("font_color", font_color)
+	popup.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.16, 1.0))
+	popup.add_theme_constant_override("outline_size", 7)
+	popup.custom_minimum_size = Vector2(380, 92)
+	popup.modulate = Color(1, 1, 1, 0)
+	add_child(popup)
+	move_child(popup, get_child_count() - 1)
+	var center_position: Vector2 = board.global_position + board.size * 0.5
+	popup.global_position = center_position - Vector2(190, 198)
+	popup.pivot_offset = popup.custom_minimum_size * 0.5
+	popup.scale = Vector2(0.82, 0.82)
+	passive_effect_tween = create_tween()
+	passive_effect_tween.set_parallel(true)
+	passive_effect_tween.tween_property(popup, "modulate", Color(1, 1, 1, 1), 0.10)
+	passive_effect_tween.tween_property(popup, "scale", Vector2(1.08, 1.08), 0.12)
+	passive_effect_tween.tween_property(popup, "position", popup.position + Vector2(0, -18), 0.46)
+	passive_effect_tween.set_parallel(false)
+	passive_effect_tween.tween_property(popup, "modulate", Color(1, 1, 1, 0), 0.24)
+	passive_effect_tween.tween_callback(_clear_passive_effect_popup)
+
+func _clear_passive_effect_popup() -> void:
+	if passive_effect_tween != null:
+		passive_effect_tween.kill()
+		passive_effect_tween = null
+	var popup: Node = get_node_or_null("PassiveEffectPopup")
+	if popup != null:
+		popup.queue_free()
+
 func _passive_intro_text(character_id: String) -> String:
 	match character_id:
 		"Rin":
-			return "Rin Passive: Long Chain Bonus"
+			return "Rin Passive: ロングチェインボーナス"
 		"Moka":
-			return "Moka Passive: Gentle Recovery"
+			return "Moka Passive: ふわふわリカバー"
 		"Kaede":
-			return "Kaede Passive: Calm Hint"
+			return "Kaede Passive: おちつきヒント"
 		_:
 			return ""
+
+func _get_rin_long_chain_bonus(match_count: int) -> int:
+	if character_name_label.text != "Rin":
+		return 0
+	if match_count < RIN_LONG_CHAIN_MIN:
+		return 0
+	return (match_count - RIN_LONG_CHAIN_MIN + 1) * RIN_LONG_CHAIN_BONUS_PER_EXTRA
+
+func _try_moka_recovery() -> bool:
+	if character_name_label.text != "Moka":
+		return false
+	if moka_recovery_used:
+		return false
+	if moves > 0:
+		return false
+	if score >= stage_clear_score:
+		return false
+	moka_recovery_used = true
+	moves += 1
+	return true
 
 func _stage_opening_message(character_id: String, stage_index: int) -> String:
 	match character_id:
@@ -267,13 +335,15 @@ func _kaede_stage_clear_message(stage_index: int) -> String:
 func _resolve_match(indices: Array[int]) -> bool:
 	var current_combo: int = _register_combo()
 	var combo_bonus: int = max(0, current_combo - 1) * COMBO_SCORE_BONUS_PER_STEP
+	var rin_passive_bonus: int = _get_rin_long_chain_bonus(indices.size())
 	var removed: Dictionary = {}
 	var index_cursor: int = 0
 	while index_cursor < indices.size():
 		removed[indices[index_cursor]] = true
 		index_cursor += 1
-	score += indices.size() + combo_bonus
+	score += indices.size() + combo_bonus + rin_passive_bonus
 	moves = max(0, moves - 1)
+	var recovered_by_moka: bool = _try_moka_recovery()
 	gauge.value = min(score, stage_clear_score)
 	var percent: int = int(float(min(score, stage_clear_score)) / float(stage_clear_score) * 100.0)
 	moves_label.text = "MOVES\n%d" % moves
@@ -286,6 +356,11 @@ func _resolve_match(indices: Array[int]) -> bool:
 	_play_combo_popup(current_combo)
 	_play_score_label_emphasis()
 	_play_sd_combo_emphasis()
+	if rin_passive_bonus > 0:
+		_play_passive_effect_popup("ロングチェインボーナス\n+%d" % rin_passive_bonus, Color(1.0, 0.94, 0.54, 1.0))
+	if recovered_by_moka:
+		_play_passive_effect_popup("ふわふわリカバー\n+1 MOVE", Color(0.76, 0.94, 1.0, 1.0))
+		_play_moves_label_emphasis(Color(0.76, 0.94, 1.0, 1.0), 1.18)
 	if score >= stage_clear_score:
 		_clear_stage()
 		_play_restore_complete_emphasis()
