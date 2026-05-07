@@ -10,6 +10,7 @@ func _setup_stage_info() -> void:
 	no_moves_popup_played = false
 	stage_clear_popup_played = false
 	low_moves_popup_last_moves = -1
+	position = Vector2.ZERO
 	sd_message_label.text = _opening_message(character_name_label.text)
 
 func _on_retry_pressed() -> void:
@@ -18,6 +19,7 @@ func _on_retry_pressed() -> void:
 	no_moves_popup_played = false
 	stage_clear_popup_played = false
 	low_moves_popup_last_moves = -1
+	position = Vector2.ZERO
 	sd_message_label.text = _opening_message(character_name_label.text)
 
 func _on_hint_pressed() -> void:
@@ -56,11 +58,20 @@ func _clear_named_popup(node_name: String) -> void:
 	if popup != null:
 		popup.queue_free()
 
+func _play_screen_shake(strength: float) -> void:
+	position = Vector2.ZERO
+	var tween: Tween = create_tween()
+	tween.tween_property(self, "position", Vector2(strength, 0), 0.025)
+	tween.tween_property(self, "position", Vector2(-strength, 0), 0.04)
+	tween.tween_property(self, "position", Vector2(strength * 0.55, 0), 0.035)
+	tween.tween_property(self, "position", Vector2.ZERO, 0.04)
+
 func _play_low_moves_popup(remaining_moves: int) -> void:
 	if low_moves_popup_last_moves == remaining_moves:
 		return
 	low_moves_popup_last_moves = remaining_moves
 	_clear_named_popup("LowMovesPopup")
+	_play_screen_shake(2.5)
 	var popup: Label = Label.new()
 	popup.name = "LowMovesPopup"
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -93,6 +104,7 @@ func _play_stage_clear_popup() -> void:
 		return
 	stage_clear_popup_played = true
 	_clear_named_popup("StageClearPopup")
+	_play_screen_shake(3.0)
 	var popup: Label = Label.new()
 	popup.name = "StageClearPopup"
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -123,6 +135,7 @@ func _play_no_moves_popup() -> void:
 		return
 	no_moves_popup_played = true
 	_clear_named_popup("NoMovesPopup")
+	_play_screen_shake(5.0)
 	var popup: Label = Label.new()
 	popup.name = "NoMovesPopup"
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
