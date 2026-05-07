@@ -20,6 +20,9 @@ const SD_MAX_ACTION_FRAMES: int = 4
 const CLEAR_FLASH_PEAK_ALPHA: float = 0.38
 const MATCH_EFFECT_DELAY: float = 0.16
 const MATCH_EFFECT_SCALE: Vector2 = Vector2(1.12, 1.12)
+const REFILL_DROP_OFFSET_Y: float = -18.0
+const REFILL_ROW_STAGGER: float = 0.018
+const REFILL_ANIM_DURATION: float = 0.16
 
 const DROP_PATHS: Array[String] = [
 	"res://assets/puzzle/drops/memory_orb_red.png",
@@ -304,6 +307,21 @@ func _play_match_cell_effect(indices: Array[int]) -> void:
 			tween.tween_property(piece, "scale", Vector2.ONE, 0.08)
 		cursor += 1
 
+func _play_refill_effect() -> void:
+	var i: int = 0
+	while i < piece_controls.size():
+		var piece: PanelContainer = piece_controls[i]
+		var original_position: Vector2 = piece.position
+		var row: int = int(i / BOARD_SIZE)
+		piece.position = original_position + Vector2(0, REFILL_DROP_OFFSET_Y)
+		piece.modulate = Color(1, 1, 1, 0.0)
+		var tween: Tween = create_tween()
+		tween.tween_interval(float(row) * REFILL_ROW_STAGGER)
+		tween.set_parallel(true)
+		tween.tween_property(piece, "position", original_position, REFILL_ANIM_DURATION)
+		tween.tween_property(piece, "modulate", Color(1, 1, 1, 1), REFILL_ANIM_DURATION)
+		i += 1
+
 func _play_match_popup(match_count: int) -> void:
 	var popup: Label = Label.new()
 	popup.name = "MatchPopup"
@@ -488,6 +506,8 @@ func _resolve_match(indices: Array[int]) -> bool:
 	return false
 
 func _drop_and_refill(removed: Dictionary) -> void:
+	selected_indices.clear()
+	selected_color = -1
 	var col: int = 0
 	while col < BOARD_SIZE:
 		var kept: Array[int] = []
@@ -507,6 +527,7 @@ func _drop_and_refill(removed: Dictionary) -> void:
 			row -= 1
 		col += 1
 	_update_board_view()
+	_play_refill_effect()
 
 func _get_piece_index_at_position(global_position: Vector2) -> int:
 	var i: int = 0
