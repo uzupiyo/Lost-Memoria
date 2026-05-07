@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://scripts/puzzle_screen_stage_rules.gd" id="1_puzzle"]
+[ext_resource type="Script" path="res://scripts/puzzle_screen_memory_burst.gd" id="1_puzzle"]
 [ext_resource type="Theme" path="res://assets/ui/theme/main_theme.tres" id="2_theme"]
 
 [node name="Puzzle" type="Control"]
