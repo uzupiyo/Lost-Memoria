@@ -1,5 +1,54 @@
 extends "res://scripts/puzzle_screen.gd"
 
+func _setup_stage_info() -> void:
+	super._setup_stage_info()
+	sd_message_label.text = _opening_message(character_name_label.text)
+
+func _on_retry_pressed() -> void:
+	super._on_retry_pressed()
+	sd_message_label.text = _opening_message(character_name_label.text)
+
+func _on_hint_pressed() -> void:
+	sd_message_label.text = _hint_message(character_name_label.text)
+
+func _clear_stage() -> void:
+	var character_id: String = character_name_label.text
+	super._clear_stage()
+	sd_message_label.text = _clear_message(character_id)
+
+func _opening_message(character_id: String) -> String:
+	match character_id:
+		"Rin":
+			return "一緒に、記憶の欠片を集めましょう。"
+		"Moka":
+			return "よーし、どんどん欠片を集めていこう！"
+		"Kaede":
+			return "落ち着いて進めましょう。ひとつずつ戻せば大丈夫です。"
+		_:
+			return "一緒に、記憶の欠片を集めましょう。"
+
+func _hint_message(character_id: String) -> String:
+	match character_id:
+		"Rin":
+			return "同じ色を3つ以上、ななめにもつなげられます。焦らず大きくつなげましょう。"
+		"Moka":
+			return "ななめもOKだよ！ いっぱいつなげたら一気に進めるかも！"
+		"Kaede":
+			return "同じ色はななめにも接続できます。盤面全体を見て、長い道を探しましょう。"
+		_:
+			return "同じ色を3つ以上、ななめにもつなげられます。"
+
+func _clear_message(character_id: String) -> String:
+	match character_id:
+		"Rin":
+			return "記憶の欠片が、またひとつ戻りました。"
+		"Moka":
+			return "やったね！ 記憶の欠片、ばっちり戻ったよ！"
+		"Kaede":
+			return "よくできました。記憶が静かに戻ってきています。"
+		_:
+			return "記憶の欠片が、またひとつ戻りました。"
+
 func _update_sd_combo_message(current_combo: int) -> void:
 	var character_id: String = character_name_label.text
 	match character_id:
