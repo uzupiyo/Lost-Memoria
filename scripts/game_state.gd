@@ -61,6 +61,7 @@ func _add_still_series(character: String, situation: String, count: int) -> void
 			"title": "%s %s %s" % [character, situation, number_text],
 			"image_path": "res://assets/stills/%s/%s/%s_%s_%s.webp" % [character, situation, character, situation, number_text],
 			"unlocked_stages": 0,
+			"stage_ranks": {},
 			"total_stages": STILL_STAGE_COUNT
 		}
 		index += 1
@@ -124,15 +125,55 @@ func clear_selected_stage() -> void:
 	unlock_stage(selected_still_id, selected_stage_index)
 	set_collection_focus(selected_still_id)
 
+func clear_selected_stage_with_rank(rank: String) -> void:
+	unlock_stage_with_rank(selected_still_id, selected_stage_index, rank)
+	set_collection_focus(selected_still_id)
+
 func unlock_stage(still_id: String, stage_index: int) -> void:
+	unlock_stage_with_rank(still_id, stage_index, "")
+
+func unlock_stage_with_rank(still_id: String, stage_index: int, rank: String) -> void:
 	if not stills.has(still_id):
 		return
 	var data: Dictionary = stills[still_id]
 	var current: int = int(data.get("unlocked_stages", 0))
 	var next_value: int = max(current, stage_index + 1)
 	data["unlocked_stages"] = clamp(next_value, 0, int(data.get("total_stages", STILL_STAGE_COUNT)))
+	if not rank.is_empty():
+		var stage_ranks: Dictionary = data.get("stage_ranks", {})
+		var key: String = str(stage_index)
+		var previous_rank: String = str(stage_ranks.get(key, ""))
+		stage_ranks[key] = _better_rank(previous_rank, rank)
+		data["stage_ranks"] = stage_ranks
 	stills[still_id] = data
 	SaveManager.save_game()
+
+func get_stage_rank(still_id: String, stage_index: int) -> String:
+	var data: Dictionary = get_still_data(still_id)
+	if data.is_empty():
+		return ""
+	var stage_ranks: Dictionary = data.get("stage_ranks", {})
+	return str(stage_ranks.get(str(stage_index), ""))
+
+func _better_rank(old_rank: String, new_rank: String) -> String:
+	if old_rank.is_empty():
+		return new_rank
+	if _rank_value(new_rank) > _rank_value(old_rank):
+		return new_rank
+	return old_rank
+
+func _rank_value(rank: String) -> int:
+	match rank:
+		"S":
+			return 4
+		"A":
+			return 3
+		"B":
+			return 2
+		"C":
+			return 1
+		_:
+			return 0
 
 func select_stage(still_id: String, stage_index: int) -> void:
 	selected_still_id = still_id
