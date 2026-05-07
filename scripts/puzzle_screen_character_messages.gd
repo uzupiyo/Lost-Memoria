@@ -178,7 +178,7 @@ func _low_moves_popup_text(character_id: String, remaining_moves: int) -> String
 		"Rin":
 			return "LAST %d MOVES\nDON'T GIVE UP" % remaining_moves
 		"Moka":
-			return "LAST %d MOVES!\nGO GO!" % remaining_moves
+			return "LAST %d MOVES\nSLOWLY..." % remaining_moves
 		"Kaede":
 			return "LAST %d MOVES\nSTAY CALM" % remaining_moves
 		_:
@@ -189,7 +189,7 @@ func _stage_clear_popup_text(character_id: String) -> String:
 		"Rin":
 			return "STAGE CLEAR\nMEMORY GET!"
 		"Moka":
-			return "CLEAR!\nNICE MEMORY!"
+			return "CLEAR...!\nKIRA KIRA"
 		"Kaede":
 			return "STAGE CLEAR\nMEMORY STABILIZED"
 		_:
@@ -200,7 +200,7 @@ func _no_moves_popup_text(character_id: String) -> String:
 		"Rin":
 			return "NO MOVES\nTRY AGAIN"
 		"Moka":
-			return "NO MOVES\nREVENGE!"
+			return "NO MOVES\nONE MORE...?"
 		"Kaede":
 			return "NO MOVES\nRETRY CALMLY"
 		_:
@@ -211,7 +211,7 @@ func _opening_message(character_id: String) -> String:
 		"Rin":
 			return "記憶の欠片、ウチと一緒に集めよ！"
 		"Moka":
-			return "よーし、どんどん欠片を集めていこう！"
+			return "えへへ、欠片さん、いっしょに集めよぉ。"
 		"Kaede":
 			return "落ち着いて進めましょう。ひとつずつ戻せば大丈夫です。"
 		_:
@@ -222,7 +222,7 @@ func _hint_message(character_id: String) -> String:
 		"Rin":
 			return "同じ色を3つ以上ね！ ななめもいけるから、でっかくつなげよ！"
 		"Moka":
-			return "ななめもOKだよ！ いっぱいつなげたら一気に進めるかも！"
+			return "ななめも、つながるよぉ。ゆっくり、ながーくしてみよ？"
 		"Kaede":
 			return "同じ色はななめにも接続できます。盤面全体を見て、長い道を探しましょう。"
 		_:
@@ -233,7 +233,7 @@ func _clear_message(character_id: String) -> String:
 		"Rin":
 			return "やったじゃん！ 記憶の欠片、またひとつ戻ったよ！"
 		"Moka":
-			return "やったね！ 記憶の欠片、ばっちり戻ったよ！"
+			return "わぁい、欠片さん戻ったねぇ。きらきらだぁ。"
 		"Kaede":
 			return "よくできました。記憶が静かに戻ってきています。"
 		_:
@@ -244,7 +244,7 @@ func _low_moves_message(character_id: String, remaining_moves: int) -> String:
 		"Rin":
 			return "あと%d手！ まだ全然いけるっしょ、でっかくつなげよ！" % remaining_moves
 		"Moka":
-			return "あと%d手！ ここから大逆転、狙っていこう！" % remaining_moves
+			return "あと%d手だよぉ。あわてないで、そーっと探そ？" % remaining_moves
 		"Kaede":
 			return "残り%d手です。無理に急がず、確実につながる場所を選びましょう。" % remaining_moves
 		_:
@@ -255,7 +255,7 @@ func _no_moves_message(character_id: String) -> String:
 		"Rin":
 			return "手数なくなっちゃった！ Retryで、もっかいいこ！"
 		"Moka":
-			return "うーん、今回はここまで！ Retryでリベンジしよ！"
+			return "あぅ……手数なくなっちゃったぁ。もういっかい、する？"
 		"Kaede":
 			return "手数切れです。盤面を見直して、もう一度落ち着いて挑みましょう。"
 		_:
@@ -283,11 +283,11 @@ func _update_rin_combo_message(current_combo: int) -> void:
 
 func _update_moka_combo_message(current_combo: int) -> void:
 	if current_combo >= 5:
-		sd_message_label.text = "すごいすごい！ この勢いなら全部思い出せそう！"
+		sd_message_label.text = "ふわぁ……いっぱいつながったねぇ。すごいねぇ。"
 	elif current_combo >= 3:
-		sd_message_label.text = "きてるよ！ 記憶の欠片がどんどん集まってる！"
+		sd_message_label.text = "きらきら、集まってきたよぉ。ぽかぽかするね。"
 	elif current_combo >= 2:
-		sd_message_label.text = "やった、連続だね！ そのままいこう！"
+		sd_message_label.text = "えへへ、つながったぁ。もういっこ、いけるかなぁ？"
 
 func _update_kaede_combo_message(current_combo: int) -> void:
 	if current_combo >= 5:
