@@ -25,7 +25,7 @@ func _build_stage_list() -> void:
 		var percent: int = GameState.get_unlock_percent(still_id)
 
 		var panel: PanelContainer = PanelContainer.new()
-		panel.custom_minimum_size = Vector2(0, 132)
+		panel.custom_minimum_size = Vector2(0, 156)
 		still_list.add_child(panel)
 
 		var row: VBoxContainer = VBoxContainer.new()
@@ -40,16 +40,18 @@ func _build_stage_list() -> void:
 		unlock_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		row.add_child(unlock_label)
 
+		var mastery_label: Label = Label.new()
+		mastery_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		row.add_child(mastery_label)
+
 		var button_row: HBoxContainer = HBoxContainer.new()
 		button_row.alignment = BoxContainer.ALIGNMENT_CENTER
 		row.add_child(button_row)
 
 		var total_stages: int = int(data.get("total_stages", GameState.STILL_STAGE_COUNT))
 		var unlocked_stages: int = int(data.get("unlocked_stages", 0))
-		if unlocked_stages >= total_stages:
-			unlock_label.text = "COMPLETE - Full memory unlocked"
-		else:
-			unlock_label.text = "Next unlock: Stage %d" % (unlocked_stages + 1)
+		unlock_label.text = _unlock_status_text(unlocked_stages, total_stages)
+		mastery_label.text = _mastery_status_text(still_id, unlocked_stages, total_stages)
 		var stage_index: int = 0
 		while stage_index < total_stages:
 			var button: Button = Button.new()
@@ -59,6 +61,31 @@ func _build_stage_list() -> void:
 			button_row.add_child(button)
 			stage_index += 1
 		still_index += 1
+
+func _unlock_status_text(unlocked_stages: int, total_stages: int) -> String:
+	if unlocked_stages >= total_stages:
+		return "COMPLETE - Full memory unlocked"
+	return "Next unlock: Stage %d" % (unlocked_stages + 1)
+
+func _mastery_status_text(still_id: String, unlocked_stages: int, total_stages: int) -> String:
+	if unlocked_stages <= 0:
+		return "Mastery: Not started"
+	var s_count: int = _rank_count(still_id, total_stages, "S")
+	var cleared_count: int = min(unlocked_stages, total_stages)
+	if cleared_count >= total_stages and s_count >= total_stages:
+		return "Mastery: PERFECT MEMORY - All S"
+	if cleared_count >= total_stages:
+		return "Mastery: Complete / S Ranks %d/%d" % [s_count, total_stages]
+	return "Mastery: S Ranks %d/%d" % [s_count, total_stages]
+
+func _rank_count(still_id: String, total_stages: int, target_rank: String) -> int:
+	var count: int = 0
+	var stage_index: int = 0
+	while stage_index < total_stages:
+		if GameState.get_stage_rank(still_id, stage_index) == target_rank:
+			count += 1
+		stage_index += 1
+	return count
 
 func _stage_button_text(still_id: String, stage_index: int, unlocked_stages: int) -> String:
 	var rank: String = GameState.get_stage_rank(still_id, stage_index)
