@@ -1,17 +1,20 @@
 extends "res://scripts/puzzle_screen.gd"
 
 var no_moves_popup_played: bool = false
+var stage_clear_popup_played: bool = false
 
 func _setup_stage_info() -> void:
 	super._setup_stage_info()
-	_clear_no_moves_popup()
+	_clear_result_popups()
 	no_moves_popup_played = false
+	stage_clear_popup_played = false
 	sd_message_label.text = _opening_message(character_name_label.text)
 
 func _on_retry_pressed() -> void:
 	super._on_retry_pressed()
-	_clear_no_moves_popup()
+	_clear_result_popups()
 	no_moves_popup_played = false
+	stage_clear_popup_played = false
 	sd_message_label.text = _opening_message(character_name_label.text)
 
 func _on_hint_pressed() -> void:
@@ -21,6 +24,7 @@ func _clear_stage() -> void:
 	var character_id: String = character_name_label.text
 	super._clear_stage()
 	sd_message_label.text = _clear_message(character_id)
+	_play_stage_clear_popup()
 
 func _finish_match_resolution(removed: Dictionary) -> void:
 	super._finish_match_resolution(removed)
@@ -38,16 +42,50 @@ func _update_move_pressure_message() -> void:
 	if moves <= 5:
 		sd_message_label.text = _low_moves_message(character_id, moves)
 
-func _clear_no_moves_popup() -> void:
-	var popup: Node = get_node_or_null("NoMovesPopup")
+func _clear_result_popups() -> void:
+	_clear_named_popup("NoMovesPopup")
+	_clear_named_popup("StageClearPopup")
+
+func _clear_named_popup(node_name: String) -> void:
+	var popup: Node = get_node_or_null(node_name)
 	if popup != null:
 		popup.queue_free()
+
+func _play_stage_clear_popup() -> void:
+	if stage_clear_popup_played:
+		return
+	stage_clear_popup_played = true
+	_clear_named_popup("StageClearPopup")
+	var popup: Label = Label.new()
+	popup.name = "StageClearPopup"
+	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	popup.text = "STAGE CLEAR\nMEMORY RESTORED"
+	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	popup.add_theme_font_size_override("font_size", 40)
+	popup.add_theme_color_override("font_color", Color(1.0, 0.92, 0.48, 1.0))
+	popup.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.16, 1.0))
+	popup.add_theme_constant_override("outline_size", 8)
+	popup.custom_minimum_size = Vector2(360, 120)
+	popup.modulate = Color(1, 1, 1, 0)
+	add_child(popup)
+	move_child(popup, get_child_count() - 1)
+	var center_position: Vector2 = board.global_position + board.size * 0.5
+	popup.global_position = center_position - Vector2(180, 86)
+	popup.pivot_offset = popup.custom_minimum_size * 0.5
+	popup.scale = Vector2(0.82, 0.82)
+	var tween: Tween = create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(popup, "modulate", Color(1, 1, 1, 1), 0.10)
+	tween.tween_property(popup, "scale", Vector2(1.10, 1.10), 0.16)
+	tween.set_parallel(false)
+	tween.tween_property(popup, "scale", Vector2.ONE, 0.14)
 
 func _play_no_moves_popup() -> void:
 	if no_moves_popup_played:
 		return
 	no_moves_popup_played = true
-	_clear_no_moves_popup()
+	_clear_named_popup("NoMovesPopup")
 	var popup: Label = Label.new()
 	popup.name = "NoMovesPopup"
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
