@@ -23,6 +23,8 @@ const MATCH_EFFECT_SCALE: Vector2 = Vector2(1.12, 1.12)
 const REFILL_DROP_OFFSET_Y: float = -18.0
 const REFILL_ROW_STAGGER: float = 0.018
 const REFILL_ANIM_DURATION: float = 0.16
+const COMBO_TIMEOUT: float = 2.4
+const COMBO_SCORE_BONUS_PER_STEP: int = 1
 
 const DROP_PATHS: Array[String] = [
 	"res://assets/puzzle/drops/memory_orb_red.png",
@@ -49,6 +51,8 @@ var is_resolving_match: bool = false
 var has_cleared: bool = false
 var pending_scene_change: bool = false
 var drop_textures: Dictionary = {}
+var combo_count: int = 0
+var combo_timer: float = 0.0
 var sd_idle_time: float = 0.0
 var sd_frame_timer: float = 0.0
 var sd_idle_frame_index: int = 0
@@ -198,11 +202,27 @@ func _load_sd_textures_for_action(character_id: String, action_name: String, max
 
 func _process(delta: float) -> void:
 	_update_sd_animation(delta)
+	_update_combo_timer(delta)
 	if has_cleared or is_resolving_match or not is_selecting:
 		return
 	var hovered_index: int = _get_piece_index_at_position(get_global_mouse_position())
 	if hovered_index >= 0:
 		_try_add_to_selection(hovered_index)
+
+func _update_combo_timer(delta: float) -> void:
+	if combo_timer <= 0.0:
+		return
+	combo_timer = max(0.0, combo_timer - delta)
+	if combo_timer <= 0.0:
+		combo_count = 0
+
+func _register_combo() -> int:
+	if combo_timer > 0.0:
+		combo_count += 1
+	else:
+		combo_count = 1
+	combo_timer = COMBO_TIMEOUT
+	return combo_count
 
 func _update_sd_animation(delta: float) -> void:
 	if not sd_has_base_position:
@@ -323,22 +343,32 @@ func _play_refill_effect() -> void:
 		i += 1
 
 func _play_match_popup(match_count: int) -> void:
+	_play_floating_text(_match_popup_text(match_count), board.global_position + board.size * 0.5 - Vector2(130, 70), 42, Color(1.0, 0.92, 0.48, 1.0))
+
+func _play_combo_popup(current_combo: int) -> void:
+	if current_combo <= 1:
+		return
+	var text: String = "%d COMBO" % current_combo
+	if current_combo >= 5:
+		text = "%d COMBO!\nCHAIN" % current_combo
+	_play_floating_text(text, board.global_position + board.size * 0.5 - Vector2(130, -8), 34, Color(0.75, 0.95, 1.0, 1.0))
+
+func _play_floating_text(text: String, global_pos: Vector2, font_size: int, font_color: Color) -> void:
 	var popup: Label = Label.new()
-	popup.name = "MatchPopup"
+	popup.name = "FloatingText"
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	popup.text = _match_popup_text(match_count)
+	popup.text = text
 	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	popup.add_theme_font_size_override("font_size", 42)
-	popup.add_theme_color_override("font_color", Color(1.0, 0.92, 0.48, 1.0))
+	popup.add_theme_font_size_override("font_size", font_size)
+	popup.add_theme_color_override("font_color", font_color)
 	popup.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.16, 1.0))
 	popup.add_theme_constant_override("outline_size", 8)
 	popup.custom_minimum_size = Vector2(260, 80)
 	popup.modulate = Color(1, 1, 1, 0)
 	add_child(popup)
 	move_child(popup, get_child_count() - 1)
-	var center_position: Vector2 = board.global_position + board.size * 0.5
-	popup.global_position = center_position - Vector2(130, 70)
+	popup.global_position = global_pos
 	popup.pivot_offset = popup.custom_minimum_size * 0.5
 	popup.scale = Vector2(0.85, 0.85)
 	var tween: Tween = create_tween()
@@ -483,12 +513,14 @@ func _finish_selection() -> void:
 	_update_board_view()
 
 func _resolve_match(indices: Array[int]) -> bool:
+	var current_combo: int = _register_combo()
+	var combo_bonus: int = max(0, current_combo - 1) * COMBO_SCORE_BONUS_PER_STEP
 	var removed: Dictionary = {}
 	var index_cursor: int = 0
 	while index_cursor < indices.size():
 		removed[indices[index_cursor]] = true
 		index_cursor += 1
-	score += indices.size()
+	score += indices.size() + combo_bonus
 	moves = max(0, moves - 1)
 	gauge.value = min(score, CLEAR_SCORE)
 	var percent: int = int(float(min(score, CLEAR_SCORE)) / float(CLEAR_SCORE) * 100.0)
@@ -498,6 +530,7 @@ func _resolve_match(indices: Array[int]) -> bool:
 	_play_sd_match_feedback()
 	_play_match_cell_effect(indices)
 	_play_match_popup(indices.size())
+	_play_combo_popup(current_combo)
 	if score >= CLEAR_SCORE:
 		_clear_stage()
 		return true
@@ -612,6 +645,8 @@ func _clear_stage() -> void:
 	has_cleared = true
 	is_selecting = false
 	is_resolving_match = false
+	combo_count = 0
+	combo_timer = 0.0
 	selected_indices.clear()
 	selected_color = -1
 	sd_message_label.text = "記憶の欠片が、またひとつ戻りました。"
@@ -634,6 +669,8 @@ func _on_retry_pressed() -> void:
 	has_cleared = false
 	pending_scene_change = false
 	is_resolving_match = false
+	combo_count = 0
+	combo_timer = 0.0
 	gauge.value = 0
 	moves_label.text = "MOVES\n%d" % moves
 	score_label.text = "SCORE\n0"
