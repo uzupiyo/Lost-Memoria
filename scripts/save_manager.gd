@@ -4,12 +4,15 @@ const SAVE_PATH := "user://lost_memoria_save.json"
 
 func save_game() -> void:
 	var progress := {}
+	var stage_ranks := {}
 	for still_id in GameState.stills.keys():
 		var data: Dictionary = GameState.stills[still_id]
 		progress[still_id] = int(data.get("unlocked_stages", 0))
+		stage_ranks[still_id] = data.get("stage_ranks", {})
 	var save_data := {
-		"version": 1,
-		"progress": progress
+		"version": 2,
+		"progress": progress,
+		"stage_ranks": stage_ranks
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
@@ -30,7 +33,6 @@ func load_game() -> void:
 		return
 	var progress = parsed.get("progress", {})
 	if typeof(progress) != TYPE_DICTIONARY:
-		# Backward compatibility for earlier prototype saves.
 		progress = _convert_legacy_still_save(parsed.get("stills", {}))
 	if typeof(progress) == TYPE_DICTIONARY:
 		for still_id in progress.keys():
@@ -38,6 +40,13 @@ func load_game() -> void:
 				var current: Dictionary = GameState.stills[still_id]
 				var total := int(current.get("total_stages", GameState.STILL_STAGE_COUNT))
 				current["unlocked_stages"] = clamp(int(progress[still_id]), 0, total)
+				GameState.stills[still_id] = current
+	var stage_ranks = parsed.get("stage_ranks", {})
+	if typeof(stage_ranks) == TYPE_DICTIONARY:
+		for still_id in stage_ranks.keys():
+			if GameState.stills.has(still_id) and typeof(stage_ranks[still_id]) == TYPE_DICTIONARY:
+				var current: Dictionary = GameState.stills[still_id]
+				current["stage_ranks"] = stage_ranks[still_id]
 				GameState.stills[still_id] = current
 
 func _convert_legacy_still_save(saved_stills) -> Dictionary:
@@ -56,4 +65,5 @@ func reset_save() -> void:
 	for still_id in GameState.stills.keys():
 		var data: Dictionary = GameState.stills[still_id]
 		data["unlocked_stages"] = 0
+		data["stage_ranks"] = {}
 		GameState.stills[still_id] = data
