@@ -10,12 +10,16 @@ const UI_COLOR_MIRROR_CYAN: Color = Color(0.51, 0.96, 1.0, 1.0)
 var progress_panel: PanelContainer = null
 var title_panel_tween: Tween = null
 var menu_intro_tween: Tween = null
+var logo_intro_tween: Tween = null
+var logo_idle_tween: Tween = null
+var veil_tween: Tween = null
+var icon_row_tween: Tween = null
 var crystal_tween: Tween = null
 var button_tweens: Dictionary = {}
 
 func _ready() -> void:
 	_add_global_progress_panel()
-	_setup_title_menu_polish()
+	_setup_title_screen_polish()
 
 func _add_global_progress_panel() -> void:
 	_clear_global_progress_panel()
@@ -97,6 +101,60 @@ func _add_global_progress_panel() -> void:
 
 	_play_status_panel_intro()
 
+func _setup_title_screen_polish() -> void:
+	_setup_logo_intro()
+	_setup_background_veil_idle()
+	_setup_title_menu_polish()
+	_setup_icon_row_intro()
+
+func _setup_logo_intro() -> void:
+	var logo: TextureRect = get_node_or_null("TitleLogo") as TextureRect
+	var tagline: TextureRect = get_node_or_null("Tagline") as TextureRect
+	if logo != null:
+		logo.modulate = Color(1, 1, 1, 0)
+		logo.position += Vector2(0, -10)
+		logo.pivot_offset = logo.size * 0.5
+	if tagline != null:
+		tagline.modulate = Color(1, 1, 1, 0)
+		tagline.position += Vector2(0, -6)
+	logo_intro_tween = create_tween()
+	logo_intro_tween.set_parallel(true)
+	if logo != null:
+		logo_intro_tween.tween_property(logo, "modulate", Color(1, 1, 1, 1), 0.32)
+		logo_intro_tween.tween_property(logo, "position", logo.position - Vector2(0, -10), 0.32)
+	if tagline != null:
+		logo_intro_tween.tween_property(tagline, "modulate", Color(1, 1, 1, 1), 0.44)
+		logo_intro_tween.tween_property(tagline, "position", tagline.position - Vector2(0, -6), 0.44)
+	logo_intro_tween.set_parallel(false)
+	logo_intro_tween.tween_callback(_on_logo_intro_finished)
+
+func _on_logo_intro_finished() -> void:
+	logo_intro_tween = null
+	_play_logo_idle()
+
+func _play_logo_idle() -> void:
+	var logo: TextureRect = get_node_or_null("TitleLogo") as TextureRect
+	if logo == null:
+		return
+	if logo_idle_tween != null:
+		logo_idle_tween.kill()
+	logo_idle_tween = create_tween()
+	logo_idle_tween.set_loops()
+	logo_idle_tween.tween_property(logo, "modulate", Color(1.0, 0.96, 0.82, 1.0), 1.25)
+	logo_idle_tween.tween_property(logo, "modulate", Color(1, 1, 1, 1), 1.25)
+
+func _setup_background_veil_idle() -> void:
+	var veil: ColorRect = get_node_or_null("DarkVeil") as ColorRect
+	if veil == null:
+		return
+	if veil_tween != null:
+		veil_tween.kill()
+	veil.color = Color(0, 0, 0, 0.08)
+	veil_tween = create_tween()
+	veil_tween.set_loops()
+	veil_tween.tween_property(veil, "color", Color(0.01, 0.02, 0.06, 0.15), 2.4)
+	veil_tween.tween_property(veil, "color", Color(0, 0, 0, 0.08), 2.4)
+
 func _setup_title_menu_polish() -> void:
 	var menu_root: Control = get_node_or_null("MenuRoot") as Control
 	if menu_root != null:
@@ -112,6 +170,22 @@ func _setup_title_menu_polish() -> void:
 	_setup_title_button_hover("MenuRoot/CollectionButton")
 	_setup_title_button_hover("MenuRoot/OptionsButton")
 	_play_selected_crystal_idle()
+
+func _setup_icon_row_intro() -> void:
+	var icon_row: HBoxContainer = get_node_or_null("IconRow") as HBoxContainer
+	if icon_row == null:
+		return
+	icon_row.modulate = Color(1, 1, 1, 0)
+	icon_row.position += Vector2(0, 10)
+	icon_row_tween = create_tween()
+	icon_row_tween.set_parallel(true)
+	icon_row_tween.tween_property(icon_row, "modulate", Color(1, 1, 1, 0.86), 0.42)
+	icon_row_tween.tween_property(icon_row, "position", icon_row.position - Vector2(0, 10), 0.42)
+	icon_row_tween.set_parallel(false)
+	icon_row_tween.tween_callback(_on_icon_row_intro_finished)
+
+func _on_icon_row_intro_finished() -> void:
+	icon_row_tween = null
 
 func _setup_title_button_hover(button_path: String) -> void:
 	var button: TextureButton = get_node_or_null(button_path) as TextureButton
