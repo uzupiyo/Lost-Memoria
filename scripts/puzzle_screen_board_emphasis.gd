@@ -1,18 +1,32 @@
 extends "res://scripts/puzzle_screen_status_emphasis.gd"
 
 var board_frame_tween: Tween = null
+var retry_button_tween: Tween = null
 
 func _setup_stage_info() -> void:
 	super._setup_stage_info()
 	_reset_board_frame_emphasis()
+	_reset_retry_button_emphasis()
 
 func _on_retry_pressed() -> void:
 	super._on_retry_pressed()
 	_reset_board_frame_emphasis()
+	_reset_retry_button_emphasis()
 
 func _clear_stage() -> void:
 	super._clear_stage()
 	_reset_board_frame_emphasis()
+	_reset_retry_button_emphasis()
+
+func _update_move_pressure_message() -> void:
+	super._update_move_pressure_message()
+	if has_cleared:
+		_reset_retry_button_emphasis()
+		return
+	if moves <= 0:
+		_play_retry_button_emphasis()
+	else:
+		_reset_retry_button_emphasis()
 
 func _resolve_match(indices: Array[int]) -> bool:
 	var did_clear: bool = super._resolve_match(indices)
@@ -61,3 +75,31 @@ func _reset_board_frame_emphasis() -> void:
 	if board_frame != null:
 		board_frame.scale = Vector2.ONE
 		board_frame.modulate = Color(1, 1, 1, 1)
+
+func _get_retry_button() -> Button:
+	return get_node_or_null("MarginContainer/Root/FooterRow/RetryButton") as Button
+
+func _play_retry_button_emphasis() -> void:
+	var retry_button: Button = _get_retry_button()
+	if retry_button == null:
+		return
+	if retry_button_tween != null:
+		return
+	retry_button.pivot_offset = retry_button.size * 0.5
+	retry_button_tween = create_tween()
+	retry_button_tween.set_loops()
+	retry_button_tween.set_parallel(true)
+	retry_button_tween.tween_property(retry_button, "scale", Vector2(1.08, 1.08), 0.28)
+	retry_button_tween.tween_property(retry_button, "modulate", Color(1.0, 0.86, 0.46, 1.0), 0.28)
+	retry_button_tween.set_parallel(false)
+	retry_button_tween.tween_property(retry_button, "scale", Vector2.ONE, 0.28)
+	retry_button_tween.tween_property(retry_button, "modulate", Color(1, 1, 1, 1), 0.28)
+
+func _reset_retry_button_emphasis() -> void:
+	if retry_button_tween != null:
+		retry_button_tween.kill()
+		retry_button_tween = null
+	var retry_button: Button = _get_retry_button()
+	if retry_button != null:
+		retry_button.scale = Vector2.ONE
+		retry_button.modulate = Color(1, 1, 1, 1)
