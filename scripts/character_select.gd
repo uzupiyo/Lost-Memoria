@@ -93,23 +93,7 @@ func _create_character_card(character_id: String) -> Button:
 	effect.texture = _load_character_texture(character_id, "effect")
 	card_stack.add_child(effect)
 
-	var selected_badge: Label = Label.new()
-	selected_badge.name = "SelectedBadge"
-	selected_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	selected_badge.text = "SELECTED"
-	selected_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	selected_badge.add_theme_font_size_override("font_size", 16)
-	selected_badge.add_theme_color_override("font_color", UI_COLOR_RESTORATION_GOLD)
-	selected_badge.add_theme_color_override("font_outline_color", Color(0.04, 0.03, 0.02, 1.0))
-	selected_badge.add_theme_constant_override("outline_size", 4)
-	selected_badge.add_theme_stylebox_override("normal", _make_badge_style(UI_COLOR_RESTORATION_GOLD, Color(0.20, 0.13, 0.03, 0.82)))
-	selected_badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	selected_badge.offset_left = -132
-	selected_badge.offset_top = 14
-	selected_badge.offset_right = -14
-	selected_badge.offset_bottom = 48
-	selected_badge.visible = false
-	card_stack.add_child(selected_badge)
+	_add_card_badges(card_stack, character_id)
 
 	var info_box: PanelContainer = PanelContainer.new()
 	info_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -145,6 +129,50 @@ func _create_character_card(character_id: String) -> Button:
 	info_inner.add_child(count_label)
 
 	return button
+
+func _add_card_badges(card_stack: Control, character_id: String) -> void:
+	var selected_badge: Label = _make_card_badge("SELECTED", UI_COLOR_RESTORATION_GOLD, Color(0.20, 0.13, 0.03, 0.82))
+	selected_badge.name = "SelectedBadge"
+	selected_badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	selected_badge.offset_left = -132
+	selected_badge.offset_top = 14
+	selected_badge.offset_right = -14
+	selected_badge.offset_bottom = 48
+	selected_badge.visible = false
+	card_stack.add_child(selected_badge)
+
+	var summary: Dictionary = _character_progress_summary(character_id)
+	var complete_memories: int = int(summary.get("complete_memories", 0))
+	var perfect_memories: int = int(summary.get("perfect_memories", 0))
+	if complete_memories > 0:
+		var complete_badge: Label = _make_card_badge("COMPLETE %d" % complete_memories, UI_COLOR_MIRROR_CYAN, Color(0.02, 0.16, 0.22, 0.80))
+		complete_badge.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		complete_badge.offset_left = 14
+		complete_badge.offset_top = 14
+		complete_badge.offset_right = 140
+		complete_badge.offset_bottom = 48
+		card_stack.add_child(complete_badge)
+	if perfect_memories > 0:
+		var perfect_badge: Label = _make_card_badge("PERFECT %d" % perfect_memories, UI_COLOR_RESTORATION_GOLD, Color(0.22, 0.15, 0.04, 0.84))
+		perfect_badge.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		perfect_badge.offset_left = 14
+		perfect_badge.offset_top = 54
+		perfect_badge.offset_right = 140
+		perfect_badge.offset_bottom = 88
+		card_stack.add_child(perfect_badge)
+
+func _make_card_badge(text_value: String, edge_color: Color, fill_color: Color) -> Label:
+	var badge: Label = Label.new()
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	badge.text = text_value
+	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	badge.add_theme_font_size_override("font_size", 15)
+	badge.add_theme_color_override("font_color", edge_color)
+	badge.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
+	badge.add_theme_constant_override("outline_size", 4)
+	badge.add_theme_stylebox_override("normal", _make_badge_style(edge_color, fill_color))
+	return badge
 
 func _make_card_style(selected: bool, accent: Color) -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
@@ -221,7 +249,7 @@ func _update_card_selection_styles() -> void:
 		if selected_badge != null:
 			selected_badge.visible = is_selected
 
-func _character_progress_text(character_id: String) -> String:
+func _character_progress_summary(character_id: String) -> Dictionary:
 	var ids: Array = GameState.get_still_ids_for_character(character_id)
 	var total_memories: int = ids.size()
 	var complete_memories: int = 0
@@ -244,6 +272,19 @@ func _character_progress_text(character_id: String) -> String:
 	var percent: int = 0
 	if total_stages > 0:
 		percent = int(float(restored_stages) / float(total_stages) * 100.0)
+	return {
+		"total_memories": total_memories,
+		"complete_memories": complete_memories,
+		"perfect_memories": perfect_memories,
+		"percent": percent
+	}
+
+func _character_progress_text(character_id: String) -> String:
+	var summary: Dictionary = _character_progress_summary(character_id)
+	var total_memories: int = int(summary.get("total_memories", 0))
+	var percent: int = int(summary.get("percent", 0))
+	var complete_memories: int = int(summary.get("complete_memories", 0))
+	var perfect_memories: int = int(summary.get("perfect_memories", 0))
 	return "%d Memories\nRestored %d%%   Complete %d/%d\nPerfect %d/%d" % [total_memories, percent, complete_memories, total_memories, perfect_memories, total_memories]
 
 func _is_perfect_memory(still_id: String, total_stages: int) -> bool:
