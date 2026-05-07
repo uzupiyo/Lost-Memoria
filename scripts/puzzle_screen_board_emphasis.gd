@@ -4,6 +4,7 @@ const COLLECTION_TRANSITION_EXTRA_DELAY: float = 0.85
 
 var board_frame_tween: Tween = null
 var retry_button_tween: Tween = null
+var chain_burst_tween: Tween = null
 var collection_transition_delay_started: bool = false
 
 func _setup_stage_info() -> void:
@@ -11,17 +12,20 @@ func _setup_stage_info() -> void:
 	collection_transition_delay_started = false
 	_reset_board_frame_emphasis()
 	_reset_retry_button_emphasis()
+	_clear_chain_burst_popup()
 
 func _on_retry_pressed() -> void:
 	super._on_retry_pressed()
 	collection_transition_delay_started = false
 	_reset_board_frame_emphasis()
 	_reset_retry_button_emphasis()
+	_clear_chain_burst_popup()
 
 func _clear_stage() -> void:
 	super._clear_stage()
 	_reset_board_frame_emphasis()
 	_reset_retry_button_emphasis()
+	_clear_chain_burst_popup()
 
 func _go_to_collection() -> void:
 	if collection_transition_delay_started:
@@ -48,7 +52,58 @@ func _resolve_match(indices: Array[int]) -> bool:
 		_play_board_frame_complete_emphasis()
 	else:
 		_play_board_frame_match_emphasis()
+	if combo_count >= 5 and not did_clear:
+		_play_chain_burst_popup()
 	return did_clear
+
+func _play_chain_burst_popup() -> void:
+	_clear_chain_burst_popup()
+	var popup: Label = Label.new()
+	popup.name = "ChainBurstPopup"
+	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	popup.text = _chain_burst_text(character_name_label.text)
+	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	popup.add_theme_font_size_override("font_size", 38)
+	popup.add_theme_color_override("font_color", Color(1.0, 0.96, 0.58, 1.0))
+	popup.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.16, 1.0))
+	popup.add_theme_constant_override("outline_size", 8)
+	popup.custom_minimum_size = Vector2(360, 108)
+	popup.modulate = Color(1, 1, 1, 0)
+	add_child(popup)
+	move_child(popup, get_child_count() - 1)
+	var center_position: Vector2 = board.global_position + board.size * 0.5
+	popup.global_position = center_position - Vector2(180, 132)
+	popup.pivot_offset = popup.custom_minimum_size * 0.5
+	popup.scale = Vector2(0.76, 0.76)
+	chain_burst_tween = create_tween()
+	chain_burst_tween.set_parallel(true)
+	chain_burst_tween.tween_property(popup, "modulate", Color(1, 1, 1, 1), 0.10)
+	chain_burst_tween.tween_property(popup, "scale", Vector2(1.12, 1.12), 0.14)
+	chain_burst_tween.tween_property(popup, "position", popup.position + Vector2(0, -20), 0.46)
+	chain_burst_tween.set_parallel(false)
+	chain_burst_tween.tween_property(popup, "scale", Vector2.ONE, 0.10)
+	chain_burst_tween.tween_property(popup, "modulate", Color(1, 1, 1, 0), 0.22)
+	chain_burst_tween.tween_callback(_clear_chain_burst_popup)
+
+func _chain_burst_text(character_id: String) -> String:
+	match character_id:
+		"Rin":
+			return "CHAIN BURST!\nKEEP GOING!"
+		"Moka":
+			return "BIG CHAIN!\nGO GO!"
+		"Kaede":
+			return "CHAIN FLOW\nSTAY FOCUSED"
+		_:
+			return "CHAIN BURST!"
+
+func _clear_chain_burst_popup() -> void:
+	if chain_burst_tween != null:
+		chain_burst_tween.kill()
+		chain_burst_tween = null
+	var popup: Node = get_node_or_null("ChainBurstPopup")
+	if popup != null:
+		popup.queue_free()
 
 func _play_board_frame_match_emphasis() -> void:
 	var target_scale: float = 1.015
