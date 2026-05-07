@@ -14,8 +14,17 @@ const UI_COLOR_LOCKED: Color = Color(0.48, 0.52, 0.62, 1.0)
 @onready var hint_label: Label = %HintLabel
 
 var panel_intro_tween: Tween = null
+var header_intro_tween: Tween = null
+var back_button_tween: Tween = null
 
 func _ready() -> void:
+	_setup_header_text()
+	_setup_header_and_back_style()
+	_build_stage_list()
+	_play_header_intro()
+	_play_panel_intro()
+
+func _setup_header_text() -> void:
 	title_label.text = "%s Stage Select" % GameState.selected_character_id
 	title_label.add_theme_color_override("font_color", _character_accent_color(GameState.selected_character_id))
 	title_label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
@@ -24,8 +33,96 @@ func _ready() -> void:
 	hint_label.add_theme_color_override("font_color", UI_COLOR_MIST_BLUE)
 	hint_label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
 	hint_label.add_theme_constant_override("outline_size", 3)
-	_build_stage_list()
-	_play_panel_intro()
+
+func _setup_header_and_back_style() -> void:
+	title_label.add_theme_stylebox_override("normal", _make_label_card_style(_character_accent_color(GameState.selected_character_id), 0.18))
+	hint_label.add_theme_stylebox_override("normal", _make_label_card_style(UI_COLOR_MIRROR_CYAN, 0.10))
+	var back_button: Button = _get_back_button()
+	if back_button != null:
+		back_button.custom_minimum_size = Vector2(420, 66)
+		back_button.text = "← BACK TO CHARACTER SELECT"
+		back_button.add_theme_font_size_override("font_size", 20)
+		back_button.add_theme_color_override("font_color", UI_COLOR_MIST_BLUE)
+		back_button.add_theme_color_override("font_hover_color", UI_COLOR_MIRROR_CYAN)
+		back_button.add_theme_color_override("font_pressed_color", UI_COLOR_RESTORATION_GOLD)
+		back_button.add_theme_stylebox_override("normal", _make_nav_button_style(false))
+		back_button.add_theme_stylebox_override("hover", _make_nav_button_style(true))
+		back_button.add_theme_stylebox_override("pressed", _make_nav_button_style(true))
+		back_button.pivot_offset = back_button.size * 0.5
+		if not back_button.mouse_entered.is_connected(_on_back_button_mouse_entered):
+			back_button.mouse_entered.connect(_on_back_button_mouse_entered)
+		if not back_button.mouse_exited.is_connected(_on_back_button_mouse_exited):
+			back_button.mouse_exited.connect(_on_back_button_mouse_exited)
+
+func _get_back_button() -> Button:
+	return get_node_or_null("MarginContainer/VBoxContainer/BackButton") as Button
+
+func _make_label_card_style(edge_color: Color, edge_alpha: float) -> StyleBoxFlat:
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(0.04, 0.06, 0.13, 0.34)
+	style.border_color = Color(edge_color.r, edge_color.g, edge_color.b, edge_alpha)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(16)
+	style.content_margin_left = 18
+	style.content_margin_right = 18
+	style.content_margin_top = 8
+	style.content_margin_bottom = 8
+	return style
+
+func _make_nav_button_style(is_hover: bool) -> StyleBoxFlat:
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.07, 0.13, 0.84) if not is_hover else Color(0.02, 0.16, 0.22, 0.86)
+	style.border_color = Color(UI_COLOR_MIRROR_CYAN.r, UI_COLOR_MIRROR_CYAN.g, UI_COLOR_MIRROR_CYAN.b, 0.44 if not is_hover else 0.80)
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(18)
+	style.content_margin_left = 18
+	style.content_margin_right = 18
+	style.content_margin_top = 10
+	style.content_margin_bottom = 10
+	style.shadow_color = Color(0, 0, 0, 0.28)
+	style.shadow_size = 8 if is_hover else 5
+	style.shadow_offset = Vector2(0, 3)
+	return style
+
+func _play_header_intro() -> void:
+	if header_intro_tween != null:
+		header_intro_tween.kill()
+	title_label.modulate = Color(1, 1, 1, 0)
+	hint_label.modulate = Color(1, 1, 1, 0)
+	var original_title_position: Vector2 = title_label.position
+	var original_hint_position: Vector2 = hint_label.position
+	title_label.position = original_title_position + Vector2(0, -10)
+	hint_label.position = original_hint_position + Vector2(0, -6)
+	header_intro_tween = create_tween()
+	header_intro_tween.set_parallel(true)
+	header_intro_tween.tween_property(title_label, "modulate", Color(1, 1, 1, 1), 0.22)
+	header_intro_tween.tween_property(title_label, "position", original_title_position, 0.22)
+	header_intro_tween.tween_property(hint_label, "modulate", Color(1, 1, 1, 1), 0.28).set_delay(0.04)
+	header_intro_tween.tween_property(hint_label, "position", original_hint_position, 0.28).set_delay(0.04)
+	header_intro_tween.set_parallel(false)
+	header_intro_tween.tween_callback(_on_header_intro_finished)
+
+func _on_header_intro_finished() -> void:
+	header_intro_tween = null
+
+func _on_back_button_mouse_entered() -> void:
+	_tween_back_button(Vector2(1.025, 1.025), 0.10)
+
+func _on_back_button_mouse_exited() -> void:
+	_tween_back_button(Vector2.ONE, 0.12)
+
+func _tween_back_button(target_scale: Vector2, duration: float) -> void:
+	var back_button: Button = _get_back_button()
+	if back_button == null:
+		return
+	if back_button_tween != null:
+		back_button_tween.kill()
+	back_button_tween = create_tween()
+	back_button_tween.tween_property(back_button, "scale", target_scale, duration)
+	back_button_tween.tween_callback(_on_back_button_tween_finished)
+
+func _on_back_button_tween_finished() -> void:
+	back_button_tween = null
 
 func _build_stage_list() -> void:
 	var child_index: int = still_list.get_child_count() - 1
