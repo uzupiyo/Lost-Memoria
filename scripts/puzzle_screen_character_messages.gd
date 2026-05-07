@@ -59,19 +59,19 @@ func _play_stage_clear_popup() -> void:
 	var popup: Label = Label.new()
 	popup.name = "StageClearPopup"
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	popup.text = "STAGE CLEAR\nMEMORY RESTORED"
+	popup.text = _stage_clear_popup_text(character_name_label.text)
 	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	popup.add_theme_font_size_override("font_size", 40)
 	popup.add_theme_color_override("font_color", Color(1.0, 0.92, 0.48, 1.0))
 	popup.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.16, 1.0))
 	popup.add_theme_constant_override("outline_size", 8)
-	popup.custom_minimum_size = Vector2(360, 120)
+	popup.custom_minimum_size = Vector2(400, 120)
 	popup.modulate = Color(1, 1, 1, 0)
 	add_child(popup)
 	move_child(popup, get_child_count() - 1)
 	var center_position: Vector2 = board.global_position + board.size * 0.5
-	popup.global_position = center_position - Vector2(180, 86)
+	popup.global_position = center_position - Vector2(200, 86)
 	popup.pivot_offset = popup.custom_minimum_size * 0.5
 	popup.scale = Vector2(0.82, 0.82)
 	var tween: Tween = create_tween()
@@ -89,19 +89,19 @@ func _play_no_moves_popup() -> void:
 	var popup: Label = Label.new()
 	popup.name = "NoMovesPopup"
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	popup.text = "NO MOVES\nRETRY?"
+	popup.text = _no_moves_popup_text(character_name_label.text)
 	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	popup.add_theme_font_size_override("font_size", 42)
 	popup.add_theme_color_override("font_color", Color(1.0, 0.78, 0.42, 1.0))
 	popup.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.16, 1.0))
 	popup.add_theme_constant_override("outline_size", 8)
-	popup.custom_minimum_size = Vector2(300, 120)
+	popup.custom_minimum_size = Vector2(360, 120)
 	popup.modulate = Color(1, 1, 1, 0)
 	add_child(popup)
 	move_child(popup, get_child_count() - 1)
 	var center_position: Vector2 = board.global_position + board.size * 0.5
-	popup.global_position = center_position - Vector2(150, 80)
+	popup.global_position = center_position - Vector2(180, 80)
 	popup.pivot_offset = popup.custom_minimum_size * 0.5
 	popup.scale = Vector2(0.82, 0.82)
 	var tween: Tween = create_tween()
@@ -110,6 +110,28 @@ func _play_no_moves_popup() -> void:
 	tween.tween_property(popup, "scale", Vector2(1.08, 1.08), 0.16)
 	tween.set_parallel(false)
 	tween.tween_property(popup, "scale", Vector2.ONE, 0.12)
+
+func _stage_clear_popup_text(character_id: String) -> String:
+	match character_id:
+		"Rin":
+			return "STAGE CLEAR\nMEMORY RESTORED"
+		"Moka":
+			return "CLEAR!\nNICE MEMORY!"
+		"Kaede":
+			return "STAGE CLEAR\nMEMORY STABILIZED"
+		_:
+			return "STAGE CLEAR\nMEMORY RESTORED"
+
+func _no_moves_popup_text(character_id: String) -> String:
+	match character_id:
+		"Rin":
+			return "NO MOVES\nTRY AGAIN"
+		"Moka":
+			return "NO MOVES\nREVENGE!"
+		"Kaede":
+			return "NO MOVES\nRETRY CALMLY"
+		_:
+			return "NO MOVES\nRETRY?"
 
 func _opening_message(character_id: String) -> String:
 	match character_id:
