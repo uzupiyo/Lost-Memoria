@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://scripts/collection_fullscreen_polish.gd" id="1_collection"]
+[ext_resource type="Script" path="res://scripts/collection_character_colors.gd" id="1_collection"]
 [ext_resource type="Theme" path="res://assets/ui/theme/main_theme.tres" id="2_theme"]
 
 [node name="Collection" type="Control"]
