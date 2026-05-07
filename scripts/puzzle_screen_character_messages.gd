@@ -3,6 +3,7 @@ extends "res://scripts/puzzle_screen.gd"
 var no_moves_popup_played: bool = false
 var stage_clear_popup_played: bool = false
 var low_moves_popup_last_moves: int = -1
+var screen_shake_tween: Tween = null
 
 func _setup_stage_info() -> void:
 	super._setup_stage_info()
@@ -10,7 +11,7 @@ func _setup_stage_info() -> void:
 	no_moves_popup_played = false
 	stage_clear_popup_played = false
 	low_moves_popup_last_moves = -1
-	position = Vector2.ZERO
+	_reset_screen_shake()
 	sd_message_label.text = _opening_message(character_name_label.text)
 
 func _on_retry_pressed() -> void:
@@ -19,7 +20,7 @@ func _on_retry_pressed() -> void:
 	no_moves_popup_played = false
 	stage_clear_popup_played = false
 	low_moves_popup_last_moves = -1
-	position = Vector2.ZERO
+	_reset_screen_shake()
 	sd_message_label.text = _opening_message(character_name_label.text)
 
 func _on_hint_pressed() -> void:
@@ -58,13 +59,24 @@ func _clear_named_popup(node_name: String) -> void:
 	if popup != null:
 		popup.queue_free()
 
-func _play_screen_shake(strength: float) -> void:
+func _reset_screen_shake() -> void:
+	if screen_shake_tween != null:
+		screen_shake_tween.kill()
+		screen_shake_tween = null
 	position = Vector2.ZERO
-	var tween: Tween = create_tween()
-	tween.tween_property(self, "position", Vector2(strength, 0), 0.025)
-	tween.tween_property(self, "position", Vector2(-strength, 0), 0.04)
-	tween.tween_property(self, "position", Vector2(strength * 0.55, 0), 0.035)
-	tween.tween_property(self, "position", Vector2.ZERO, 0.04)
+
+func _play_screen_shake(strength: float) -> void:
+	_reset_screen_shake()
+	screen_shake_tween = create_tween()
+	screen_shake_tween.tween_property(self, "position", Vector2(strength, 0), 0.025)
+	screen_shake_tween.tween_property(self, "position", Vector2(-strength, 0), 0.04)
+	screen_shake_tween.tween_property(self, "position", Vector2(strength * 0.55, 0), 0.035)
+	screen_shake_tween.tween_property(self, "position", Vector2.ZERO, 0.04)
+	screen_shake_tween.tween_callback(_on_screen_shake_finished)
+
+func _on_screen_shake_finished() -> void:
+	position = Vector2.ZERO
+	screen_shake_tween = null
 
 func _play_low_moves_popup(remaining_moves: int) -> void:
 	if low_moves_popup_last_moves == remaining_moves:
