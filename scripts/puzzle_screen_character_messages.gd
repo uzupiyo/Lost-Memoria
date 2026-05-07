@@ -4,11 +4,13 @@ var no_moves_popup_played: bool = false
 
 func _setup_stage_info() -> void:
 	super._setup_stage_info()
+	_clear_no_moves_popup()
 	no_moves_popup_played = false
 	sd_message_label.text = _opening_message(character_name_label.text)
 
 func _on_retry_pressed() -> void:
 	super._on_retry_pressed()
+	_clear_no_moves_popup()
 	no_moves_popup_played = false
 	sd_message_label.text = _opening_message(character_name_label.text)
 
@@ -36,10 +38,16 @@ func _update_move_pressure_message() -> void:
 	if moves <= 5:
 		sd_message_label.text = _low_moves_message(character_id, moves)
 
+func _clear_no_moves_popup() -> void:
+	var popup: Node = get_node_or_null("NoMovesPopup")
+	if popup != null:
+		popup.queue_free()
+
 func _play_no_moves_popup() -> void:
 	if no_moves_popup_played:
 		return
 	no_moves_popup_played = true
+	_clear_no_moves_popup()
 	var popup: Label = Label.new()
 	popup.name = "NoMovesPopup"
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
