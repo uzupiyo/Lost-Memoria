@@ -13,8 +13,10 @@ const PUZZLE_BACKGROUND_PATH: String = "res://assets/puzzle/ui/puzzle_scene_back
 const SD_IDLE_AMPLITUDE: float = 8.0
 const SD_IDLE_SPEED: float = 2.4
 const SD_FRAME_INTERVAL: float = 0.35
+const SD_ACTION_FRAME_INTERVAL: float = 0.12
 const SD_MATCH_BUMP_SCALE: Vector2 = Vector2(1.08, 1.08)
 const SD_MAX_IDLE_FRAMES: int = 8
+const SD_MAX_ACTION_FRAMES: int = 4
 
 const DROP_PATHS: Array[String] = [
 	"res://assets/puzzle/drops/memory_orb_red.png",
@@ -43,7 +45,13 @@ var drop_textures: Dictionary = {}
 var sd_idle_time: float = 0.0
 var sd_frame_timer: float = 0.0
 var sd_idle_frame_index: int = 0
+var sd_action_frame_index: int = 0
+var sd_action_frame_timer: float = 0.0
+var sd_action_playing: bool = false
 var sd_idle_textures: Array[Texture2D] = []
+var sd_match_textures: Array[Texture2D] = []
+var sd_clear_textures: Array[Texture2D] = []
+var sd_current_action_textures: Array[Texture2D] = []
 var sd_base_position: Vector2 = Vector2.ZERO
 var sd_has_base_position: bool = false
 
@@ -115,7 +123,7 @@ func _setup_stage_info() -> void:
 	sd_frame.texture = _load_texture_optional(SD_FRAME_PATH)
 	board_frame.texture = _load_texture_optional(BOARD_FRAME_PATH)
 	still_preview_frame.texture = _load_texture_optional(STILL_PREVIEW_FRAME_PATH)
-	_load_sd_idle_textures(character_id)
+	_load_sd_character_textures(character_id)
 	if not sd_idle_textures.is_empty():
 		sd_character.texture = sd_idle_textures[0]
 	else:
@@ -139,25 +147,32 @@ func _load_texture_optional(path: String) -> Texture2D:
 		return loaded as Texture2D
 	return null
 
-func _load_sd_idle_textures(character_id: String) -> void:
-	sd_idle_textures.clear()
+func _load_sd_character_textures(character_id: String) -> void:
+	sd_idle_textures = _load_sd_textures_for_action(character_id, "idle", SD_MAX_IDLE_FRAMES)
+	sd_match_textures = _load_sd_textures_for_action(character_id, "match", SD_MAX_ACTION_FRAMES)
+	sd_clear_textures = _load_sd_textures_for_action(character_id, "clear", SD_MAX_ACTION_FRAMES)
 	sd_idle_frame_index = 0
 	sd_frame_timer = 0.0
+	sd_action_playing = false
+	if sd_idle_textures.is_empty():
+		var portrait_texture: Texture2D = _load_texture_optional("res://assets/ui/characters/portraits/%s_portrait.webp" % character_id)
+		if portrait_texture != null:
+			sd_idle_textures.append(portrait_texture)
+
+func _load_sd_textures_for_action(character_id: String, action_name: String, max_frames: int) -> Array[Texture2D]:
+	var textures: Array[Texture2D] = []
 	var frame_index: int = 1
-	while frame_index <= SD_MAX_IDLE_FRAMES:
+	while frame_index <= max_frames:
 		var frame_name: String = "%02d" % frame_index
-		var png_path: String = "res://assets/ui/characters/sd/%s/%s_idle_%s.png" % [character_id, character_id, frame_name]
-		var webp_path: String = "res://assets/ui/characters/sd/%s/%s_idle_%s.webp" % [character_id, character_id, frame_name]
-		var sd_png_path: String = "res://assets/ui/characters/sd/%s/%s_sd_idle_%s.png" % [character_id, character_id, frame_name]
-		var sd_webp_path: String = "res://assets/ui/characters/sd/%s/%s_sd_idle_%s.webp" % [character_id, character_id, frame_name]
+		var png_path: String = "res://assets/ui/characters/sd/%s/%s_%s_%s.png" % [character_id, character_id, action_name, frame_name]
+		var webp_path: String = "res://assets/ui/characters/sd/%s/%s_%s_%s.webp" % [character_id, character_id, action_name, frame_name]
+		var sd_png_path: String = "res://assets/ui/characters/sd/%s/%s_sd_%s_%s.png" % [character_id, character_id, action_name, frame_name]
+		var sd_webp_path: String = "res://assets/ui/characters/sd/%s/%s_sd_%s_%s.webp" % [character_id, character_id, action_name, frame_name]
 		var texture: Texture2D = _load_texture_from_candidates([png_path, webp_path, sd_png_path, sd_webp_path])
 		if texture != null:
-			sd_idle_textures.append(texture)
-		elif frame_index == 1:
-			var portrait_texture: Texture2D = _load_texture_optional("res://assets/ui/characters/portraits/%s_portrait.webp" % character_id)
-			if portrait_texture != null:
-				sd_idle_textures.append(portrait_texture)
+			textures.append(texture)
 		frame_index += 1
+	return textures
 
 func _load_texture_from_candidates(candidate_paths: Array[String]) -> Texture2D:
 	var i: int = 0
@@ -175,19 +190,25 @@ func _load_texture_from_paths(primary_path: String, fallback_path: String) -> Te
 	return _load_texture_optional(fallback_path)
 
 func _process(delta: float) -> void:
-	_update_sd_idle_animation(delta)
+	_update_sd_animation(delta)
 	if has_cleared or not is_selecting:
 		return
 	var hovered_index: int = _get_piece_index_at_position(get_global_mouse_position())
 	if hovered_index >= 0:
 		_try_add_to_selection(hovered_index)
 
-func _update_sd_idle_animation(delta: float) -> void:
+func _update_sd_animation(delta: float) -> void:
 	if not sd_has_base_position:
 		return
 	sd_idle_time += delta
 	var offset_y: float = sin(sd_idle_time * SD_IDLE_SPEED) * SD_IDLE_AMPLITUDE
 	sd_character.position = sd_base_position + Vector2(0, offset_y)
+	if sd_action_playing:
+		_update_sd_action_animation(delta)
+	else:
+		_update_sd_idle_frames(delta)
+
+func _update_sd_idle_frames(delta: float) -> void:
 	if sd_idle_textures.size() <= 1:
 		return
 	sd_frame_timer += delta
@@ -197,13 +218,57 @@ func _update_sd_idle_animation(delta: float) -> void:
 	sd_idle_frame_index = (sd_idle_frame_index + 1) % sd_idle_textures.size()
 	sd_character.texture = sd_idle_textures[sd_idle_frame_index]
 
+func _update_sd_action_animation(delta: float) -> void:
+	if sd_current_action_textures.is_empty():
+		_stop_sd_action_animation()
+		return
+	sd_action_frame_timer += delta
+	if sd_action_frame_timer < SD_ACTION_FRAME_INTERVAL:
+		return
+	sd_action_frame_timer = 0.0
+	sd_action_frame_index += 1
+	if sd_action_frame_index >= sd_current_action_textures.size():
+		_stop_sd_action_animation()
+		return
+	sd_character.texture = sd_current_action_textures[sd_action_frame_index]
+
+func _play_sd_action_animation(action_textures: Array[Texture2D]) -> bool:
+	if action_textures.is_empty():
+		return false
+	sd_current_action_textures = action_textures
+	sd_action_frame_index = 0
+	sd_action_frame_timer = 0.0
+	sd_action_playing = true
+	sd_character.texture = sd_current_action_textures[0]
+	return true
+
+func _stop_sd_action_animation() -> void:
+	sd_action_playing = false
+	sd_current_action_textures.clear()
+	sd_action_frame_index = 0
+	sd_action_frame_timer = 0.0
+	if not sd_idle_textures.is_empty():
+		sd_character.texture = sd_idle_textures[sd_idle_frame_index % sd_idle_textures.size()]
+
 func _play_sd_match_feedback() -> void:
 	if sd_character == null:
 		return
+	var has_action_texture: bool = _play_sd_action_animation(sd_match_textures)
 	var tween: Tween = create_tween()
 	tween.set_parallel(false)
 	tween.tween_property(sd_character, "scale", SD_MATCH_BUMP_SCALE, 0.08)
 	tween.tween_property(sd_character, "scale", Vector2.ONE, 0.12)
+	if has_action_texture:
+		sd_message_label.text = "いい感じです。記憶が少し戻りました。"
+
+func _play_sd_clear_feedback() -> void:
+	if sd_character == null:
+		return
+	_play_sd_action_animation(sd_clear_textures)
+	var tween: Tween = create_tween()
+	tween.set_parallel(false)
+	tween.tween_property(sd_character, "scale", Vector2(1.12, 1.12), 0.10)
+	tween.tween_property(sd_character, "scale", Vector2.ONE, 0.16)
 
 func _generate_board() -> void:
 	board.columns = BOARD_SIZE
@@ -455,7 +520,7 @@ func _clear_stage() -> void:
 	selected_indices.clear()
 	selected_color = -1
 	sd_message_label.text = "記憶の欠片が、またひとつ戻りました。"
-	_play_sd_match_feedback()
+	_play_sd_clear_feedback()
 	GameState.clear_selected_stage()
 	if not pending_scene_change:
 		pending_scene_change = true
