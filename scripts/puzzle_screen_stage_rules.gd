@@ -64,15 +64,15 @@ func _stage_opening_message(character_id: String, stage_index: int) -> String:
 func _rin_stage_opening_message(stage_index: int) -> String:
 	match stage_index:
 		0:
-			return "まずは感覚をつかみましょう。記憶の欠片を一緒に集めます。"
+			return "まずは感覚つかも！ 記憶の欠片、ウチと一緒に集めよ！"
 		1:
-			return "少し目標が上がりました。でも、落ち着けば大丈夫です。"
+			return "ちょい目標上がったけど、全然いけるっしょ！ 落ち着いてこ！"
 		2:
-			return "ここからが本番です。大きくつなげて、一気に取り戻しましょう。"
+			return "ここから本番じゃん！ 大きくつなげて一気に取り戻そ！"
 		3:
-			return "手数を大切にしましょう。長いつながりを見逃さないでください。"
+			return "手数だいじにいこ！ 長くつながるとこ、見逃さないで！"
 		_:
-			return "最後まであきらめません。記憶の光を、必ず取り戻しましょう。"
+			return "最後まであきらめないから！ 記憶の光、絶対取り戻そ！"
 
 func _moka_stage_opening_message(stage_index: int) -> String:
 	match stage_index:
