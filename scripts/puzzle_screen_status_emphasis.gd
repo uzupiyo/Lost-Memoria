@@ -6,6 +6,7 @@ var gauge_tween: Tween = null
 var progress_label_tween: Tween = null
 var preview_tween: Tween = null
 var preview_frame_tween: Tween = null
+var sd_combo_tween: Tween = null
 
 func _setup_stage_info() -> void:
 	super._setup_stage_info()
@@ -13,6 +14,7 @@ func _setup_stage_info() -> void:
 	_reset_score_label_emphasis()
 	_reset_restore_gauge_emphasis()
 	_reset_preview_emphasis()
+	_reset_sd_combo_emphasis()
 
 func _on_retry_pressed() -> void:
 	super._on_retry_pressed()
@@ -20,6 +22,7 @@ func _on_retry_pressed() -> void:
 	_reset_score_label_emphasis()
 	_reset_restore_gauge_emphasis()
 	_reset_preview_emphasis()
+	_reset_sd_combo_emphasis()
 
 func _clear_stage() -> void:
 	super._clear_stage()
@@ -28,6 +31,7 @@ func _clear_stage() -> void:
 func _resolve_match(indices: Array[int]) -> bool:
 	var did_clear: bool = super._resolve_match(indices)
 	_play_score_label_emphasis()
+	_play_sd_combo_emphasis()
 	if score >= CLEAR_SCORE:
 		_play_restore_complete_emphasis()
 		_play_preview_complete_emphasis()
@@ -103,6 +107,37 @@ func _reset_score_label_emphasis() -> void:
 	if score_label != null:
 		score_label.scale = Vector2.ONE
 		score_label.modulate = Color(1, 1, 1, 1)
+
+func _play_sd_combo_emphasis() -> void:
+	if sd_character == null:
+		return
+	if combo_count < 3:
+		return
+	if sd_combo_tween != null:
+		sd_combo_tween.kill()
+	var target_scale: float = 1.08
+	if combo_count >= 5:
+		target_scale = 1.14
+	sd_character.pivot_offset = sd_character.size * 0.5
+	sd_combo_tween = create_tween()
+	sd_combo_tween.set_parallel(true)
+	sd_combo_tween.tween_property(sd_character, "scale", Vector2(target_scale, target_scale), 0.08)
+	sd_combo_tween.tween_property(sd_character, "modulate", Color(1.0, 0.95, 0.72, 1.0), 0.08)
+	sd_combo_tween.set_parallel(false)
+	sd_combo_tween.tween_property(sd_character, "scale", Vector2.ONE, 0.14)
+	sd_combo_tween.tween_property(sd_character, "modulate", Color(1, 1, 1, 1), 0.14)
+	sd_combo_tween.tween_callback(_on_sd_combo_emphasis_finished)
+
+func _on_sd_combo_emphasis_finished() -> void:
+	sd_combo_tween = null
+
+func _reset_sd_combo_emphasis() -> void:
+	if sd_combo_tween != null:
+		sd_combo_tween.kill()
+		sd_combo_tween = null
+	if sd_character != null:
+		sd_character.scale = Vector2.ONE
+		sd_character.modulate = Color(1, 1, 1, 1)
 
 func _play_restore_gauge_emphasis() -> void:
 	_play_restore_feedback(1.04, 1.08, Color(1.0, 0.92, 0.52, 1.0), 0.08, 0.14)
