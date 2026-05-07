@@ -2,12 +2,14 @@ extends "res://scripts/puzzle_screen_board_emphasis.gd"
 
 var stage_clear_score: int = 30
 var stage_move_limit: int = 25
+var passive_message_tween: Tween = null
 
 func _setup_stage_info() -> void:
 	_apply_stage_rules()
 	super._setup_stage_info()
 	_apply_stage_rule_labels()
 	_apply_stage_opening_message()
+	_play_passive_intro_message()
 
 func _on_retry_pressed() -> void:
 	super._on_retry_pressed()
@@ -19,6 +21,7 @@ func _on_retry_pressed() -> void:
 	score_label.text = "SCORE\n0"
 	progress_label.text = "0% Restoration"
 	_apply_stage_opening_message()
+	_play_passive_intro_message()
 
 func _on_hint_pressed() -> void:
 	sd_message_label.text = _stage_hint_message(character_name_label.text, GameState.selected_stage_index)
@@ -26,6 +29,7 @@ func _on_hint_pressed() -> void:
 func _clear_stage() -> void:
 	var character_id: String = character_name_label.text
 	var stage_index: int = GameState.selected_stage_index
+	_clear_passive_intro_message()
 	super._clear_stage()
 	sd_message_label.text = _stage_clear_message(character_id, stage_index)
 
@@ -58,6 +62,57 @@ func _apply_stage_rule_labels() -> void:
 
 func _apply_stage_opening_message() -> void:
 	sd_message_label.text = _stage_opening_message(character_name_label.text, GameState.selected_stage_index)
+
+func _play_passive_intro_message() -> void:
+	_clear_passive_intro_message()
+	var text_value: String = _passive_intro_text(character_name_label.text)
+	if text_value.is_empty():
+		return
+	var popup: Label = Label.new()
+	popup.name = "PassiveIntroPopup"
+	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	popup.text = text_value
+	popup.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	popup.add_theme_font_size_override("font_size", 24)
+	popup.add_theme_color_override("font_color", Color(0.88, 0.96, 1.0, 1.0))
+	popup.add_theme_color_override("font_outline_color", Color(0.08, 0.05, 0.16, 1.0))
+	popup.add_theme_constant_override("outline_size", 6)
+	popup.custom_minimum_size = Vector2(500, 80)
+	popup.modulate = Color(1, 1, 1, 0)
+	add_child(popup)
+	move_child(popup, get_child_count() - 1)
+	var center_position: Vector2 = board.global_position + board.size * 0.5
+	popup.global_position = center_position - Vector2(250, 242)
+	popup.pivot_offset = popup.custom_minimum_size * 0.5
+	popup.scale = Vector2(0.92, 0.92)
+	passive_message_tween = create_tween()
+	passive_message_tween.set_parallel(true)
+	passive_message_tween.tween_property(popup, "modulate", Color(1, 1, 1, 1), 0.18)
+	passive_message_tween.tween_property(popup, "scale", Vector2.ONE, 0.18)
+	passive_message_tween.set_parallel(false)
+	passive_message_tween.tween_interval(1.10)
+	passive_message_tween.tween_property(popup, "modulate", Color(1, 1, 1, 0), 0.28)
+	passive_message_tween.tween_callback(_clear_passive_intro_message)
+
+func _clear_passive_intro_message() -> void:
+	if passive_message_tween != null:
+		passive_message_tween.kill()
+		passive_message_tween = null
+	var popup: Node = get_node_or_null("PassiveIntroPopup")
+	if popup != null:
+		popup.queue_free()
+
+func _passive_intro_text(character_id: String) -> String:
+	match character_id:
+		"Rin":
+			return "Rin Passive: Long Chain Bonus"
+		"Moka":
+			return "Moka Passive: Gentle Recovery"
+		"Kaede":
+			return "Kaede Passive: Calm Hint"
+		_:
+			return ""
 
 func _stage_opening_message(character_id: String, stage_index: int) -> String:
 	match character_id:
