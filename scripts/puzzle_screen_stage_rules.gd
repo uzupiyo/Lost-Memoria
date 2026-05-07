@@ -20,6 +20,12 @@ func _on_retry_pressed() -> void:
 	progress_label.text = "0% Restoration"
 	_apply_stage_opening_message()
 
+func _clear_stage() -> void:
+	var character_id: String = character_name_label.text
+	var stage_index: int = GameState.selected_stage_index
+	super._clear_stage()
+	sd_message_label.text = _stage_clear_message(character_id, stage_index)
+
 func _apply_stage_rules() -> void:
 	var stage_index: int = GameState.selected_stage_index
 	match stage_index:
@@ -61,6 +67,17 @@ func _stage_opening_message(character_id: String, stage_index: int) -> String:
 		_:
 			return "記憶の欠片を集めましょう。ステージが進むほど、少しずつ難しくなります。"
 
+func _stage_clear_message(character_id: String, stage_index: int) -> String:
+	match character_id:
+		"Rin":
+			return _rin_stage_clear_message(stage_index)
+		"Moka":
+			return _moka_stage_clear_message(stage_index)
+		"Kaede":
+			return _kaede_stage_clear_message(stage_index)
+		_:
+			return "記憶の欠片が、またひとつ戻りました。"
+
 func _rin_stage_opening_message(stage_index: int) -> String:
 	match stage_index:
 		0:
@@ -73,6 +90,19 @@ func _rin_stage_opening_message(stage_index: int) -> String:
 			return "手数だいじにいこ！ 長くつながるとこ、見逃さないで！"
 		_:
 			return "最後まであきらめないから！ 記憶の光、絶対取り戻そ！"
+
+func _rin_stage_clear_message(stage_index: int) -> String:
+	match stage_index:
+		0:
+			return "やったじゃん！ まず一個、記憶戻せたね！"
+		1:
+			return "いい感じ！ ちょい難しくても余裕だったっしょ！"
+		2:
+			return "本番ステージもクリア！ この調子でガンガンいこ！"
+		3:
+			return "手数きつめでもいけたじゃん！ めっちゃいい流れ！"
+		_:
+			return "最高じゃん！ 記憶の光、かなり戻ってきてるよ！"
 
 func _moka_stage_opening_message(stage_index: int) -> String:
 	match stage_index:
@@ -87,6 +117,19 @@ func _moka_stage_opening_message(stage_index: int) -> String:
 		_:
 			return "ここまで来たら全力だよ！ 最高のチェイン見せちゃお！"
 
+func _moka_stage_clear_message(stage_index: int) -> String:
+	match stage_index:
+		0:
+			return "やったー！ まずはばっちりクリアだね！"
+		1:
+			return "いいねいいね！ 難しくなっても全然いける！"
+		2:
+			return "すごい勢い！ チェインも記憶もいい感じ！"
+		3:
+			return "手数少なくても勝てたね！ 大逆転成功！"
+		_:
+			return "最高！ ここまで来たら次も全力でいこ！"
+
 func _kaede_stage_opening_message(stage_index: int) -> String:
 	match stage_index:
 		0:
@@ -99,6 +142,19 @@ func _kaede_stage_opening_message(stage_index: int) -> String:
 			return "残り手数の管理が重要です。一手ごとの価値を意識しましょう。"
 		_:
 			return "難しい局面です。落ち着いて、最も効率の良い経路を選びましょう。"
+
+func _kaede_stage_clear_message(stage_index: int) -> String:
+	match stage_index:
+		0:
+			return "よくできました。基本はしっかり身についています。"
+		1:
+			return "安定した判断でした。次の記憶にも進めそうです。"
+		2:
+			return "難度が上がっても、落ち着いた選択ができています。"
+		3:
+			return "手数管理も十分です。とても良い進め方でした。"
+		_:
+			return "見事です。記憶の輪郭が、かなり鮮明になってきました。"
 
 func _resolve_match(indices: Array[int]) -> bool:
 	var current_combo: int = _register_combo()
