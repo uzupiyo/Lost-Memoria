@@ -29,7 +29,7 @@ func _build_character_cards() -> void:
 func _create_character_card(character_id: String) -> Button:
 	var data: Dictionary = GameState.get_character_data(character_id)
 	var button: Button = Button.new()
-	button.custom_minimum_size = Vector2(420, 760)
+	button.custom_minimum_size = Vector2(420, 800)
 	button.focus_mode = Control.FOCUS_NONE
 	button.text = ""
 	button.pressed.connect(_on_character_card_pressed.bind(character_id))
@@ -41,7 +41,6 @@ func _create_character_card(character_id: String) -> Button:
 	root.add_theme_constant_override("separation", 8)
 	button.add_child(root)
 
-	# 912 x 1536 portrait ratio, scaled down to 380 x 640.
 	var card_stack: Control = Control.new()
 	card_stack.custom_minimum_size = Vector2(380, 640)
 	card_stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -66,7 +65,7 @@ func _create_character_card(character_id: String) -> Button:
 
 	var info_box: PanelContainer = PanelContainer.new()
 	info_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	info_box.custom_minimum_size = Vector2(380, 96)
+	info_box.custom_minimum_size = Vector2(380, 136)
 	root.add_child(info_box)
 
 	var info_inner: VBoxContainer = VBoxContainer.new()
@@ -84,12 +83,46 @@ func _create_character_card(character_id: String) -> Button:
 
 	var count_label: Label = Label.new()
 	count_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	count_label.text = "%d Memories" % GameState.get_still_ids_for_character(character_id).size()
+	count_label.text = _character_progress_text(character_id)
 	count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	count_label.add_theme_font_size_override("font_size", 20)
+	count_label.add_theme_font_size_override("font_size", 18)
+	count_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	info_inner.add_child(count_label)
 
 	return button
+
+func _character_progress_text(character_id: String) -> String:
+	var ids: Array = GameState.get_still_ids_for_character(character_id)
+	var total_memories: int = ids.size()
+	var complete_memories: int = 0
+	var perfect_memories: int = 0
+	var total_stages: int = 0
+	var restored_stages: int = 0
+	var i: int = 0
+	while i < ids.size():
+		var still_id: String = str(ids[i])
+		var data: Dictionary = GameState.get_still_data(still_id)
+		var still_total: int = int(data.get("total_stages", GameState.STILL_STAGE_COUNT))
+		var unlocked: int = int(data.get("unlocked_stages", 0))
+		total_stages += still_total
+		restored_stages += min(unlocked, still_total)
+		if unlocked >= still_total:
+			complete_memories += 1
+			if _is_perfect_memory(still_id, still_total):
+				perfect_memories += 1
+		i += 1
+	var percent: int = 0
+	if total_stages > 0:
+		percent = int(float(restored_stages) / float(total_stages) * 100.0)
+	return "%d Memories\nRestored %d%% / Complete %d/%d\nPerfect %d/%d" % [total_memories, percent, complete_memories, total_memories, perfect_memories, total_memories]
+
+func _is_perfect_memory(still_id: String, total_stages: int) -> bool:
+	var stage_index: int = 0
+	while stage_index < total_stages:
+		if GameState.get_stage_rank(still_id, stage_index) != "S":
+			return false
+		stage_index += 1
+	return true
 
 func _load_character_texture(character_id: String, texture_kind: String) -> Texture2D:
 	var candidate_paths: Array[String] = _get_character_asset_candidates(character_id, texture_kind)
@@ -137,7 +170,7 @@ func _on_character_card_pressed(character_id: String) -> void:
 func _update_selected_info() -> void:
 	var data: Dictionary = GameState.get_character_data(selected_character_id)
 	selected_name_label.text = str(data.get("display_name", selected_character_id))
-	selected_description_label.text = str(data.get("description", ""))
+	selected_description_label.text = "%s\n%s" % [str(data.get("description", "")), _character_progress_text(selected_character_id)]
 
 func _on_start_pressed() -> void:
 	GameState.select_character(selected_character_id)
