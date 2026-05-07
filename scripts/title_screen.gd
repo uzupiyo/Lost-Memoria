@@ -11,10 +11,10 @@ func _add_global_progress_panel() -> void:
 	progress_panel.name = "GlobalProgressPanel"
 	progress_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	progress_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	progress_panel.offset_left = -560.0
-	progress_panel.offset_top = 540.0
-	progress_panel.offset_right = -70.0
-	progress_panel.offset_bottom = 790.0
+	progress_panel.offset_left = -580.0
+	progress_panel.offset_top = 520.0
+	progress_panel.offset_right = -60.0
+	progress_panel.offset_bottom = 800.0
 	add_child(progress_panel)
 
 	var box: VBoxContainer = VBoxContainer.new()
@@ -48,14 +48,36 @@ func _clear_global_progress_panel() -> void:
 
 func _global_progress_text() -> String:
 	var summary: Dictionary = _progress_summary_for_all()
-	return "Restored %d%%\nComplete Memories %d/%d\nPerfect Memories %d/%d\n%s" % [
+	return "Restored %d%%\nComplete Memories %d/%d\nPerfect Memories %d/%d\n%s\nAchievement: %s" % [
 		int(summary.get("percent", 0)),
 		int(summary.get("complete_memories", 0)),
 		int(summary.get("total_memories", 0)),
 		int(summary.get("perfect_memories", 0)),
 		int(summary.get("total_memories", 0)),
-		_character_progress_line()
+		_character_progress_line(),
+		_achievement_title(summary)
 	]
+
+func _achievement_title(summary: Dictionary) -> String:
+	var percent: int = int(summary.get("percent", 0))
+	var complete_memories: int = int(summary.get("complete_memories", 0))
+	var total_memories: int = max(1, int(summary.get("total_memories", 0)))
+	var perfect_memories: int = int(summary.get("perfect_memories", 0))
+	if perfect_memories >= total_memories:
+		return "Memory Master"
+	if complete_memories >= total_memories:
+		return "Full Restorer"
+	if perfect_memories >= 5:
+		return "Perfect Hunter"
+	if percent >= 75:
+		return "Light Collector"
+	if percent >= 50:
+		return "Mirror Restorer"
+	if percent >= 25:
+		return "Shard Seeker"
+	if percent > 0:
+		return "First Memory"
+	return "New Awakening"
 
 func _character_progress_line() -> String:
 	var parts: Array[String] = []
