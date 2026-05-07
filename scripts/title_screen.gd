@@ -11,10 +11,10 @@ func _add_global_progress_panel() -> void:
 	progress_panel.name = "GlobalProgressPanel"
 	progress_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	progress_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	progress_panel.offset_left = -520.0
-	progress_panel.offset_top = 565.0
-	progress_panel.offset_right = -80.0
-	progress_panel.offset_bottom = 760.0
+	progress_panel.offset_left = -560.0
+	progress_panel.offset_top = 540.0
+	progress_panel.offset_right = -70.0
+	progress_panel.offset_bottom = 790.0
 	add_child(progress_panel)
 
 	var box: VBoxContainer = VBoxContainer.new()
@@ -47,12 +47,39 @@ func _clear_global_progress_panel() -> void:
 	progress_panel = null
 
 func _global_progress_text() -> String:
+	var summary: Dictionary = _progress_summary_for_all()
+	return "Restored %d%%\nComplete Memories %d/%d\nPerfect Memories %d/%d\n%s" % [
+		int(summary.get("percent", 0)),
+		int(summary.get("complete_memories", 0)),
+		int(summary.get("total_memories", 0)),
+		int(summary.get("perfect_memories", 0)),
+		int(summary.get("total_memories", 0)),
+		_character_progress_line()
+	]
+
+func _character_progress_line() -> String:
+	var parts: Array[String] = []
+	var ids: Array = GameState.get_character_ids()
+	var i: int = 0
+	while i < ids.size():
+		var character_id: String = str(ids[i])
+		var summary: Dictionary = _progress_summary_for_character(character_id)
+		parts.append("%s %d%%" % [character_id, int(summary.get("percent", 0))])
+		i += 1
+	return " / ".join(parts)
+
+func _progress_summary_for_all() -> Dictionary:
+	return _progress_summary_for_still_ids(GameState.get_all_still_ids())
+
+func _progress_summary_for_character(character_id: String) -> Dictionary:
+	return _progress_summary_for_still_ids(GameState.get_still_ids_for_character(character_id))
+
+func _progress_summary_for_still_ids(ids: Array) -> Dictionary:
 	var total_memories: int = 0
 	var complete_memories: int = 0
 	var perfect_memories: int = 0
 	var total_stages: int = 0
 	var restored_stages: int = 0
-	var ids: Array = GameState.get_all_still_ids()
 	var i: int = 0
 	while i < ids.size():
 		var still_id: String = str(ids[i])
@@ -70,7 +97,12 @@ func _global_progress_text() -> String:
 	var percent: int = 0
 	if total_stages > 0:
 		percent = int(float(restored_stages) / float(total_stages) * 100.0)
-	return "Restored %d%%\nComplete Memories %d/%d\nPerfect Memories %d/%d" % [percent, complete_memories, total_memories, perfect_memories, total_memories]
+	return {
+		"percent": percent,
+		"total_memories": total_memories,
+		"complete_memories": complete_memories,
+		"perfect_memories": perfect_memories
+	}
 
 func _is_perfect_memory(still_id: String, total_stages: int) -> bool:
 	var stage_index: int = 0
