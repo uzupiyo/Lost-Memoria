@@ -58,6 +58,7 @@ func _resolve_match(indices: Array[int]) -> bool:
 
 func _play_chain_burst_popup() -> void:
 	_clear_chain_burst_popup()
+	_play_screen_shake(4.0)
 	var popup: Label = Label.new()
 	popup.name = "ChainBurstPopup"
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
