@@ -12,7 +12,9 @@ const STILL_PREVIEW_FRAME_PATH: String = "res://assets/puzzle/ui/still_preview_f
 const PUZZLE_BACKGROUND_PATH: String = "res://assets/puzzle/ui/puzzle_scene_background.png"
 const SD_IDLE_AMPLITUDE: float = 8.0
 const SD_IDLE_SPEED: float = 2.4
+const SD_FRAME_INTERVAL: float = 0.35
 const SD_MATCH_BUMP_SCALE: Vector2 = Vector2(1.08, 1.08)
+const SD_MAX_IDLE_FRAMES: int = 8
 
 const DROP_PATHS: Array[String] = [
 	"res://assets/puzzle/drops/memory_orb_red.png",
@@ -39,6 +41,9 @@ var has_cleared: bool = false
 var pending_scene_change: bool = false
 var drop_textures: Dictionary = {}
 var sd_idle_time: float = 0.0
+var sd_frame_timer: float = 0.0
+var sd_idle_frame_index: int = 0
+var sd_idle_textures: Array[Texture2D] = []
 var sd_base_position: Vector2 = Vector2.ZERO
 var sd_has_base_position: bool = false
 
@@ -110,7 +115,11 @@ func _setup_stage_info() -> void:
 	sd_frame.texture = _load_texture_optional(SD_FRAME_PATH)
 	board_frame.texture = _load_texture_optional(BOARD_FRAME_PATH)
 	still_preview_frame.texture = _load_texture_optional(STILL_PREVIEW_FRAME_PATH)
-	sd_character.texture = _load_sd_character_texture(character_id)
+	_load_sd_idle_textures(character_id)
+	if not sd_idle_textures.is_empty():
+		sd_character.texture = sd_idle_textures[0]
+	else:
+		sd_character.texture = null
 	still_preview.texture = _load_texture_optional(str(still_data.get("image_path", "")))
 
 func _load_drop_textures() -> void:
@@ -130,14 +139,27 @@ func _load_texture_optional(path: String) -> Texture2D:
 		return loaded as Texture2D
 	return null
 
-func _load_sd_character_texture(character_id: String) -> Texture2D:
-	var candidate_paths: Array[String] = [
-		"res://assets/ui/characters/sd/%s/%s_idle_01.png" % [character_id, character_id],
-		"res://assets/ui/characters/sd/%s/%s_idle_01.webp" % [character_id, character_id],
-		"res://assets/ui/characters/sd/%s/%s_sd_idle_01.png" % [character_id, character_id],
-		"res://assets/ui/characters/sd/%s/%s_sd_idle_01.webp" % [character_id, character_id],
-		"res://assets/ui/characters/portraits/%s_portrait.webp" % character_id
-	]
+func _load_sd_idle_textures(character_id: String) -> void:
+	sd_idle_textures.clear()
+	sd_idle_frame_index = 0
+	sd_frame_timer = 0.0
+	var frame_index: int = 1
+	while frame_index <= SD_MAX_IDLE_FRAMES:
+		var frame_name: String = "%02d" % frame_index
+		var png_path: String = "res://assets/ui/characters/sd/%s/%s_idle_%s.png" % [character_id, character_id, frame_name]
+		var webp_path: String = "res://assets/ui/characters/sd/%s/%s_idle_%s.webp" % [character_id, character_id, frame_name]
+		var sd_png_path: String = "res://assets/ui/characters/sd/%s/%s_sd_idle_%s.png" % [character_id, character_id, frame_name]
+		var sd_webp_path: String = "res://assets/ui/characters/sd/%s/%s_sd_idle_%s.webp" % [character_id, character_id, frame_name]
+		var texture: Texture2D = _load_texture_from_candidates([png_path, webp_path, sd_png_path, sd_webp_path])
+		if texture != null:
+			sd_idle_textures.append(texture)
+		elif frame_index == 1:
+			var portrait_texture: Texture2D = _load_texture_optional("res://assets/ui/characters/portraits/%s_portrait.webp" % character_id)
+			if portrait_texture != null:
+				sd_idle_textures.append(portrait_texture)
+		frame_index += 1
+
+func _load_texture_from_candidates(candidate_paths: Array[String]) -> Texture2D:
 	var i: int = 0
 	while i < candidate_paths.size():
 		var texture: Texture2D = _load_texture_optional(candidate_paths[i])
@@ -166,6 +188,14 @@ func _update_sd_idle_animation(delta: float) -> void:
 	sd_idle_time += delta
 	var offset_y: float = sin(sd_idle_time * SD_IDLE_SPEED) * SD_IDLE_AMPLITUDE
 	sd_character.position = sd_base_position + Vector2(0, offset_y)
+	if sd_idle_textures.size() <= 1:
+		return
+	sd_frame_timer += delta
+	if sd_frame_timer < SD_FRAME_INTERVAL:
+		return
+	sd_frame_timer = 0.0
+	sd_idle_frame_index = (sd_idle_frame_index + 1) % sd_idle_textures.size()
+	sd_character.texture = sd_idle_textures[sd_idle_frame_index]
 
 func _play_sd_match_feedback() -> void:
 	if sd_character == null:
