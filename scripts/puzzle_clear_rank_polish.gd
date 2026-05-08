@@ -1,6 +1,12 @@
 extends "res://scripts/puzzle_character_colors.gd"
 
 const CLEAR_RANK_POPUP_NAME: String = "ClearRankPopup"
+const RANK_BADGE_TEXTURES: Dictionary = {
+	"S": "res://assets/ui/badges/rank_s.png",
+	"A": "res://assets/ui/badges/rank_a.png",
+	"B": "res://assets/ui/badges/rank_b.png",
+	"C": "res://assets/ui/badges/rank_c.png"
+}
 
 var polished_clear_rank_tween: Tween = null
 var preview_pulse_tween: Tween = null
@@ -90,7 +96,7 @@ func _play_clear_rank_popup(rank: String = "") -> void:
 	var popup: PanelContainer = PanelContainer.new()
 	popup.name = CLEAR_RANK_POPUP_NAME
 	popup.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	popup.custom_minimum_size = Vector2(620, 170)
+	popup.custom_minimum_size = Vector2(520, 360)
 	popup.add_theme_stylebox_override("panel", _make_rank_popup_style(rank_color, resolved_rank))
 	popup.modulate = Color(1, 1, 1, 0)
 	add_child(popup)
@@ -99,18 +105,26 @@ func _play_clear_rank_popup(rank: String = "") -> void:
 	var box: VBoxContainer = VBoxContainer.new()
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 8)
+	box.add_theme_constant_override("separation", 4)
 	popup.add_child(box)
+
+	var badge: TextureRect = TextureRect.new()
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	badge.custom_minimum_size = Vector2(260, 260)
+	badge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	badge.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	badge.texture = _load_rank_badge_texture(resolved_rank)
+	box.add_child(badge)
 
 	var rank_label: Label = Label.new()
 	rank_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	rank_label.text = "CLEAR RANK  %s" % resolved_rank
 	rank_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	rank_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	rank_label.add_theme_font_size_override("font_size", 42)
+	rank_label.add_theme_font_size_override("font_size", 34)
 	rank_label.add_theme_color_override("font_color", rank_color)
 	rank_label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
-	rank_label.add_theme_constant_override("outline_size", 7)
+	rank_label.add_theme_constant_override("outline_size", 6)
 	box.add_child(rank_label)
 
 	var comment_label: Label = Label.new()
@@ -118,7 +132,7 @@ func _play_clear_rank_popup(rank: String = "") -> void:
 	comment_label.text = _get_clear_rank_comment(resolved_rank)
 	comment_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	comment_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	comment_label.add_theme_font_size_override("font_size", 24)
+	comment_label.add_theme_font_size_override("font_size", 21)
 	comment_label.add_theme_color_override("font_color", UI_COLOR_MEMORY_WHITE)
 	comment_label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
 	comment_label.add_theme_constant_override("outline_size", 4)
@@ -126,7 +140,7 @@ func _play_clear_rank_popup(rank: String = "") -> void:
 	box.add_child(comment_label)
 
 	var center_position: Vector2 = board.global_position + board.size * 0.5
-	popup.global_position = center_position - Vector2(310, -82)
+	popup.global_position = center_position - Vector2(260, 180)
 	popup.pivot_offset = popup.custom_minimum_size * 0.5
 	popup.scale = Vector2(0.76, 0.76)
 	polished_clear_rank_tween = create_tween()
@@ -135,9 +149,17 @@ func _play_clear_rank_popup(rank: String = "") -> void:
 	polished_clear_rank_tween.tween_property(popup, "scale", Vector2(1.10, 1.10), 0.18)
 	polished_clear_rank_tween.set_parallel(false)
 	polished_clear_rank_tween.tween_property(popup, "scale", Vector2.ONE, 0.16)
-	polished_clear_rank_tween.tween_interval(0.78)
+	polished_clear_rank_tween.tween_interval(0.88)
 	polished_clear_rank_tween.tween_property(popup, "modulate", Color(1, 1, 1, 0), 0.20)
 	polished_clear_rank_tween.tween_callback(_on_clear_rank_popup_finished)
+
+func _load_rank_badge_texture(rank: String) -> Texture2D:
+	var path: String = RANK_BADGE_TEXTURES.get(rank, "")
+	if path.is_empty():
+		return null
+	if not ResourceLoader.exists(path):
+		return null
+	return load(path) as Texture2D
 
 func _clear_rank_popup() -> void:
 	if polished_clear_rank_tween != null:
@@ -169,12 +191,12 @@ func _rank_color(rank: String) -> Color:
 
 func _make_rank_popup_style(rank_color: Color, rank: String) -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = Color(0.04, 0.06, 0.13, 0.92)
-	style.border_color = Color(rank_color.r, rank_color.g, rank_color.b, 0.88)
+	style.bg_color = Color(0.04, 0.06, 0.13, 0.78)
+	style.border_color = Color(rank_color.r, rank_color.g, rank_color.b, 0.70)
 	style.set_border_width_all(3 if rank == "S" else 2)
-	style.set_corner_radius_all(22)
-	style.content_margin_left = 20
-	style.content_margin_right = 20
+	style.set_corner_radius_all(24)
+	style.content_margin_left = 18
+	style.content_margin_right = 18
 	style.content_margin_top = 18
 	style.content_margin_bottom = 18
 	style.shadow_color = Color(0, 0, 0, 0.48)
