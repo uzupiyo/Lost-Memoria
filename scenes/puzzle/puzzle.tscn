@@ -1,7 +1,13 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/puzzle_clear_rank_polish.gd" id="1_puzzle"]
 [ext_resource type="Theme" path="res://assets/ui/theme/main_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" path="res://assets/ui/puzzle/button_back_normal.png" id="3_back_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui/puzzle/button_back_hover.png" id="4_back_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui/puzzle/button_retry_normal.png" id="5_retry_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui/puzzle/button_retry_hover.png" id="6_retry_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui/puzzle/button_hint_normal.png" id="7_hint_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui/puzzle/button_hint_hover.png" id="8_hint_hover"]
 
 [node name="Puzzle" type="Control"]
 layout_mode = 3
@@ -253,20 +259,32 @@ layout_mode = 2
 alignment = 1
 theme_override_constants/separation = 40
 
-[node name="BackButton" type="Button" parent="MarginContainer/Root/FooterRow"]
+[node name="BackButton" type="TextureButton" parent="MarginContainer/Root/FooterRow"]
 custom_minimum_size = Vector2(260, 64)
 layout_mode = 2
-text = "← Back"
+texture_normal = ExtResource("3_back_normal")
+texture_hover = ExtResource("4_back_hover")
+texture_pressed = ExtResource("4_back_hover")
+ignore_texture_size = true
+stretch_mode = 0
 
-[node name="RetryButton" type="Button" parent="MarginContainer/Root/FooterRow"]
+[node name="RetryButton" type="TextureButton" parent="MarginContainer/Root/FooterRow"]
 custom_minimum_size = Vector2(260, 64)
 layout_mode = 2
-text = "↻ Retry"
+texture_normal = ExtResource("5_retry_normal")
+texture_hover = ExtResource("6_retry_hover")
+texture_pressed = ExtResource("6_retry_hover")
+ignore_texture_size = true
+stretch_mode = 0
 
-[node name="HintButton" type="Button" parent="MarginContainer/Root/FooterRow"]
+[node name="HintButton" type="TextureButton" parent="MarginContainer/Root/FooterRow"]
 custom_minimum_size = Vector2(260, 64)
 layout_mode = 2
-text = "✦ Hint"
+texture_normal = ExtResource("7_hint_normal")
+texture_hover = ExtResource("8_hint_hover")
+texture_pressed = ExtResource("8_hint_hover")
+ignore_texture_size = true
+stretch_mode = 0
 
 [connection signal="pressed" from="MarginContainer/Root/FooterRow/BackButton" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="MarginContainer/Root/FooterRow/RetryButton" to="." method="_on_retry_pressed"]
