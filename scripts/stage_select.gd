@@ -8,6 +8,11 @@ const UI_COLOR_RESTORATION_GOLD: Color = Color(1.0, 0.85, 0.42, 1.0)
 const UI_COLOR_MIRROR_CYAN: Color = Color(0.51, 0.96, 1.0, 1.0)
 const UI_COLOR_DREAM_VIOLET: Color = Color(0.72, 0.61, 1.0, 1.0)
 const UI_COLOR_LOCKED: Color = Color(0.48, 0.52, 0.62, 1.0)
+const MEMORY_STATUS_BADGE_TEXTURES: Dictionary = {
+	"LOCKED": "res://assets/ui/badges/badge_locked.png",
+	"COMPLETE": "res://assets/ui/badges/badge_complete.png",
+	"PERFECT": "res://assets/ui/badges/badge_perfect_memory.png"
+}
 
 @onready var still_list: VBoxContainer = %StillList
 @onready var title_label: Label = %TitleLabel
@@ -145,20 +150,20 @@ func _build_stage_list() -> void:
 		var is_complete: bool = unlocked_stages >= total_stages
 
 		var panel: PanelContainer = PanelContainer.new()
-		panel.custom_minimum_size = Vector2(0, 190)
+		panel.custom_minimum_size = Vector2(0, 220)
 		panel.add_theme_stylebox_override("panel", _make_still_card_style(is_complete, is_perfect))
 		panel.modulate = Color(1, 1, 1, 0)
 		still_list.add_child(panel)
 
 		var margin: MarginContainer = MarginContainer.new()
 		margin.add_theme_constant_override("margin_left", 18)
-		margin.add_theme_constant_override("margin_top", 14)
+		margin.add_theme_constant_override("margin_top", 12)
 		margin.add_theme_constant_override("margin_right", 18)
-		margin.add_theme_constant_override("margin_bottom", 14)
+		margin.add_theme_constant_override("margin_bottom", 12)
 		panel.add_child(margin)
 
 		var row: VBoxContainer = VBoxContainer.new()
-		row.add_theme_constant_override("separation", 8)
+		row.add_theme_constant_override("separation", 6)
 		margin.add_child(row)
 
 		var header_row: HBoxContainer = HBoxContainer.new()
@@ -182,7 +187,7 @@ func _build_stage_list() -> void:
 		badge_row.alignment = BoxContainer.ALIGNMENT_CENTER
 		badge_row.add_theme_constant_override("separation", 8)
 		row.add_child(badge_row)
-		_add_mastery_badges(badge_row, is_complete, is_perfect, s_count, total_stages)
+		_add_mastery_badges(badge_row, unlocked_stages, is_complete, is_perfect, s_count, total_stages)
 
 		var unlock_label: Label = Label.new()
 		unlock_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -225,14 +230,44 @@ func _build_stage_list() -> void:
 			stage_index += 1
 		still_index += 1
 
-func _add_mastery_badges(parent: HBoxContainer, is_complete: bool, is_perfect: bool, s_count: int, total_stages: int) -> void:
+func _add_mastery_badges(parent: HBoxContainer, unlocked_stages: int, is_complete: bool, is_perfect: bool, s_count: int, total_stages: int) -> void:
 	if is_perfect:
-		parent.add_child(_make_badge("PERFECT MEMORY", UI_COLOR_RESTORATION_GOLD, Color(0.22, 0.15, 0.04, 0.86)))
+		parent.add_child(_make_image_badge("PERFECT", Vector2(320, 106)))
 	elif is_complete:
-		parent.add_child(_make_badge("COMPLETE", UI_COLOR_MIRROR_CYAN, Color(0.02, 0.16, 0.22, 0.82)))
+		parent.add_child(_make_image_badge("COMPLETE", Vector2(260, 86)))
+	elif unlocked_stages <= 0:
+		parent.add_child(_make_image_badge("LOCKED", Vector2(240, 80)))
 	else:
 		parent.add_child(_make_badge("IN PROGRESS", UI_COLOR_MIST_BLUE, Color(0.05, 0.07, 0.13, 0.78)))
 	parent.add_child(_make_badge("S %d/%d" % [s_count, total_stages], UI_COLOR_RESTORATION_GOLD if s_count > 0 else UI_COLOR_LOCKED, Color(0.04, 0.06, 0.13, 0.82)))
+
+func _make_image_badge(status_kind: String, min_size: Vector2) -> Control:
+	var texture: Texture2D = _load_memory_status_badge_texture(status_kind)
+	if texture != null:
+		var badge: TextureRect = TextureRect.new()
+		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		badge.custom_minimum_size = min_size
+		badge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		badge.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		badge.texture = texture
+		return badge
+	match status_kind:
+		"PERFECT":
+			return _make_badge("PERFECT MEMORY", UI_COLOR_RESTORATION_GOLD, Color(0.22, 0.15, 0.04, 0.86))
+		"COMPLETE":
+			return _make_badge("COMPLETE", UI_COLOR_MIRROR_CYAN, Color(0.02, 0.16, 0.22, 0.82))
+		"LOCKED":
+			return _make_badge("LOCKED", UI_COLOR_LOCKED, Color(0.03, 0.04, 0.07, 0.76))
+		_:
+			return _make_badge(status_kind, UI_COLOR_MIST_BLUE, Color(0.05, 0.07, 0.13, 0.78))
+
+func _load_memory_status_badge_texture(status_kind: String) -> Texture2D:
+	var path: String = MEMORY_STATUS_BADGE_TEXTURES.get(status_kind, "")
+	if path.is_empty():
+		return null
+	if not ResourceLoader.exists(path):
+		return null
+	return load(path) as Texture2D
 
 func _make_still_card_style(is_complete: bool, is_perfect: bool) -> StyleBoxFlat:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
