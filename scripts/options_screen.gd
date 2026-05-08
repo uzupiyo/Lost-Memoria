@@ -67,8 +67,12 @@ func _setup_buttons() -> void:
 		"Root/ResetConfirmPanel/ConfirmBox/ConfirmRow/ConfirmResetButton"
 	]
 	for path in button_paths:
-		var button: Button = get_node_or_null(path) as Button
-		if button != null:
+		var base_button: BaseButton = get_node_or_null(path) as BaseButton
+		if base_button == null:
+			continue
+		base_button.pivot_offset = base_button.size * 0.5
+		if base_button is Button:
+			var button: Button = base_button as Button
 			var is_danger: bool = path.ends_with("ConfirmResetButton") or path.ends_with("ResetSaveButton")
 			button.add_theme_font_size_override("font_size", 20)
 			button.add_theme_color_override("font_color", UI_COLOR_DANGER if is_danger else UI_COLOR_MIST_BLUE)
@@ -77,10 +81,10 @@ func _setup_buttons() -> void:
 			button.add_theme_stylebox_override("normal", _make_button_style(false, is_danger))
 			button.add_theme_stylebox_override("hover", _make_button_style(true, is_danger))
 			button.add_theme_stylebox_override("pressed", _make_button_style(true, is_danger))
-			if not button.mouse_entered.is_connected(_on_button_mouse_entered.bind(button)):
-				button.mouse_entered.connect(_on_button_mouse_entered.bind(button))
-			if not button.mouse_exited.is_connected(_on_button_mouse_exited.bind(button)):
-				button.mouse_exited.connect(_on_button_mouse_exited.bind(button))
+		if not base_button.mouse_entered.is_connected(_on_button_mouse_entered.bind(base_button)):
+			base_button.mouse_entered.connect(_on_button_mouse_entered.bind(base_button))
+		if not base_button.mouse_exited.is_connected(_on_button_mouse_exited.bind(base_button)):
+			base_button.mouse_exited.connect(_on_button_mouse_exited.bind(base_button))
 
 func _apply_panel_style(path: String, edge_color: Color) -> void:
 	var panel: PanelContainer = get_node_or_null(path) as PanelContainer
@@ -171,13 +175,13 @@ func _on_confirm_reset_pressed() -> void:
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/title/title.tscn")
 
-func _on_button_mouse_entered(button: Button) -> void:
+func _on_button_mouse_entered(button: BaseButton) -> void:
 	_tween_button(button, Vector2(1.025, 1.025), 0.10)
 
-func _on_button_mouse_exited(button: Button) -> void:
+func _on_button_mouse_exited(button: BaseButton) -> void:
 	_tween_button(button, Vector2.ONE, 0.12)
 
-func _tween_button(button: Button, target_scale: Vector2, duration: float) -> void:
+func _tween_button(button: BaseButton, target_scale: Vector2, duration: float) -> void:
 	if button_tweens.has(button):
 		var old_tween: Tween = button_tweens[button]
 		if old_tween != null:
@@ -187,5 +191,5 @@ func _tween_button(button: Button, target_scale: Vector2, duration: float) -> vo
 	tween.tween_property(button, "scale", target_scale, duration)
 	tween.tween_callback(_on_button_tween_finished.bind(button))
 
-func _on_button_tween_finished(button: Button) -> void:
+func _on_button_tween_finished(button: BaseButton) -> void:
 	button_tweens.erase(button)
