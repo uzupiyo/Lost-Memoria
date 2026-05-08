@@ -83,8 +83,12 @@ func _setup_footer_buttons() -> void:
 		"MarginContainer/Root/FooterRow/HintButton"
 	]
 	for path in button_paths:
-		var button: Button = get_node_or_null(path) as Button
-		if button != null:
+		var base_button: BaseButton = get_node_or_null(path) as BaseButton
+		if base_button == null:
+			continue
+		base_button.pivot_offset = base_button.size * 0.5
+		if base_button is Button:
+			var button: Button = base_button as Button
 			button.add_theme_font_size_override("font_size", 20)
 			button.add_theme_color_override("font_color", UI_COLOR_MIST_BLUE)
 			button.add_theme_color_override("font_hover_color", UI_COLOR_MIRROR_CYAN)
@@ -92,9 +96,10 @@ func _setup_footer_buttons() -> void:
 			button.add_theme_stylebox_override("normal", _make_nav_button_style(false))
 			button.add_theme_stylebox_override("hover", _make_nav_button_style(true))
 			button.add_theme_stylebox_override("pressed", _make_nav_button_style(true))
-			button.pivot_offset = button.size * 0.5
-			button.mouse_entered.connect(_on_nav_button_mouse_entered.bind(button))
-			button.mouse_exited.connect(_on_nav_button_mouse_exited.bind(button))
+		if not base_button.mouse_entered.is_connected(_on_nav_button_mouse_entered.bind(base_button)):
+			base_button.mouse_entered.connect(_on_nav_button_mouse_entered.bind(base_button))
+		if not base_button.mouse_exited.is_connected(_on_nav_button_mouse_exited.bind(base_button)):
+			base_button.mouse_exited.connect(_on_nav_button_mouse_exited.bind(base_button))
 
 func _setup_restore_gauge_style() -> void:
 	restore_gauge.add_theme_stylebox_override("background", _make_gauge_background_style())
@@ -191,13 +196,13 @@ func _play_hud_intro() -> void:
 func _on_hud_intro_finished() -> void:
 	hud_intro_tween = null
 
-func _on_nav_button_mouse_entered(button: Button) -> void:
+func _on_nav_button_mouse_entered(button: BaseButton) -> void:
 	_tween_nav_button(button, Vector2(1.025, 1.025), 0.10)
 
-func _on_nav_button_mouse_exited(button: Button) -> void:
+func _on_nav_button_mouse_exited(button: BaseButton) -> void:
 	_tween_nav_button(button, Vector2.ONE, 0.12)
 
-func _tween_nav_button(button: Button, target_scale: Vector2, duration: float) -> void:
+func _tween_nav_button(button: BaseButton, target_scale: Vector2, duration: float) -> void:
 	if nav_button_tweens.has(button):
 		var old_tween: Tween = nav_button_tweens[button]
 		if old_tween != null:
@@ -207,5 +212,5 @@ func _tween_nav_button(button: Button, target_scale: Vector2, duration: float) -
 	tween.tween_property(button, "scale", target_scale, duration)
 	tween.tween_callback(_on_nav_button_tween_finished.bind(button))
 
-func _on_nav_button_tween_finished(button: Button) -> void:
+func _on_nav_button_tween_finished(button: BaseButton) -> void:
 	nav_button_tweens.erase(button)
