@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/options_screen.gd" id="1_options"]
 [ext_resource type="Theme" path="res://assets/ui/theme/main_theme.tres" id="2_theme"]
@@ -6,6 +6,8 @@
 [ext_resource type="Texture2D" path="res://assets/ui/options/button_reset_save_data_hover.png" id="4_reset_hover"]
 [ext_resource type="Texture2D" path="res://assets/ui/options/button_cancel_normal.png" id="5_cancel_normal"]
 [ext_resource type="Texture2D" path="res://assets/ui/options/button_cancel_hover.png" id="6_cancel_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui/options/button_back_to_title_normal.png" id="7_back_title_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui/options/button_back_to_title_hover.png" id="8_back_title_hover"]
 
 [node name="Options" type="Control"]
 layout_mode = 3
@@ -82,10 +84,14 @@ texture_pressed = ExtResource("4_reset_hover")
 ignore_texture_size = true
 stretch_mode = 0
 
-[node name="BackButton" type="Button" parent="Root/ContentPanel/ContentBox"]
-custom_minimum_size = Vector2(420, 64)
+[node name="BackButton" type="TextureButton" parent="Root/ContentPanel/ContentBox"]
+custom_minimum_size = Vector2(520, 96)
 layout_mode = 2
-text = "BACK TO TITLE"
+texture_normal = ExtResource("7_back_title_normal")
+texture_hover = ExtResource("8_back_title_hover")
+texture_pressed = ExtResource("8_back_title_hover")
+ignore_texture_size = true
+stretch_mode = 0
 
 [node name="ResetConfirmPanel" type="PanelContainer" parent="Root"]
 unique_name_in_owner = true
