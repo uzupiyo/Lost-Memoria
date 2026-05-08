@@ -1,6 +1,10 @@
 extends "res://scripts/collection_memory_badges.gd"
 
 const FULLSCREEN_STATUS_BADGE_NAME: String = "FullscreenStatusBadge"
+const FULLSCREEN_STATUS_BADGE_TEXTURES: Dictionary = {
+	"COMPLETE": "res://assets/ui/badges/badge_complete.png",
+	"PERFECT": "res://assets/ui/badges/badge_perfect_memory.png"
+}
 
 var fullscreen_tween: Tween = null
 
@@ -45,31 +49,48 @@ func _rebuild_fullscreen_status_badge(still_id: String) -> void:
 		return
 	var total_stages: int = int(data.get("total_stages", GameState.STILL_STAGE_COUNT))
 	var is_perfect: bool = _rank_count(still_id, total_stages, "S") >= total_stages
-	var status_text: String = "MEMORY COMPLETE"
-	var edge_color: Color = UI_COLOR_MIRROR_CYAN
-	var fill_color: Color = Color(0.02, 0.16, 0.22, 0.82)
-	if is_perfect:
-		status_text = "PERFECT MEMORY  ·  ALL S"
-		edge_color = UI_COLOR_RESTORATION_GOLD
-		fill_color = Color(0.22, 0.15, 0.04, 0.86)
-	var badge: Label = Label.new()
+	var status_kind: String = "PERFECT" if is_perfect else "COMPLETE"
+	var edge_color: Color = UI_COLOR_RESTORATION_GOLD if is_perfect else UI_COLOR_MIRROR_CYAN
+	var fill_color: Color = Color(0.22, 0.15, 0.04, 0.86) if is_perfect else Color(0.02, 0.16, 0.22, 0.82)
+	var badge: Control = _make_fullscreen_status_badge(status_kind, edge_color, fill_color)
 	badge.name = FULLSCREEN_STATUS_BADGE_NAME
 	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	badge.text = status_text
-	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	badge.add_theme_font_size_override("font_size", 24)
-	badge.add_theme_color_override("font_color", edge_color)
-	badge.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
-	badge.add_theme_constant_override("outline_size", 5)
-	badge.add_theme_stylebox_override("normal", _make_fullscreen_badge_style(edge_color, fill_color))
 	badge.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	badge.offset_left = 420
-	badge.offset_top = 22
-	badge.offset_right = -420
-	badge.offset_bottom = 78
+	badge.offset_left = 390
+	badge.offset_top = 10
+	badge.offset_right = -390
+	badge.offset_bottom = 150
 	viewer.add_child(badge)
 	viewer.move_child(badge, viewer.get_child_count() - 1)
+
+func _make_fullscreen_status_badge(status_kind: String, edge_color: Color, fill_color: Color) -> Control:
+	var texture: Texture2D = _load_fullscreen_status_badge_texture(status_kind)
+	if texture != null:
+		var badge: TextureRect = TextureRect.new()
+		badge.custom_minimum_size = Vector2(500, 140)
+		badge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		badge.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		badge.texture = texture
+		return badge
+	var fallback_text: String = "PERFECT MEMORY  ·  ALL S" if status_kind == "PERFECT" else "MEMORY COMPLETE"
+	var badge_label: Label = Label.new()
+	badge_label.text = fallback_text
+	badge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	badge_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	badge_label.add_theme_font_size_override("font_size", 24)
+	badge_label.add_theme_color_override("font_color", edge_color)
+	badge_label.add_theme_color_override("font_outline_color", Color(0.02, 0.03, 0.08, 1.0))
+	badge_label.add_theme_constant_override("outline_size", 5)
+	badge_label.add_theme_stylebox_override("normal", _make_fullscreen_badge_style(edge_color, fill_color))
+	return badge_label
+
+func _load_fullscreen_status_badge_texture(status_kind: String) -> Texture2D:
+	var path: String = FULLSCREEN_STATUS_BADGE_TEXTURES.get(status_kind, "")
+	if path.is_empty():
+		return null
+	if not ResourceLoader.exists(path):
+		return null
+	return load(path) as Texture2D
 
 func _clear_fullscreen_status_badge() -> void:
 	var old_badge: Node = get_node_or_null("FullscreenViewer/%s" % FULLSCREEN_STATUS_BADGE_NAME)
