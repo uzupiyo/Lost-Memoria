@@ -2,6 +2,11 @@ extends "res://scripts/collection_rank_badges.gd"
 
 const MEMORY_STATUS_BADGE_NAME: String = "MemoryStatusBadge"
 const MEMORY_PERCENT_BADGE_NAME: String = "MemoryPercentBadge"
+const MEMORY_STATUS_BADGE_TEXTURES: Dictionary = {
+	"LOCKED": "res://assets/ui/badges/badge_locked.png",
+	"COMPLETE": "res://assets/ui/badges/badge_complete.png",
+	"PERFECT": "res://assets/ui/badges/badge_perfect_memory.png"
+}
 
 var memory_badge_tween: Tween = null
 
@@ -37,29 +42,33 @@ func _rebuild_memory_badges(still_id: String) -> void:
 	var is_complete: bool = unlocked_stages >= total_stages
 	var is_perfect: bool = _rank_count(still_id, total_stages, "S") >= total_stages
 
+	var status_kind: String = "LOCKED"
 	var status_text: String = "LOCKED"
 	var status_color: Color = UI_COLOR_LOCKED
 	var status_fill: Color = Color(0.03, 0.04, 0.07, 0.76)
 	if is_perfect:
+		status_kind = "PERFECT"
 		status_text = "PERFECT MEMORY"
 		status_color = UI_COLOR_RESTORATION_GOLD
 		status_fill = Color(0.22, 0.15, 0.04, 0.86)
 	elif is_complete:
+		status_kind = "COMPLETE"
 		status_text = "MEMORY COMPLETE"
 		status_color = UI_COLOR_MIRROR_CYAN
 		status_fill = Color(0.02, 0.16, 0.22, 0.84)
 	elif unlocked_stages > 0:
+		status_kind = "SHARD"
 		status_text = "SHARD %d/%d" % [unlocked_stages, total_stages]
 		status_color = UI_COLOR_MIST_BLUE
 		status_fill = Color(0.05, 0.07, 0.13, 0.82)
 
-	var status_badge: Label = _make_memory_overlay_badge(status_text, status_color, status_fill, 20, Vector2(300, 46))
+	var status_badge: Control = _make_memory_status_badge(status_kind, status_text, status_color, status_fill)
 	status_badge.name = MEMORY_STATUS_BADGE_NAME
 	status_badge.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	status_badge.offset_left = 20
-	status_badge.offset_top = 20
-	status_badge.offset_right = 320
-	status_badge.offset_bottom = 66
+	status_badge.offset_left = 18
+	status_badge.offset_top = 16
+	status_badge.offset_right = 438
+	status_badge.offset_bottom = 156
 	still_stack.add_child(status_badge)
 	still_stack.move_child(status_badge, still_stack.get_child_count() - 1)
 
@@ -85,6 +94,27 @@ func _clear_memory_badges() -> void:
 	var old_percent: Node = get_node_or_null("Root/MainRow/StillFrame/StillStack/%s" % MEMORY_PERCENT_BADGE_NAME)
 	if old_percent != null:
 		old_percent.queue_free()
+
+func _make_memory_status_badge(status_kind: String, text_value: String, edge_color: Color, fill_color: Color) -> Control:
+	var texture: Texture2D = _load_memory_status_badge_texture(status_kind)
+	if texture != null:
+		var badge: TextureRect = TextureRect.new()
+		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		badge.custom_minimum_size = Vector2(420, 140)
+		badge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		badge.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		badge.texture = texture
+		badge.modulate = Color(1, 1, 1, 0)
+		return badge
+	return _make_memory_overlay_badge(text_value, edge_color, fill_color, 20, Vector2(300, 46))
+
+func _load_memory_status_badge_texture(status_kind: String) -> Texture2D:
+	var path: String = MEMORY_STATUS_BADGE_TEXTURES.get(status_kind, "")
+	if path.is_empty():
+		return null
+	if not ResourceLoader.exists(path):
+		return null
+	return load(path) as Texture2D
 
 func _make_memory_overlay_badge(text_value: String, edge_color: Color, fill_color: Color, font_size: int, min_size: Vector2) -> Label:
 	var badge: Label = Label.new()
@@ -116,7 +146,7 @@ func _make_memory_badge_style(edge_color: Color, fill_color: Color) -> StyleBoxF
 	style.shadow_offset = Vector2(0, 3)
 	return style
 
-func _play_memory_badge_intro(status_badge: Label, percent_badge: Label) -> void:
+func _play_memory_badge_intro(status_badge: Control, percent_badge: Control) -> void:
 	if memory_badge_tween != null:
 		memory_badge_tween.kill()
 	status_badge.scale = Vector2(0.96, 0.96)
